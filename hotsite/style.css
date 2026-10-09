@@ -1,0 +1,78 @@
+/* O hotsite herda a identidade e a navega??o de ../style.css. */
+.hotsite-page .inicio{padding-top:14px;padding-bottom:40px}
+.hotsite-page .textoInicio{max-width:850px}
+.hotsite-page .textoInicio h3{margin-bottom:18px;color:#c9dad6}
+.hotsite-page .textoInicio>p{font-size:18px;line-height:1.85;color:var(--muted);max-width:720px;margin-bottom:26px}
+.hotsite-page .informacoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:32px;margin-top:40px}
+.hotsite-page .informacoes h3{display:flex;align-items:center;gap:14px;font-size:22px;margin-bottom:12px}
+.hotsite-page .icone-informacao{width:42px;height:42px;object-fit:contain;flex-shrink:0}
+.hotsite-page .informacoes p{font-size:16px;line-height:1.8;color:var(--muted)}
+.hotsite-page .escolher{padding-top:40px;padding-bottom:52px}
+.hotsite-values{grid-template-columns:repeat(3,minmax(0,1fr))}
+.hotsite-page .pessoa>span{font-size:12px;line-height:1.6;color:#92dcd0;margin:10px 0 14px}
+.hotsite-page .pessoa>small{display:block;font-size:14px;line-height:1.75;color:var(--muted)}
+.hotsite-page .foto{color:#b7f6eb;font-size:24px;background:radial-gradient(circle at 30% 20%,#376260,#10282e)}
+.hotsite-page .hotsite-download h2{margin:0}
+.hotsite-page .downloadTcc{flex-shrink:0}
+@media(max-width:850px){.hotsite-values{grid-template-columns:1fr}.hotsite-page .informacoes{gap:24px}}
+@media(max-width:520px){.hotsite-page .inicio{padding-top:28px}.hotsite-page .textoInicio>p{font-size:17px}.hotsite-page .informacoes{grid-template-columns:1fr;gap:24px;margin-top:30px}.hotsite-page .pessoa>span{font-size:14px}.hotsite-page .pessoa>small{font-size:15px}}
+
+/* Historia com introducao central e tres etapas visuais. */
+.hotsite-page .project-story{padding-top:56px;padding-bottom:64px;position:relative;isolation:isolate}
+.project-story::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% 35%,#66e9db12,transparent 65%)}
+.project-story-heading{text-align:center;max-width:720px;margin:0 auto 48px}
+.project-story-heading h2{font-size:clamp(32px,3.8vw,46px);line-height:1.2;letter-spacing:-.045em;margin-bottom:20px}
+.project-story-heading>p{font-size:17px;line-height:1.8;color:var(--muted);max-width:530px;margin:auto}
+.story-journey{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;position:relative}
+.story-journey::before{content:'';position:absolute;left:8%;right:8%;top:33px;height:1px;background:linear-gradient(90deg,transparent,#86e5d967,transparent);z-index:-1}
+.story-chapter{padding:0 24px 28px;position:relative}
+.story-number{display:grid;place-items:center;width:66px;height:66px;margin-bottom:28px;border-radius:50%;font-size:20px;font-weight:500;letter-spacing:.04em;color:#c4fff0;background:radial-gradient(circle at 30% 10%,#37605e,#122326 70%);border:1px solid #96ebda45;box-shadow:inset 0 1px #edfff52b,0 0 26px #74eadb12,0 8px 20px #0004}
+.story-chapter h3{font-size:23px;line-height:1.3;margin-bottom:16px}
+.story-chapter p{font-size:16px;line-height:1.85;color:var(--muted)}
+.story-chapter::after{content:'';position:absolute;left:24px;right:24px;bottom:0;height:1px;background:linear-gradient(90deg,#82ddd644,transparent)}
+@media(max-width:850px){.hotsite-page .project-story{padding-top:36px;padding-bottom:44px}.story-journey{grid-template-columns:1fr;gap:28px}.story-journey::before{display:none}.story-chapter{display:grid;grid-template-columns:66px 1fr;column-gap:24px;padding:0 0 26px}.story-number{grid-column:1;grid-row:1 / span 2;margin:0}.story-chapter h3,.story-chapter p{grid-column:2}.story-chapter::after{left:90px;right:0}.project-story-heading{margin-bottom:36px}}
+@media(max-width:520px){.story-chapter{grid-template-columns:48px 1fr;column-gap:16px}.story-number{width:48px;height:48px;font-size:16px}.story-chapter h3{font-size:21px}.story-chapter p{font-size:15px}.story-chapter::after{left:64px}.project-story-heading>p{font-size:16px}}
+
+/* Espaco acima de todo o conteudo do hotsite. */
+.hotsite-page main{padding-top:15px}
+@media(max-width:520px){.hotsite-page main{padding-top:5px}}
+
+/* Composicao visual para equilibrar a abertura do hotsite. */
+.hotsite-page .inicio{display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center;isolation:isolate}
+.hotsite-page .inicio>div{min-width:0}
+.hotsite-page .inicio h1{font-size:clamp(40px,4.5vw,62px)}
+.hotsite-page .informacoes{gap:22px}.hotsite-page .informacoes h3{font-size:20px;gap:10px}
+.hot-visual{position:relative;isolation:isolate;padding:20px 0 65px}
+.hot-visual-grid{position:absolute;inset:0;border-radius:30px;z-index:-2;background-image:linear-gradient(#9af5e509 1px,transparent 1px),linear-gradient(90deg,#9af5e509 1px,transparent 1px);background-size:36px 36px;mask-image:radial-gradient(ellipse,#000 20%,transparent 72%);-webkit-mask-image:radial-gradient(ellipse,#000 20%,transparent 72%)}
+.hot-phones{width:100%;padding:25px 8px 40px}.hot-phones img{display:block;width:100%;height:auto;max-width:100%;object-fit:contain}
+.hot-brand{display:flex;align-items:center;justify-content:center;gap:10px;width:max-content;max-width:100%;margin:-10px auto 0;padding:9px 22px;border:1px solid #a3e6da2b;border-radius:50px;background:linear-gradient(130deg,#1a3032,#0b171a);box-shadow:0 12px 28px #0004;font-size:21px;letter-spacing:-.04em}
+.hot-brand img{width:36px;height:36px;object-fit:contain}.hot-brand strong{font-weight:500;color:var(--cyan)}
+.hotsite-page .escolher,.hotsite-page .equipe{position:relative}
+.hotsite-page .escolher::before,.hotsite-page .equipe::before{content:'';position:absolute;top:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,#87d9cf26,transparent)}
+@media(max-width:850px){.hotsite-page .inicio{grid-template-columns:1fr;gap:24px}.hot-visual{width:min(490px,100%);margin:auto;padding-bottom:25px}}
+@media(max-width:520px){.hotsite-page .inicio h1{font-size:clamp(36px,9.5vw,46px)}.hot-visual{padding-top:0}.hot-phones{padding:15px 4px 30px}}
+
+/* Mantém cada coluna dentro da largura disponível. */
+.hotsite-page .inicio{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:36px}
+.hot-visual{width:100%;min-width:0;padding-bottom:24px}
+.hotsite-page .informacoes>div{min-width:0}
+.hotsite-page .informacoes h3{flex-wrap:wrap;overflow-wrap:anywhere}
+.hotsite-page .inicio h1{overflow-wrap:break-word}
+@media(max-width:1000px){.hotsite-page .informacoes{grid-template-columns:1fr;gap:22px}}
+@media(max-width:850px){.hotsite-page .inicio{grid-template-columns:minmax(0,1fr);gap:28px}.hot-visual{width:min(530px,100%)}.hotsite-page .informacoes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.hotsite-page .informacoes{grid-template-columns:1fr}.hot-brand{font-size:19px;padding:8px 18px}}
+
+html[data-theme="light"] .hotsite-page .member{background:linear-gradient(145deg,#fff,#eaf5f1);border-color:var(--line)}
+html[data-theme="light"] .hotsite-page .hot-brand{background:linear-gradient(130deg,#fff,#dceee5);border-color:var(--line);color:var(--text)}
+html[data-theme="light"] .hotsite-page .pessoa>small{color:var(--muted)}
+html[data-theme="light"] .hotsite-page .story-number{color:#214e45}
+
+/* Destaques de transparência e privacidade. */
+.hotsite-page .informacoes>div{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
+.hotsite-page .informacoes h3{flex-wrap:nowrap;gap:12px;font-size:19px;letter-spacing:-.025em}
+.hotsite-page .informacoes h3>span{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;font-size:23px;background:transparent;border:0;box-shadow:none}
+.hotsite-page .informacoes p{font-size:15px;line-height:1.75}
+html[data-theme="light"] .hotsite-page .informacoes>div{background:transparent}
+html[data-theme="light"] .hotsite-page .informacoes h3>span{background:transparent;border:0}
+@media(min-width:851px) and (max-width:1100px){.hotsite-page .informacoes{grid-template-columns:1fr}}
+@media(max-width:600px){.hotsite-page .informacoes{grid-template-columns:1fr}.hotsite-page .informacoes>div{padding:0}}

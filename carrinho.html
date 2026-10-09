@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Carrinho | HomeWise</title><link rel="stylesheet" href="style.css"></head>
+<body class="cart-page">
+<header class="navbar"><div class="container nav"><a href="index.html" class="logo"><img class="logo-image" src="img/logo_Homewise.png" alt=""><span class="logo-name">Home<span>Wise</span></span></a><nav class="links"><a class="" href="index.html">Início</a><a class="" href="depoimentos.html">Depoimentos</a><a class="" href="como-funciona.html">Como funciona</a><a class="" href="sobre.html">Sobre Nós</a><a href="precos.html">Preços</a><a class="" href="faq.html">FAQ</a></nav><a href="#" class="btn btn-blue" data-download>Baixar agora ⬇</a></div></header>
+<main class="container">
+<section class="page-head"><span class="badge">● Seu carrinho</span><h1>Dados para sua <span class="gradient">compra.</span></h1><p class="lead">Preencha suas informações pessoais e o endereço.</p></section>
+<div class="cart-layout">
+<form id="purchase-form" class="cart-form">
+<fieldset><legend>Dados pessoais</legend><div class="cart-fields">
+<div class="field field-wide"><label for="nome">Nome completo</label><input id="nome" name="nome" autocomplete="name" required minlength="3" placeholder="Seu nome completo"></div>
+<div class="field"><label for="cpf">CPF</label><input id="cpf" name="cpf" inputmode="numeric" required maxlength="14" pattern="[0-9]{3}\.[0-9]{3}\.[0-9]{3}-[0-9]{2}" placeholder="000.000.000-00" title="Informe os 11 dígitos do CPF"></div>
+<div class="field"><label for="nascimento">Data de nascimento</label><input id="nascimento" name="nascimento" type="date" autocomplete="bday" required></div>
+<div class="field field-wide"><label for="telefone">Número de telefone</label><input id="telefone" name="telefone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="15" pattern="\([0-9]{2}\) [0-9]{4,5}-[0-9]{4}" placeholder="(11) 99999-9999" title="Informe o DDD e o telefone"></div>
+</div></fieldset>
+<fieldset><legend>Endereço</legend><div class="cart-fields">
+<div class="field"><label for="cep">CEP</label><input id="cep" name="cep" autocomplete="postal-code" inputmode="numeric" maxlength="9" pattern="[0-9]{5}-[0-9]{3}" required placeholder="00000-000"></div>
+<div class="field field-wide"><label for="endereco">Rua ou avenida</label><input id="endereco" name="endereco" autocomplete="address-line1" required placeholder="Nome da rua ou avenida"></div>
+<div class="field"><label for="numero">Número</label><input id="numero" name="numero" required placeholder="Número ou S/N"></div>
+<div class="field"><label for="complemento">Complemento (opcional)</label><input id="complemento" name="complemento" autocomplete="address-line2" placeholder="Apartamento, bloco, casa"></div>
+<div class="field"><label for="bairro">Bairro</label><input id="bairro" name="bairro" required></div>
+<div class="field"><label for="cidade">Cidade</label><input id="cidade" name="cidade" autocomplete="address-level2" required></div>
+<div class="field"><label for="estado">Estado</label><select id="estado" name="estado" autocomplete="address-level1" required><option value="">Selecione</option><option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option></select></div>
+</div></fieldset>
+<p class="cart-note">Esta página é uma demonstração. O preenchimento não realiza uma compra nem envia seus dados.</p>
+<button type="submit" class="btn btn-primary">Revisar dados</button>
+<p id="cart-status" role="status" aria-live="polite"></p>
+</form>
+<aside class="cart-summary"><h2>Seu plano</h2><p id="selected-plan">Escolha um plano para continuar.</p><p class="cart-total" id="plan-price"></p><a href="precos.html" class="btn">Ver planos</a></aside>
+</div></main>
+<footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
+<script src="script.js"></script><script src="carrinho.js"></script>
+</body></html>
