@@ -70,9 +70,9 @@ html[data-theme="light"] .hotsite-page .story-number{color:#214e45}
 /* Destaques de transparência e privacidade. */
 .hotsite-page .informacoes>div{padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
 .hotsite-page .informacoes h3{flex-wrap:nowrap;gap:12px;font-size:19px;letter-spacing:-.025em}
-.hotsite-page .informacoes h3>span{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;font-size:23px;background:transparent;border:0;box-shadow:none}
+.hotsite-page .informacoes h3>span{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;font-size:23px;background:transparent;border:0;box-shadow:none;color:var(--cyan)}
 .hotsite-page .informacoes p{font-size:15px;line-height:1.75}
 html[data-theme="light"] .hotsite-page .informacoes>div{background:transparent}
-html[data-theme="light"] .hotsite-page .informacoes h3>span{background:transparent;border:0}
+html[data-theme="light"] .hotsite-page .informacoes h3>span{background:transparent;border:0;color:#137e71}
 @media(min-width:851px) and (max-width:1100px){.hotsite-page .informacoes{grid-template-columns:1fr}}
 @media(max-width:600px){.hotsite-page .informacoes{grid-template-columns:1fr}.hotsite-page .informacoes>div{padding:0}}

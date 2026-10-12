@@ -1,4 +1,4 @@
-﻿// Interações compartilhadas pelas páginas HomeWise.
+// Interações compartilhadas pelas páginas HomeWise.
 const themeButton = document.createElement('button');
 themeButton.type = 'button';
 themeButton.className = 'theme-toggle';
@@ -6,7 +6,7 @@ document.body.append(themeButton);
 function setTheme(theme) {
   const light = theme === 'light';
   document.documentElement.dataset.theme = light ? 'light' : 'dark';
-  themeButton.textContent = light ? '☾ Tema escuro' : '☀ Tema claro';
+  themeButton.innerHTML = light ? '<i class="fa-solid fa-moon"></i> Tema escuro' : '<i class="fa-solid fa-sun"></i> Tema claro';
   themeButton.setAttribute('aria-label', light ? 'Ativar tema escuro' : 'Ativar tema claro');
   themeButton.setAttribute('aria-pressed', String(light));
 }
@@ -24,7 +24,7 @@ if (!modal) {
   modal = document.createElement('div');
   modal.id = 'modal';
   modal.className = 'modal';
-  modal.innerHTML = '<div class="modal-box"><button class="close" data-close aria-label="Fechar">×</button><h2 id="modalTitle"></h2><p id="modalText"></p><br><button class="btn btn-primary" data-close>Fechar</button></div>';
+  modal.innerHTML = '<div class="modal-box"><button class="close" data-close aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button><h2 id="modalTitle"></h2><p id="modalText"></p><br><button class="btn btn-primary" data-close>Fechar</button></div>';
   document.body.append(modal);
 }
 modal.setAttribute('role', 'dialog');
@@ -57,15 +57,15 @@ document.querySelectorAll('.links').forEach((nav, index) => {
   const toggle = document.createElement('button');
   toggle.type = 'button';
   toggle.className = 'menu-toggle';
-  toggle.textContent = '☰ Menu';
+  toggle.innerHTML = '<i class="fa-solid fa-bars"></i> Menu';
   toggle.setAttribute('aria-controls', nav.id);
   toggle.setAttribute('aria-expanded', 'false');
   nav.before(toggle);
-  const close = () => {nav.classList.remove('is-open'); toggle.setAttribute('aria-expanded', 'false'); toggle.textContent = '☰ Menu';};
+  const close = () => {nav.classList.remove('is-open'); toggle.setAttribute('aria-expanded', 'false'); toggle.innerHTML = '<i class="fa-solid fa-bars"></i> Menu';};
   toggle.addEventListener('click', () => {
     const isOpen = nav.classList.toggle('is-open');
     toggle.setAttribute('aria-expanded', String(isOpen));
-    toggle.textContent = isOpen ? '× Fechar' : '☰ Menu';
+    toggle.innerHTML = isOpen ? '<i class="fa-solid fa-xmark"></i> Fechar' : '<i class="fa-solid fa-bars"></i> Menu';
   });
   nav.addEventListener('click', event => {if (event.target.closest('a')) close();});
   document.addEventListener('keydown', event => {if (event.key === 'Escape' && nav.classList.contains('is-open')) {close(); toggle.focus();}});
