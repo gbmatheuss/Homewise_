@@ -1,4 +1,27 @@
+import {firebaseReady, selectedPlan, planQuery, authMessage} from './firebase.js';
 const purchaseForm = document.getElementById('purchase-form');
+let authenticatedUser = null;
+try {
+  const {auth, sdk} = await firebaseReady;
+  sdk.onAuthStateChanged(auth, user => {
+    authenticatedUser = user;
+    document.getElementById('protected-cart').hidden = !user;
+    document.getElementById('account-bar').hidden = !user;
+    if (!user) {location.replace('login.html' + planQuery); return;}
+    document.getElementById('account-status').textContent = '';
+    document.getElementById('account-email').textContent = 'Conectado como ' + user.email;
+    if (!document.getElementById('nome').value) document.getElementById('nome').value = user.displayName || '';
+  });
+  document.getElementById('sign-out').onclick = async event => {
+    event.target.disabled = true;
+    try {await sdk.signOut(auth);} catch (error) {
+      document.getElementById('account-status').textContent = authMessage(error);
+      event.target.disabled = false;
+    }
+  };
+} catch {
+  document.getElementById('account-status').textContent = 'Não foi possível verificar sua conta. Verifique sua conexão e recarregue a página.';
+}
 const maskField = (id, format) => document.getElementById(id).addEventListener('input', event => {event.target.value = format(event.target.value.replace(/\D/g, ''));});
 maskField('cpf', digits => digits.slice(0,11).replace(/^(\d{3})(\d)/,'$1.$2').replace(/^(\d{3}\.\d{3})(\d)/,'$1.$2').replace(/(\d{3}\.\d{3}\.\d{3})(\d)/,'$1-$2'));
 maskField('cep', digits => digits.slice(0,8).replace(/^(\d{5})(\d)/,'$1-$2'));
@@ -7,6 +30,6 @@ const birthday = document.getElementById('nascimento');
 const today = new Date();
 birthday.max = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
 const plans = {'Básico':'19,90','Plus':'29,90','Premium':'49,90'};
-const selected = new URLSearchParams(location.search).get('plano');
+const selected = selectedPlan;
 if(Object.hasOwn(plans, selected)){document.getElementById('selected-plan').textContent=selected;document.getElementById('plan-price').textContent='R$ '+plans[selected]+' / mês';}
-purchaseForm.addEventListener('submit',event=>{event.preventDefault();document.getElementById('cart-status').textContent='Campos preenchidos. A compra e o pagamento ainda não estão disponíveis.';});
+purchaseForm.addEventListener('submit',event=>{event.preventDefault();if (!authenticatedUser) {location.replace('login.html' + planQuery);return;}document.getElementById('cart-status').textContent='Campos preenchidos. A compra e o pagamento ainda não estão disponíveis.';});

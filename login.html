@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Sua conta | HomeWise</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="auth.css"></head>
+<body>
+<header class="navbar"><div class="container nav"><a href="index.html" class="logo"><img class="logo-image" src="img/logo_Homewise.png" alt=""><span class="logo-name">Home<span>Wise</span></span></a><a href="precos.html" class="btn">Ver planos</a></div></header>
+<main class="container auth-layout">
+<section class="auth-intro"><span class="badge">● Primeiro, sua conta</span><h1>Sua casa mais<br><span class="gradient">inteligente.</span></h1><p class="lead">Crie sua conta ou entre para continuar com o plano escolhido.</p><div class="cart-summary"><h2>Plano selecionado</h2><p id="auth-plan"></p><p id="auth-price" class="cart-total"></p><a href="precos.html">Trocar plano</a></div></section>
+<section class="cart-form auth-card" aria-labelledby="auth-title">
+<div class="auth-tabs"><button type="button" class="btn btn-primary" id="tab-register" aria-pressed="true">Criar conta</button><button type="button" class="btn" id="tab-login" aria-pressed="false">Já tenho conta</button></div>
+<h2 id="auth-title">Crie sua conta</h2>
+<form id="auth-form">
+<fieldset id="auth-fields" disabled>
+<div class="field" id="name-field"><label for="auth-name">Nome completo</label><input id="auth-name" autocomplete="name" minlength="3" maxlength="120" required></div>
+<div class="field"><label for="auth-email">E-mail</label><input id="auth-email" type="email" autocomplete="email" required></div>
+<div class="field"><label for="auth-password">Senha</label><input id="auth-password" type="password" autocomplete="new-password" minlength="6" required aria-describedby="password-help"><small id="password-help">Use pelo menos 6 caracteres.</small></div>
+<div class="field" id="confirm-field"><label for="auth-confirm">Confirme a senha</label><input id="auth-confirm" type="password" autocomplete="new-password" minlength="6" required></div>
+<button type="submit" class="btn btn-primary" id="auth-submit">Criar conta e continuar</button>
+<button type="button" class="auth-link" id="reset-password" hidden>Esqueci minha senha</button>
+</fieldset>
+</form>
+<p id="auth-status" role="status" aria-live="polite">Conectando com segurança…</p>
+<noscript>Ative o JavaScript para criar sua conta ou entrar.</noscript>
+</section></main>
+<footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
+<script src="script.js"></script><script type="module" src="auth.js"></script>
+</body></html>

@@ -5,7 +5,9 @@
 <header class="navbar"><div class="container nav"><a href="index.html" class="logo"><img class="logo-image" src="img/logo_Homewise.png" alt=""><span class="logo-name">Home<span>Wise</span></span></a><nav class="links"><a class="" href="index.html">Início</a><a class="" href="depoimentos.html">Depoimentos</a><a class="" href="como-funciona.html">Como funciona</a><a class="" href="sobre.html">Sobre Nós</a><a href="precos.html">Preços</a><a class="" href="faq.html">FAQ</a></nav><a href="#" class="btn btn-blue" data-download>Baixar agora <i class="fa-solid fa-download"></i></a></div></header>
 <main class="container">
 <section class="page-head"><span class="badge">● Seu carrinho</span><h1>Dados para sua <span class="gradient">compra.</span></h1><p class="lead">Preencha suas informações pessoais e o endereço.</p></section>
-<div class="cart-layout">
+<p id="account-status" role="status" aria-live="polite">Verificando sua conta…</p>
+<div id="account-bar" hidden><span id="account-email"></span> <button type="button" class="btn" id="sign-out">Sair da conta</button></div>
+<div class="cart-layout" id="protected-cart" hidden>
 <form id="purchase-form" class="cart-form">
 <fieldset><legend>Dados pessoais</legend><div class="cart-fields">
 <div class="field field-wide"><label for="nome">Nome completo</label><input id="nome" name="nome" autocomplete="name" required minlength="3" placeholder="Seu nome completo"></div>
@@ -29,5 +31,6 @@
 <aside class="cart-summary"><h2>Seu plano</h2><p id="selected-plan">Escolha um plano para continuar.</p><p class="cart-total" id="plan-price"></p><a href="precos.html" class="btn"><i class="fa-solid fa-arrow-left"></i> Ver planos</a></aside>
 </div></main>
 <footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
-<script src="script.js"></script><script src="carrinho.js"></script>
+<style>#protected-cart[hidden],#account-bar[hidden]{display:none}#account-bar{margin-bottom:24px}#account-email{margin-right:16px}</style>
+<script src="script.js"></script><script type="module" src="carrinho.js"></script>
 </body></html>
