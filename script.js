@@ -75,7 +75,8 @@ document.addEventListener('click', event => {
   if (event.target.closest('[data-close]') || event.target === modal) closeModal();
   const plan = event.target.closest('[data-plan]');
   if (plan) {event.preventDefault(); window.location.href = 'login.html?plano=' + encodeURIComponent(plan.dataset.plan);}
-  if (event.target.closest('[data-download]')) {event.preventDefault(); openModal('HomeWise em breve', 'O aplicativo ainda não possui um link de download disponível. Enquanto isso, conheça os recursos na página Como funciona.');}
+  const download = event.target.closest('[data-download]');
+  if (download && (download.tagName !== 'A' || download.getAttribute('href') === '#')) {event.preventDefault(); openModal('HomeWise em breve', 'O aplicativo ainda não possui um link de download disponível. Enquanto isso, conheça os recursos na página Como funciona.');}
   if (event.target.closest('[data-support]')) {event.preventDefault(); openModal('Suporte HomeWise', 'Consulte as perguntas frequentes para saber mais sobre instalação, dispositivos e planos. O canal de atendimento ainda não está disponível neste projeto.');}
   const placeholder = event.target.closest('a[href*="SEU_LINKEDIN_AQUI"]');
   if (placeholder) {event.preventDefault(); showToast('O perfil desta pessoa ainda não foi informado.');}
