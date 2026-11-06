@@ -91,7 +91,7 @@ footer{margin-top:105px;padding:35px 0;color:#778b8a;border-top-color:#b7ded814;
 .how-phone .phone-orbit{top:31%;height:37%}.how-phone .phone-orbit-front{top:28%;height:43%}
 @media(max-width:850px){.how-phone{width:min(490px,100%);margin:auto}.how-phone img{max-height:660px}}
 @media(max-width:520px){.how-phone{padding:25px 8px 45px}.how-phone img{max-height:550px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+
 
 /* Mais espa?o para os celulares, sem ampliar al?m da coluna. */
 .home-page .hero .phone-showcase{width:100%;max-width:600px}
@@ -253,9 +253,19 @@ footer{font-size:14px;line-height:1.8;margin-top:88px;padding:36px 0}
 .step:hover{transform:translateX(2px)}.imagem-celulares:hover img{transform:translateY(-3px)}
 .social-links a:hover{transform:translateY(-2px)}
 @keyframes gentle-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.modal.show .modal-box,.toast.show,.faq-item.open .faq-a{animation:gentle-enter .22s var(--motion-ease) both}
+.modal.show .modal-box,.toast.show{animation:gentle-enter .22s var(--motion-ease) both}
 @media(hover:none){.card:hover,.testimonial:hover,.member:hover,.value:hover,.price:hover,.btn:hover,.step:hover,.social-links a:hover,.imagem-celulares:hover img{transform:none}.phone-showcase img{animation:none}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+/* Resposta ao toque: compressão curta ao pressionar, retorno com a curva padrão. */
+.theme-toggle,.menu-toggle,.close{transition:transform .25s var(--motion-ease),border-color .2s ease,background-color .2s ease}
+.btn:active,.btn:hover:active{transform:scale(.97);transition-duration:.08s}
+.theme-toggle:active,.menu-toggle:active,.close:active{transform:scale(.94);transition-duration:.08s}
+.faq-q{transition:background-color .2s ease}.faq-q:active{background-color:#76eee20a}
+.billing-toggle .btn{transition:transform .3s var(--motion-ease),border-color .3s ease,box-shadow .3s ease,color .2s ease}
+.billing-toggle .btn[aria-pressed="true"]{box-shadow:inset 0 1px #c7fff321,0 0 0 1px #76eee233,0 6px 22px #0004}
+/* Movimento reduzido: segue o controle "Animações" (html[data-motion]); sem JS, segue o sistema. */
+html[data-motion="reduced"]{scroll-behavior:auto}html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-motion="reduced"] *::after{transition:none!important;animation:none!important}
+@media(prefers-reduced-motion:reduce){html:not([data-motion]){scroll-behavior:auto}html:not([data-motion]) *,html:not([data-motion]) *::before,html:not([data-motion]) *::after{transition:none!important;animation:none!important}}
+
 
 /* Planos: valores em destaque e superficies com luz sutil. */
 .pricing-page main>.section{padding-top:48px;padding-bottom:32px}

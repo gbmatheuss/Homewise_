@@ -1,4 +1,9 @@
 // Interações compartilhadas pelas páginas HomeWise.
+// Modo efetivo de animação definido por js/motion-boot.js (controle "Animações"); sem ele, segue o sistema.
+const prefersReducedMotion = () => {
+  const mode = document.documentElement.dataset.motion;
+  return mode ? mode !== 'full' : window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+};
 const themeButton = document.createElement('button');
 themeButton.type = 'button';
 themeButton.className = 'theme-toggle';
@@ -72,6 +77,12 @@ document.querySelectorAll('.links').forEach((nav, index) => {
   document.addEventListener('keydown', event => {if (event.key === 'Escape' && nav.classList.contains('is-open')) {close(); toggle.focus();}});
   window.matchMedia('(min-width: 851px)').addEventListener('change', close);
 });
+// Troca o valor exibido de uma vez (sem números intermediários) e só suaviza a aparência.
+function swapText(el, text, kind) {
+  if (el.textContent === text) return;
+  if (window.HWMotion) {window.HWMotion.swapValue(el, text, kind); return;}
+  el.textContent = text;
+}
 let selectedCycle = 'mensal';
 document.querySelectorAll('[data-cycle]').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -83,12 +94,12 @@ document.querySelectorAll('[data-cycle]').forEach(btn => {
     });
     document.querySelectorAll('[data-price-value]').forEach(el => {
       const value = selectedCycle === 'anual' ? el.dataset.annual : el.dataset.monthly;
-      el.textContent = 'R$ ' + value;
+      swapText(el, 'R$ ' + value);
     });
     document.querySelectorAll('[data-billing-note]').forEach(el => {
-      el.textContent = selectedCycle === 'anual'
+      swapText(el, selectedCycle === 'anual'
         ? `Equivale a ${el.dataset.annualTotal} (15% de desconto)`
-        : 'Cobrado mensalmente • Sem fidelidade';
+        : 'Cobrado mensalmente • Sem fidelidade', 'note');
     });
   });
 });
@@ -112,8 +123,28 @@ document.querySelectorAll('.faq-q').forEach((button, index) => {
   button.setAttribute('aria-controls', answer.id);
   const sync = () => {const open = button.parentElement.classList.contains('open'); button.setAttribute('aria-expanded', String(open)); answer.hidden = !open;};
   sync();
-  button.addEventListener('click', () => {button.parentElement.classList.toggle('open'); sync();});
+  button.addEventListener('click', () => {
+    const item = button.parentElement;
+    const opening = item.classList.toggle('open');
+    button.setAttribute('aria-expanded', String(opening));
+    animateAnswer(item, answer, opening);
+  });
 });
+// Abre/fecha a resposta com altura + opacidade; o texto já está no DOM e acessível desde o início.
+function animateAnswer(item, answer, opening) {
+  answer.getAnimations?.().forEach(animation => animation.cancel());
+  if (prefersReducedMotion() || !answer.animate) {answer.hidden = !opening; return;}
+  answer.hidden = false;
+  const style = getComputedStyle(answer);
+  const full = {height: answer.offsetHeight + 'px', paddingBottom: style.paddingBottom, opacity: 1};
+  const closed = {height: '0px', paddingBottom: '0px', opacity: 0};
+  answer.style.overflow = 'hidden';
+  const animation = answer.animate(opening ? [closed, full] : [full, closed], {duration: opening ? 300 : 220, easing: 'cubic-bezier(.22,.8,.28,1)'});
+  animation.onfinish = () => {
+    answer.style.overflow = '';
+    if (!item.classList.contains('open')) answer.hidden = true;
+  };
+}
 let toastTimer;
 function showToast(message) {
   const toast = document.getElementById('toast');

@@ -6,6 +6,8 @@
     <title>Início | HomeWise</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/motion.css">
+    <script src="js/motion-boot.js"></script>
 </head>
 <body class="home-page">
     <header class="navbar">
@@ -23,7 +25,44 @@
         </div>
     </header>
     <main>
-        <section class="container hero">
+        <section class="hw-opening" id="abertura" aria-label="Abertura do HomeWise">
+            <div class="hw-op-sticky">
+                <div class="hw-op-bg" aria-hidden="true"></div>
+                <div class="hw-op-grid" aria-hidden="true"></div>
+                <svg class="hw-op-house" viewBox="0 0 1000 600" aria-hidden="true" focusable="false">
+                    <path class="hw-draw" pathLength="1" d="M250 300 L500 110 L750 300"/>
+                    <path class="hw-draw" pathLength="1" d="M300 262 V470 H700 V262"/>
+                    <path class="hw-draw" pathLength="1" d="M640 216 V150 H675 V243"/>
+                    <path class="hw-draw" pathLength="1" d="M465 470 V385 H535 V470"/>
+                    <path class="hw-draw" pathLength="1" d="M345 320 H425 V382 H345 Z M385 320 V382"/>
+                    <path class="hw-draw" pathLength="1" d="M575 320 H655 V382 H575 Z M615 320 V382"/>
+                    <path class="hw-draw" pathLength="1" d="M120 470 H880"/>
+                    <path class="hw-link is-water" d="M209 380 C250 380 262 420 300 420 C380 420 420 262 483 252"/>
+                    <path class="hw-link is-energy" d="M791 380 C750 380 738 420 700 420 C620 420 580 262 517 252"/>
+                    <path class="hw-packet is-water" pathLength="1" d="M209 380 C250 380 262 420 300 420 C380 420 420 262 483 252"/>
+                    <path class="hw-packet is-energy" pathLength="1" d="M791 380 C750 380 738 420 700 420 C620 420 580 262 517 252"/>
+                    <g class="hw-op-node hw-op-node-water is-water"><circle cx="175" cy="380" r="34"/><path d="M175 362 C175 362 162 377 162 386 a13 13 0 0 0 26 0 C188 377 175 362 175 362Z"/></g>
+                    <g class="hw-op-node hw-op-node-energy is-energy"><circle cx="825" cy="380" r="34"/><path d="M830 362 L815 384 H826 L820 399 L836 375 H825 Z"/></g>
+                    <g class="hw-op-node hw-op-node-hub"><circle cx="500" cy="252" r="22"/><path d="M488 250 a17 17 0 0 1 24 0 M493 256 a9 9 0 0 1 14 0 M500 262 v.5"/></g>
+                </svg>
+                <div class="hw-op-phone hw-op-phone-l" aria-hidden="true"><div class="hw-op-phone-in"><img src="img/05-metas-agua.png" alt=""></div></div>
+                <div class="hw-op-phone hw-op-phone-r" aria-hidden="true"><div class="hw-op-phone-in"><img src="img/06-alertas.png" alt=""></div></div>
+                <div class="hw-op-center">
+                    <div class="hw-op-brand"><div class="hw-op-brand-in"><img src="img/logo_Homewise.png" alt=""><span class="logo-name">Home<span>Wise</span></span></div></div>
+                    <p class="hw-op-tagline hw-op-fade">Água e energia da sua casa, conectadas e acompanhadas em tempo real.</p>
+                    <div class="hw-op-actions hw-op-fade">
+                        <a class="btn btn-primary" href="#conteudo">Ir para o conteúdo <i class="fa-solid fa-arrow-down"></i></a>
+                        <span class="hw-op-cue" aria-hidden="true">Role para explorar</span>
+                    </div>
+                </div>
+                <svg class="hw-op-waves" viewBox="0 0 1200 120" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                    <path class="w2" pathLength="1" d="M0 64 C36 43 64 43 100 64 C136 85 164 85 200 64 C236 43 264 43 300 64 C336 85 364 85 400 64 C436 43 464 43 500 64 C536 85 564 85 600 64 C636 43 664 43 700 64 C736 85 764 85 800 64 C836 43 864 43 900 64 C936 85 964 85 1000 64 C1036 43 1064 43 1100 64 C1136 85 1164 85 1200 64"/>
+                    <path class="w3" pathLength="1" d="M0 58 C27 45 48 45 75 58 C102 71 123 71 150 58 C177 45 198 45 225 58 C252 71 273 71 300 58 C327 45 348 45 375 58 C402 71 423 71 450 58 C477 45 498 45 525 58 C552 71 573 71 600 58 C627 45 648 45 675 58 C702 71 723 71 750 58 C777 45 798 45 825 58 C852 71 873 71 900 58 C927 45 948 45 975 58 C1002 71 1023 71 1050 58 C1077 45 1098 45 1125 58 C1152 71 1173 71 1200 58"/>
+                    <path class="w1" pathLength="1" d="M0 60 C54 25 96 25 150 60 C204 95 246 95 300 60 C354 25 396 25 450 60 C504 95 546 95 600 60 C654 25 696 25 750 60 C804 95 846 95 900 60 C954 25 996 25 1050 60 C1104 95 1146 95 1200 60"/>
+                </svg>
+            </div>
+        </section>
+        <section class="container hero" id="conteudo" tabindex="-1">
             <div>
                 <span class="badge">● Inteligência para economizar</span>
                 <h1>Controle. Economize.<br><span class="gradient">Transforme seu consumo.</span></h1>
@@ -74,5 +113,6 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
     <script src="js/script.js"></script>
+    <script src="js/motion.js"></script>
 </body>
 </html>

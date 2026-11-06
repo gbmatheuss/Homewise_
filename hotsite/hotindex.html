@@ -8,12 +8,85 @@
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="style.css">
     
-</head>
+<link rel="stylesheet" href="../css/motion.css"><script src="../js/motion-boot.js"></script></head>
 <body class="hotsite-page about-page">
 <main>
 
     
 
+    <section class="hs-story" aria-labelledby="hs-title">
+        <div class="hs-sticky">
+            <div class="hs-bg" aria-hidden="true"></div>
+            <div class="hs-bg-layer hs-bg-water" aria-hidden="true"></div>
+            <div class="hs-bg-layer hs-bg-energy" aria-hidden="true"></div>
+            <div class="hs-bg-layer hs-bg-app" aria-hidden="true"></div>
+            <div class="hs-grid" aria-hidden="true"></div>
+            <div class="hs-head">
+                <a class="hs-brand" href="../index.html" aria-label="HomeWise — página inicial"><img src="../img/logo_Homewise.png" alt=""><span>Home<strong>Wise</strong></span></a>
+                <a class="btn hs-skip" href="#inicio">Ir para o conteúdo <i class="fa-solid fa-arrow-down"></i></a>
+            </div>
+            <div class="hs-copy">
+                <span class="hs-kicker">Casa conectada</span>
+                <h2 class="hs-title" id="hs-title">Uma casa que <span class="gradient">ganha vida.</span></h2>
+                <div class="hs-texts">
+                    <ol class="hs-steps">
+                        <li class="hs-step is-active"><b>01</b><h3>Uma casa comum</h3><p>Tudo começa com a rotina de uma residência: torneiras, chuveiros, lâmpadas e tomadas.</p></li>
+                        <li class="hs-step" data-tone="water"><b>02</b><h3>Água em movimento</h3><p>O sensor de vazão YF-S201 acompanha a água que entra na casa em tempo real.</p></li>
+                        <li class="hs-step" data-tone="energy"><b>03</b><h3>Energia sob controle</h3><p>O medidor PZEM-004T registra potência, tensão e consumo elétrico.</p></li>
+                        <li class="hs-step"><b>04</b><h3>Uma central conecta tudo</h3><p>A central HomeWise reúne as leituras dos sensores e as envia pela rede Wi-Fi.</p></li>
+                        <li class="hs-step"><b>05</b><h3>Na palma da mão</h3><p>O aplicativo transforma os dados em alertas, metas e economia.</p></li>
+                    </ol>
+                    <div class="hs-final">
+                        <p>Água, energia e a sua casa conectadas em um só aplicativo.</p>
+                        <a class="btn btn-primary" href="../index.html">Conheça agora <i class="fa-solid fa-arrow-right"></i></a>
+                        <a class="btn" href="#equipe">Conheça a equipe</a>
+                    </div>
+                </div>
+            </div>
+            <div class="hs-scene">
+                <svg class="hs-house" viewBox="0 0 800 520" aria-hidden="true" focusable="false">
+                    <g class="hs-structure">
+                        <path d="M20 440 H780"/>
+                        <path d="M180 236 L400 92 L620 236"/>
+                        <path d="M210 220 V440 H590 V220"/>
+                        <path d="M210 330 H590"/>
+                        <path d="M400 220 V440"/>
+                        <path d="M430 440 V384 H470 V440"/>
+                        <path d="M40 440 V410 H86 V440"/>
+                        <path d="M740 440 V120 M712 140 H768"/>
+                    </g>
+                    <rect class="hs-window" x="320" y="252" width="56" height="44" rx="5"/>
+                    <rect class="hs-window" x="520" y="356" width="56" height="44" rx="5"/>
+                    <path class="hs-fixture" d="M286 236 V250 M274 256 H298 M278 264 v8 M286 264 v10 M294 264 v8"/>
+                    <path class="hs-fixture" d="M270 410 H330 M300 410 V388 H318 V396"/>
+                    <path class="hs-fixture" d="M480 220 V236 M468 250 L480 236 L492 250 Z"/>
+                    <path class="hs-fixture" d="M540 392 h22 v26 h-22 Z M547 402 v5 M555 402 v5"/>
+                    <path class="hs-fixture" d="M320 252 H376 V296 H320 Z M520 356 H576 V400 H520 Z"/>
+                    <path class="hs-pipe" pathLength="1" d="M86 426 H262 V256 H276"/>
+                    <path class="hs-pipe" pathLength="1" d="M262 420 H300 V410"/>
+                    <path class="hs-cable" pathLength="1" d="M740 148 Q676 210 590 242 H480 V236"/>
+                    <path class="hs-cable" pathLength="1" d="M560 242 V392"/>
+                    <path class="hs-data-draw hs-data" pathLength="1" d="M196 426 C270 470 340 400 382 388"/>
+                    <path class="hs-data-draw hs-data" pathLength="1" d="M660 216 C600 300 470 330 414 376"/>
+                    <path class="hs-uplink" pathLength="1" d="M418 385 C520 470 700 470 800 420"/>
+                    <path class="hs-signal" d="M388 356 a17 17 0 0 1 24 0"/>
+                    <path class="hs-signal" d="M380 348 a28 28 0 0 1 40 0"/>
+                    <path class="hs-signal" d="M372 340 a39 39 0 0 1 56 0"/>
+                    <g class="hs-node hs-node-water"><circle cx="180" cy="426" r="16"/><path d="M180 417 C180 417 173 425 173 430 a7 7 0 0 0 14 0 C187 425 180 417 180 417Z"/></g>
+                    <g class="hs-node hs-node-energy"><circle cx="670" cy="202" r="16"/><path d="M673 193 L664 205 H671 L667 213 L676 200 H670 Z"/></g>
+                    <g class="hs-node hs-node-hub"><circle cx="400" cy="385" r="18"/><path d="M391 384 a12 12 0 0 1 18 0 M395 389 a6 6 0 0 1 10 0 M400 393 v.5"/></g>
+                </svg>
+                <span class="hs-tag" data-tone="water" style="--x:22.5%;--y:82%" aria-hidden="true"><strong>YF-S201</strong>Vazão de água</span>
+                <span class="hs-tag" data-tone="energy" style="--x:83.75%;--y:38.8%" aria-hidden="true"><strong>PZEM-004T</strong>Energia elétrica</span>
+                <span class="hs-tag" data-tone="hub" data-place="below" style="--x:50%;--y:74%" aria-hidden="true"><strong>Central HomeWise</strong>Wi-Fi</span>
+                <div class="hs-phones" aria-hidden="true">
+                    <div class="hs-phone hs-phone-back"><img src="../img/app-conectar-central.png" alt=""></div>
+                    <div class="hs-phone hs-phone-front"><img src="../img/02-inicio.png" alt=""></div>
+                </div>
+            </div>
+            <div class="hs-progress" aria-hidden="true"><span></span></div>
+        </div>
+    </section>
     <section id="inicio" class="container page-head inicio">
 
         <div class="textoInicio">
@@ -178,7 +251,7 @@
     </section>
 </main>
 <footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
-<script src="../js/script.js"></script>
+<script src="../js/script.js"></script><script src="../js/motion.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
