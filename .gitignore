@@ -1,0 +1,18 @@
+# Dependencias e caches locais
+node_modules/
+.cache/
+
+# Ambientes e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
