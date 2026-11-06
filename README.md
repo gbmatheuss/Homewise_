@@ -91,3 +91,4 @@ npx serve .
 ## 🔒 Ambiente Acadêmico
 
 Os pagamentos e planos exibidos neste portal constituem uma **demonstração acadêmica e comercial para o Trabalho de Conclusão de Curso (TCC)**. Não há transações financeiras reais nem cobranças em contas bancárias.
+
