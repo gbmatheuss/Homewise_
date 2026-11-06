@@ -1,28 +1,71 @@
-// Configuração pública do aplicativo. Senhas são gerenciadas pelo Firebase Auth.
+// Configuração pública do aplicativo HomeWise sincronizada com o app mobile (homewise-65bb1).
 export const plans = {'Básico': '19,90', Plus: '29,90', Premium: '49,90'};
-const requested = new URLSearchParams(location.search).get('plano');
-export const selectedPlan = Object.hasOwn(plans, requested) ? requested : 'Plus';
-export const planQuery = '?plano=' + encodeURIComponent(selectedPlan);
+export const annualPlans = {'Básico': '16,90', Plus: '25,40', Premium: '42,40'};
+export const annualTotals = {'Básico': '202,80', Plus: '304,80', Premium: '508,80'};
+export const planIds = {'Básico': 'basico', Plus: 'plus', Premium: 'premium'};
+export const idToPlanName = {basico: 'Básico', plus: 'Plus', premium: 'Premium'};
+
+const params = new URLSearchParams(location.search);
+const requestedPlan = params.get('plano');
+const requestedCycle = params.get('ciclo');
+export const selectedPlan = Object.hasOwn(plans, requestedPlan) ? requestedPlan : 'Plus';
+export const selectedCycle = requestedCycle === 'anual' ? 'anual' : 'mensal';
+
+export function buildPlanQuery(planName = selectedPlan, cycle = selectedCycle) {
+  return '?plano=' + encodeURIComponent(planName) + '&ciclo=' + encodeURIComponent(cycle);
+}
+
+export const planQuery = buildPlanQuery(selectedPlan, selectedCycle);
+
+export function formatPlanPrice(planName = selectedPlan, cycle = selectedCycle) {
+  const table = cycle === 'anual' ? annualPlans : plans;
+  const val = table[planName] || plans.Plus;
+  return cycle === 'anual'
+    ? `R$ ${val} / mês (anual: R$ ${annualTotals[planName]})`
+    : `R$ ${val} / mês`;
+}
+
 export const firebaseReady = (async () => {
-  const [{initializeApp}, sdk] = await Promise.all([
+  const [{initializeApp}, sdk, firestoreSdk] = await Promise.all([
     import('https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js'),
-    import('https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js')
+    import('https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js'),
+    import('https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js')
   ]);
   const app = initializeApp({
-    apiKey: 'AIzaSyCww4Tnkn-PbM_F-YQlqAMjHNeIQX9klDI',
-    authDomain: 'academia-aura.firebaseapp.com',
-    projectId: 'academia-aura',
-    storageBucket: 'academia-aura.firebasestorage.app',
-    messagingSenderId: '267073767631',
-    appId: '1:267073767631:web:3940160d54309bb1a00fba',
-    measurementId: 'G-90P71HPFP1'
+    apiKey: 'AIzaSyArdNHN_NkjKYtqo2M0_t5Rg1ot6_lBO38',
+    authDomain: 'homewise-65bb1.firebaseapp.com',
+    projectId: 'homewise-65bb1',
+    storageBucket: 'homewise-65bb1.firebasestorage.app',
+    messagingSenderId: '1038567423475',
+    appId: '1:1038567423475:web:b07801fb6f742604526686',
+    measurementId: 'G-2F2LDCFJHQ'
   });
   const auth = sdk.getAuth(app);
+  const db = firestoreSdk.getFirestore(app);
   auth.languageCode = 'pt-BR';
   await auth.authStateReady();
-  return {auth, sdk};
-  
+  return {auth, sdk, db, firestoreSdk};
 })();
+
+export async function obterPerfilWeb(uid) {
+  try {
+    const {db, firestoreSdk} = await firebaseReady;
+    const snap = await firestoreSdk.getDoc(firestoreSdk.doc(db, 'usuarios', uid));
+    return snap.exists() ? snap.data() : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function salvarPerfilWeb(uid, dados) {
+  const {db, firestoreSdk} = await firebaseReady;
+  await firestoreSdk.setDoc(
+    firestoreSdk.doc(db, 'usuarios', uid),
+    {...dados, uid, atualizado_em: new Date()},
+    {merge: true}
+  );
+}
+
 export function authMessage(error) {
   const messages = {
     'auth/email-already-in-use': 'Este e-mail já possui uma conta. Entre ou recupere sua senha.',
@@ -38,6 +81,5 @@ export function authMessage(error) {
     'auth/operation-not-allowed': 'O acesso por e-mail e senha precisa ser habilitado no Firebase Authentication.',
     'auth/unauthorized-domain': 'Este domínio precisa ser autorizado no Firebase Authentication.'
   };
-  return messages[error.code] || 'Não foi possível concluir. Tente novamente em instantes.';
-  
+  return messages[error?.code] || 'Não foi possível concluir. Tente novamente em instantes.';
 }

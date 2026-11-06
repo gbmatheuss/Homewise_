@@ -1,10 +1,10 @@
-import {firebaseReady, selectedPlan, plans, planQuery, authMessage} from './firebase.js';
+import {firebaseReady, selectedPlan, selectedCycle, formatPlanPrice, planQuery, authMessage, salvarPerfilWeb} from './firebase.js';
 const byId = id => document.getElementById(id);
 const form = byId('auth-form'), fields = byId('auth-fields'), status = byId('auth-status');
 const password = byId('auth-password'), confirm = byId('auth-confirm');
 let mode = 'register', busy = false, client;
-byId('auth-plan').textContent = selectedPlan;
-byId('auth-price').textContent = 'R$ ' + plans[selectedPlan] + ' / mês';
+byId('auth-plan').textContent = `${selectedPlan} (${selectedCycle === 'anual' ? 'Ciclo anual • 15% OFF' : 'Ciclo mensal'})`;
+byId('auth-price').textContent = formatPlanPrice(selectedPlan, selectedCycle);
 function message(text, error = false) { status.textContent = text; status.dataset.error = String(error); }
 function setMode(next) {
   if (busy) return;
@@ -45,8 +45,16 @@ form.addEventListener('submit', async event => {
     const email = byId('auth-email').value.trim();
     if (mode === 'register') {
       const {user} = await sdk.createUserWithEmailAndPassword(auth, email, password.value);
-      // A criação da conta já foi concluída mesmo se a atualização do nome falhar.
+      // A criação da conta já foi concluída mesmo se a atualização do nome ou Firestore falhar.
       try {await sdk.updateProfile(user, {displayName: name});} catch {}
+      try {
+        await salvarPerfilWeb(user.uid, {
+          nome: name,
+          email: email.toLowerCase(),
+          dispositivo_id: '',
+          criado_em: new Date()
+        });
+      } catch {}
     } else { await sdk.signInWithEmailAndPassword(auth, email, password.value); }
     form.reset();
     location.replace('carrinho.html' + planQuery);

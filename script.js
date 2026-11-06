@@ -43,6 +43,7 @@ function openModal(title, text) {
   document.body.classList.add('modal-open');
   modal.querySelector('[data-close]').focus();
 }
+window.openModal = openModal;
 function closeModal() {
   if (!modal.classList.contains('show')) return;
   modal.classList.remove('show');
@@ -71,10 +72,33 @@ document.querySelectorAll('.links').forEach((nav, index) => {
   document.addEventListener('keydown', event => {if (event.key === 'Escape' && nav.classList.contains('is-open')) {close(); toggle.focus();}});
   window.matchMedia('(min-width: 851px)').addEventListener('change', close);
 });
+let selectedCycle = 'mensal';
+document.querySelectorAll('[data-cycle]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedCycle = btn.dataset.cycle === 'anual' ? 'anual' : 'mensal';
+    document.querySelectorAll('[data-cycle]').forEach(other => {
+      const active = other.dataset.cycle === selectedCycle;
+      other.setAttribute('aria-pressed', String(active));
+      other.classList.toggle('btn-primary', active);
+    });
+    document.querySelectorAll('[data-price-value]').forEach(el => {
+      const value = selectedCycle === 'anual' ? el.dataset.annual : el.dataset.monthly;
+      el.textContent = 'R$ ' + value;
+    });
+    document.querySelectorAll('[data-billing-note]').forEach(el => {
+      el.textContent = selectedCycle === 'anual'
+        ? `Equivale a ${el.dataset.annualTotal} (15% de desconto)`
+        : 'Cobrado mensalmente • Sem fidelidade';
+    });
+  });
+});
 document.addEventListener('click', event => {
   if (event.target.closest('[data-close]') || event.target === modal) closeModal();
   const plan = event.target.closest('[data-plan]');
-  if (plan) {event.preventDefault(); window.location.href = 'login.html?plano=' + encodeURIComponent(plan.dataset.plan);}
+  if (plan) {
+    event.preventDefault();
+    window.location.href = 'login.html?plano=' + encodeURIComponent(plan.dataset.plan) + '&ciclo=' + encodeURIComponent(selectedCycle);
+  }
   const download = event.target.closest('[data-download]');
   if (download && (download.tagName !== 'A' || download.getAttribute('href') === '#')) {event.preventDefault(); openModal('HomeWise em breve', 'O aplicativo ainda não possui um link de download disponível. Enquanto isso, conheça os recursos na página Como funciona.');}
   if (event.target.closest('[data-support]')) {event.preventDefault(); openModal('Suporte HomeWise', 'Consulte as perguntas frequentes para saber mais sobre instalação, dispositivos e planos. O canal de atendimento ainda não está disponível neste projeto.');}

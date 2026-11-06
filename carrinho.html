@@ -15,8 +15,8 @@
 <div class="field"><label for="nascimento">Data de nascimento</label><input id="nascimento" name="nascimento" type="date" autocomplete="bday" required></div>
 <div class="field field-wide"><label for="telefone">Número de telefone</label><input id="telefone" name="telefone" type="tel" autocomplete="tel" inputmode="tel" required maxlength="15" pattern="\([0-9]{2}\) [0-9]{4,5}-[0-9]{4}" placeholder="(11) 99999-9999" title="Informe o DDD e o telefone"></div>
 </div></fieldset>
-<fieldset><legend>Endereço</legend><div class="cart-fields">
-<div class="field"><label for="cep">CEP</label><input id="cep" name="cep" autocomplete="postal-code" inputmode="numeric" maxlength="9" pattern="[0-9]{5}-[0-9]{3}" required placeholder="00000-000"></div>
+<fieldset><legend>Endereço da residência</legend><div class="cart-fields">
+<div class="field"><label for="cep">CEP <small id="cep-feedback" class="field-hint"></small></label><input id="cep" name="cep" autocomplete="postal-code" inputmode="numeric" maxlength="9" pattern="[0-9]{5}-[0-9]{3}" required placeholder="00000-000"></div>
 <div class="field field-wide"><label for="endereco">Rua ou avenida</label><input id="endereco" name="endereco" autocomplete="address-line1" required placeholder="Nome da rua ou avenida"></div>
 <div class="field"><label for="numero">Número</label><input id="numero" name="numero" required placeholder="Número ou S/N"></div>
 <div class="field"><label for="complemento">Complemento (opcional)</label><input id="complemento" name="complemento" autocomplete="address-line2" placeholder="Apartamento, bloco, casa"></div>
@@ -24,11 +24,64 @@
 <div class="field"><label for="cidade">Cidade</label><input id="cidade" name="cidade" autocomplete="address-level2" required></div>
 <div class="field"><label for="estado">Estado</label><select id="estado" name="estado" autocomplete="address-level1" required><option value="">Selecione</option><option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option></select></div>
 </div></fieldset>
-<p class="cart-note">Esta página é uma demonstração. O preenchimento não realiza uma compra nem envia seus dados.</p>
-<button type="submit" class="btn btn-primary"><i class="fa-solid fa-clipboard-check"></i> Revisar dados</button>
+<fieldset><legend>Forma de pagamento (Simulação)</legend>
+<div class="payment-tabs" role="group" aria-label="Forma de pagamento">
+  <button type="button" class="btn btn-primary" data-pay-method="pix" aria-pressed="true"><i class="fa-brands fa-pix"></i> PIX (Aprovação imediata)</button>
+  <button type="button" class="btn" data-pay-method="cartao" aria-pressed="false"><i class="fa-solid fa-credit-card"></i> Cartão de crédito</button>
+</div>
+<div id="payment-pix" class="payment-panel">
+  <p class="cart-note">Ambiente de demonstração acadêmica (TCC): escaneie o QR Code demonstrativo ou copie o código PIX. Ao confirmar, o pagamento é simulado e o plano é ativado na sua conta.</p>
+  <div class="pix-box pix-grid">
+    <div class="pix-qr-wrap" aria-label="QR Code PIX demonstrativo">
+      <svg viewBox="0 0 120 120" class="pix-qr-svg" role="img" aria-label="QR Code PIX">
+        <rect x="0" y="0" width="120" height="120" rx="8" fill="#ffffff"/>
+        <path fill="#07131b" d="M12,12 h30 v30 h-30 z M18,18 v18 h18 v-18 z M22,22 h10 v10 h-10 z M78,12 h30 v30 h-30 z M84,18 v18 h18 v-18 z M88,22 h10 v10 h-10 z M12,78 h30 v30 h-30 z M18,84 v18 h18 v-18 z M22,88 h10 v10 h-10 z M50,12 h8 v8 h-8 z M62,12 h8 v16 h-8 z M50,28 h8 v14 h-8 z M12,50 h14 v8 h-14 z M34,50 h16 v8 h-16 z M58,46 h14 v14 h-14 z M78,50 h12 v8 h-12 z M98,50 h10 v16 h-10 z M50,68 h10 v12 h-10 z M68,68 h16 v8 h-16 z M50,88 h16 v8 h-16 z M74,84 h14 v14 h-14 z M94,78 h14 v12 h-14 z M74,100 h34 v8 h-34 z"/>
+      </svg>
+    </div>
+    <div class="pix-details">
+      <span class="pix-label">Código PIX Copia e Cola (Demonstrativo)</span>
+      <code id="pix-code">00020126580014BR.GOV.BCB.PIX0136homewise-tcc-assinatura-demo5204000053039865802BR5916HOMEWISEMONITORA6009SAOPAULO62070503***6304ABCD</code>
+      <button type="button" class="btn" id="copy-pix"><i class="fa-regular fa-copy"></i> Copiar código PIX</button>
+    </div>
+  </div>
+</div>
+<div id="payment-card" class="payment-panel" hidden>
+  <div class="cart-fields">
+    <div class="field field-wide"><label for="card-name">Nome impresso no cartão</label><input id="card-name" autocomplete="cc-name" placeholder="NOME COMO ESTÁ NO CARTÃO"></div>
+    <div class="field field-wide"><label for="card-number">Número do cartão (fictício)</label><input id="card-number" inputmode="numeric" maxlength="19" placeholder="0000 0000 0000 0000"></div>
+    <div class="field"><label for="card-expiry">Validade (MM/AA)</label><input id="card-expiry" inputmode="numeric" maxlength="5" placeholder="12/30"></div>
+    <div class="field"><label for="card-cvv">CVV</label><input id="card-cvv" inputmode="numeric" maxlength="4" placeholder="123"></div>
+  </div>
+</div>
+</fieldset>
+<p class="cart-note">Ambiente demonstrativo sem cobrança financeira real. A assinatura escolhida fica vinculada à sua conta no aplicativo HomeWise.</p>
+<button type="submit" class="btn btn-primary" id="submit-purchase"><i class="fa-solid fa-circle-check"></i> Simular pagamento e ativar assinatura</button>
 <p id="cart-status" role="status" aria-live="polite"></p>
 </form>
-<aside class="cart-summary"><h2>Seu plano</h2><p id="selected-plan">Escolha um plano para continuar.</p><p class="cart-total" id="plan-price"></p><a href="precos.html" class="btn"><i class="fa-solid fa-arrow-left"></i> Ver planos</a></aside>
+<aside class="cart-summary">
+  <div id="active-sub-banner" class="active-sub-banner" hidden></div>
+  <h2>Seu plano</h2>
+  <div class="field" style="margin-bottom:14px">
+    <label for="cart-plan-select">Plano escolhido</label>
+    <select id="cart-plan-select">
+      <option value="Básico">HomeWise Básico</option>
+      <option value="Plus">HomeWise Plus (Mais escolhido)</option>
+      <option value="Premium">HomeWise Premium</option>
+    </select>
+  </div>
+  <div class="field" style="margin-bottom:16px">
+    <label for="cart-cycle-select">Ciclo de cobrança</label>
+    <select id="cart-cycle-select">
+      <option value="mensal">Mensal (sem fidelidade)</option>
+      <option value="anual">Anual (15% de desconto)</option>
+    </select>
+  </div>
+  <p id="selected-plan" style="font-weight:600;color:var(--text)"></p>
+  <p class="cart-total" id="plan-price"></p>
+  <ul class="checks cart-checks" id="plan-benefits"></ul>
+  <button type="button" class="btn" id="cancel-sub-btn" hidden style="width:100%;margin-bottom:10px;border-color:#f8717155;color:#fca5a5"><i class="fa-solid fa-ban"></i> Cancelar assinatura atual</button>
+  <a href="precos.html" class="btn" style="width:100%"><i class="fa-solid fa-arrow-left"></i> Comparar planos</a>
+</aside>
 </div></main>
 <footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
 <style>#protected-cart[hidden],#account-bar[hidden]{display:none}#account-bar{margin-bottom:24px}#account-email{margin-right:16px}</style>
