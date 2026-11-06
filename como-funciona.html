@@ -1,19 +1,79 @@
 <!DOCTYPE html>
-<html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Como funciona | HomeWise</title><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="style.css"></head>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Como funciona | HomeWise</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
 <body class="how-page">
-<header class="navbar"><div class="container nav"><a href="index.html" class="logo"><img class="logo-image" src="img/logo_Homewise.png" alt=""><span class="logo-name">Home<span>Wise</span></span></a><nav class="links"><a class="" href="index.html">Início</a><a class="" href="depoimentos.html">Depoimentos</a><a class="active" href="como-funciona.html">Como funciona</a><a class="" href="sobre.html">Sobre Nós</a><a class="" href="precos.html">Preços</a><a class="" href="faq.html">FAQ</a></nav><a href="#" class="btn btn-blue" data-download>Baixar agora <i class="fa-solid fa-download"></i></a></div></header>
-<main><section class="container page-head"><span class="badge">● Simples e inteligente</span><h1>Como funciona em<br><span class="gradient">4 passos simples.</span></h1><p class="lead">Comece a economizar em poucos minutos e tenha o controle total do seu consumo.</p></section>
-<section class="container content-grid"><div class="steps">
-<div class="step"><div class="num">1</div><div><h3>Conecte seus dispositivos</h3><p>Instale os sensores de água e energia em poucos minutos.</p></div></div>
-<div class="step"><div class="num">2</div><div><h3>Monitore em tempo real</h3><p>Acompanhe seu consumo ao vivo pelo app HomeWise.</p></div></div>
-<div class="step"><div class="num">3</div><div><h3>Receba alertas inteligentes</h3><p>Acompanhe seu consumo e receba avisos quando algo acontecer.</p></div></div>
-<div class="step"><div class="num">4</div><div><h3>Economize todo mês</h3><p>Use os dados e insights para reduzir gastos e atingir suas metas.</p></div></div>
-</div><div class="imagem-celulares phone-showcase how-phone">
-<div class="phone-scene" aria-hidden="true"><span class="phone-orbit phone-orbit-back"></span><span class="phone-orbit phone-orbit-front"></span><span class="phone-platform"></span><span class="phone-spark phone-spark-one"></span><span class="phone-spark phone-spark-two"></span><span class="phone-spark phone-spark-three"></span></div>
-<img class="app-preview" src="img/print_inicio_celular.png" alt="Tela de consumo do aplicativo HomeWise">
-</div></section></main>
-<div class="modal" id="modal"><div class="modal-box"><button class="close" data-close aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button><h2 id="modalTitle"></h2><p id="modalText"></p><br><button class="btn btn-primary" data-close>Fechar</button></div></div>
-<div class="toast" id="toast"></div>
-<footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
-<script src="script.js"></script></body></html>
+    <header class="navbar">
+        <div class="container nav">
+            <a href="index.html" class="logo"><img class="logo-image" src="img/logo_Homewise.png" alt=""><span class="logo-name">Home<span>Wise</span></span></a>
+            <nav class="links" aria-label="Navegação principal">
+                <a href="index.html">Início</a>
+                <a href="depoimentos.html">Depoimentos</a>
+                <a class="active" href="como-funciona.html">Como funciona</a>
+                <a href="sobre.html">Sobre Nós</a>
+                <a href="precos.html">Preços</a>
+                <a href="faq.html">FAQ</a>
+            </nav>
+            <a href="#" class="btn btn-blue" data-download>Baixar agora <i class="fa-solid fa-download"></i></a>
+        </div>
+    </header>
+    <main class="how-main">
+        <section class="container page-head how-heading">
+            <span class="badge">● Simples e inteligente</span>
+            <h1>Como funciona<br><span class="gradient">em 4 passos.</span></h1>
+            <p class="lead">Do primeiro sensor aos insights da sua casa: acompanhe como o HomeWise ajuda você a economizar.</p>
+        </section>
+        <section class="container how-steps" aria-label="As quatro etapas do HomeWise">
+            <article class="how-step-card">
+                <div class="how-step-copy">
+                    <span class="how-step-number">01</span>
+                    <h2>Conecte seus dispositivos</h2>
+                    <p>Instale os sensores de água e energia e conecte tudo ao aplicativo em poucos minutos.</p>
+                </div>
+                <div class="how-step-image">
+                    <img src="img/app-conectar-central.png" alt="Configuração da central HomeWise no perfil, com código da central e opção de escanear QR Code" width="379" height="598">
+                </div>
+            </article>
+            <article class="how-step-card">
+                <div class="how-step-copy">
+                    <span class="how-step-number">02</span>
+                    <h2>Monitore em tempo real</h2>
+                    <p>Acompanhe o consumo da sua casa e veja água e energia em um só lugar.</p>
+                </div>
+                <div class="how-step-image">
+                    <img src="img/02-inicio.png" alt="Exemplo de acompanhamento do consumo no aplicativo">
+                </div>
+            </article>
+            <article class="how-step-card">
+                <div class="how-step-copy">
+                    <span class="how-step-number">03</span>
+                    <h2>Receba alertas inteligentes</h2>
+                    <p>Saiba quando houver um consumo fora do normal e aja antes que ele pese na conta.</p>
+                </div>
+                <div class="how-step-image">
+                    <img src="img/04-energia-ano.png" alt="Exemplo de alerta de consumo no aplicativo">
+                </div>
+            </article>
+            <article class="how-step-card">
+                <div class="how-step-copy">
+                    <span class="how-step-number">04</span>
+                    <h2>Economize todo mês</h2>
+                    <p>Use históricos e insights para entender seus hábitos e reduzir seus gastos.</p>
+                </div>
+                <div class="how-step-image">
+                    <img src="img/05-metas-agua.png" alt="Exemplo de telas de consumo e relatórios HomeWise">
+                </div>
+            </article>
+        </section>
+    </main>
+    <div class="modal" id="modal"><div class="modal-box"><button class="close" data-close aria-label="Fechar"><i class="fa-solid fa-xmark"></i></button><h2 id="modalTitle"></h2><p id="modalText"></p><br><button class="btn btn-primary" data-close>Fechar</button></div></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
+    <script src="script.js"></script>
+</body>
+</html>

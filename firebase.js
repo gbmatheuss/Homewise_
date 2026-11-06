@@ -21,6 +21,7 @@ export const firebaseReady = (async () => {
   auth.languageCode = 'pt-BR';
   await auth.authStateReady();
   return {auth, sdk};
+  
 })();
 export function authMessage(error) {
   const messages = {
@@ -38,4 +39,5 @@ export function authMessage(error) {
     'auth/unauthorized-domain': 'Este domínio precisa ser autorizado no Firebase Authentication.'
   };
   return messages[error.code] || 'Não foi possível concluir. Tente novamente em instantes.';
+  
 }

@@ -215,17 +215,6 @@ footer{font-size:14px;line-height:1.8;margin-top:88px;padding:36px 0}
 .faq-heading{width:100%;max-width:900px;margin:0 auto 35px;text-align:left}
 .faq-heading .lead{margin-left:0;margin-right:auto}
 
-/* Celular alinhado ao bloco de apresentacao, ao lado das etapas. */
-@media(min-width:851px){
- .how-page main{width:min(1120px,calc(100% - 80px));margin-inline:auto;padding-top:76px;padding-bottom:30px;display:grid;grid-template-columns:1fr 1fr;column-gap:48px;row-gap:36px;align-items:start}
- .how-page .page-head{grid-column:1;grid-row:1;width:100%;padding:0;margin:0}
- .how-page .content-grid{display:contents}
- .how-page .steps{grid-column:1;grid-row:2}
- .how-page .how-phone{grid-column:2;grid-row:1 / span 2;align-self:start;justify-self:end;margin:0;padding:41px 0 55px 24px;width:100%;position:relative;left:90px}
-}
-
-@media(min-width:851px) and (max-width:1100px){.how-page .how-phone{left:40px}}
-
 /* Formulario do carrinho. */
 .cart-layout{display:grid;grid-template-columns:minmax(0,2fr) minmax(250px,1fr);gap:28px;align-items:start}
 .cart-form,.cart-summary{padding:32px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#142326,#081012)}
@@ -253,8 +242,8 @@ footer{font-size:14px;line-height:1.8;margin-top:88px;padding:36px 0}
 
 /* Planos: valores em destaque e superficies com luz sutil. */
 .pricing-page main>.section{padding-top:48px;padding-bottom:32px}
-.pricing-page h1{text-align:center;max-width:850px;margin-inline:auto}
-.pricing-page .lead{text-align:center;margin:18px auto 48px!important;font-size:17px}
+.pricing-page h1{text-align:left;max-width:850px;margin-inline:0}
+.pricing-page .lead{text-align:left;margin:18px 0 48px!important;font-size:17px}
 .pricing-page .prices{gap:24px;padding-top:8px;isolation:isolate}
 .pricing-page .price{padding:64px 30px 30px;border-radius:22px;border-color:#a0d8d326;background:radial-gradient(ellipse at 80% 0%,#80e5d919,transparent 52%),linear-gradient(155deg,#15252a,#091216 75%);box-shadow:inset 0 1px #f0fff00a,0 18px 36px #0003}
 .pricing-page .price::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,#9be7da69,transparent);pointer-events:none}
@@ -301,3 +290,89 @@ html[data-theme="light"] .toast{background:#e1f4e8;color:#214e45;border-color:#5
 html[data-theme="light"] footer{color:#536f6a;border-color:var(--line)}
 html[data-theme="light"] .testimonial small{color:#536f6a!important}
 @media(max-width:520px){.theme-toggle{left:12px;bottom:12px;font-size:13px;padding:9px 13px}footer{padding-bottom:70px}}
+
+.how-main{position:relative;isolation:isolate;overflow:hidden;padding:54px 0 76px}
+.how-main::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(rgba(118,238,226,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(118,238,226,.035) 1px,transparent 1px),radial-gradient(ellipse at 12% 18%,#185f6b3b,transparent 35%),radial-gradient(ellipse at 88% 78%,#185f6b3b,transparent 38%);background-size:72px 72px,72px 72px,auto,auto}
+.how-heading{text-align:left;padding:18px 0 0}
+.how-heading h1{max-width:850px;margin:0 0 18px;font-size:clamp(40px,5vw,62px)}
+.how-heading .lead{margin:0;max-width:650px}
+.how-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:38px 24px;padding-top:56px;padding-bottom:20px}
+.how-step-card{position:relative;isolation:isolate;display:flex;align-items:center;min-height:278px;overflow:hidden;padding:30px;border:1px solid #a6d9d52b;border-radius:16px;background:linear-gradient(125deg,#203b4bd9,#18313ddd 62%,#263d63cf);box-shadow:inset 0 1px #ffffff12,0 16px 38px #0003}
+.how-step-card:nth-child(even){transform:translateY(24px)}
+.how-step-card:nth-child(even) .how-step-copy{margin-left:auto}
+.how-step-copy{position:relative;z-index:2;width:63%;max-width:290px}
+.how-step-number{display:block;margin-bottom:8px;color:#dce7e7;font-size:24px;font-weight:700;line-height:1.2}
+.how-step-copy h2{margin-bottom:10px;color:#8ef0dc;font-size:clamp(20px,2vw,25px);line-height:1.25;letter-spacing:-.025em}
+.how-step-copy p{max-width:290px;color:#d0dddf;font-size:14px;line-height:1.65}
+.how-step-image{position:absolute;inset:auto 10px 0 auto;z-index:1;display:grid;width:43%;height:94%;place-items:end center;pointer-events:none}
+.how-step-image img{width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 14px 18px #0008)}
+.how-step-card:nth-child(even) .how-step-image{right:auto;left:10px}
+@media(max-width:850px){
+ .how-main{padding-top:36px}
+ .how-steps{gap:26px 18px;padding-top:42px}
+ .how-step-card{min-height:250px;padding:24px}
+ .how-step-copy{width:65%}
+ .how-step-image{width:42%;height:90%}
+}
+@media(max-width:700px){
+ .how-steps{grid-template-columns:1fr;max-width:600px;gap:18px}
+ .how-step-card,.how-step-card:nth-child(even){min-height:240px;transform:none}
+ .how-step-copy{width:64%}
+ .how-step-image{width:38%;height:92%}
+}
+@media(max-width:520px){
+ .how-main{padding:22px 0 48px}
+ .how-heading{padding-top:14px}
+ .how-heading .badge{margin-bottom:18px}
+ .how-heading h1{font-size:clamp(37px,10vw,48px)}
+ .how-heading .lead{font-size:16px}
+ .how-steps{padding-top:32px}
+ .how-step-card{min-height:220px;padding:20px 18px}
+ .how-step-copy{width:67%}
+ .how-step-copy h2{font-size:19px}
+ .how-step-copy p{font-size:13px;line-height:1.55}
+ .how-step-number{font-size:21px}
+ .how-step-image{right:4px;width:36%;height:88%}
+ .how-step-card:nth-child(even) .how-step-image{left:4px}
+}
+html[data-theme="light"] .how-step-card{background:linear-gradient(125deg,#e1f1ed,#d9eae8 62%,#e0e8f4);border-color:#447b7033;box-shadow:inset 0 1px #ffffffad,0 12px 30px #254e3b12}
+html[data-theme="light"] .how-step-number{color:#315d57}
+html[data-theme="light"] .how-step-copy h2{color:#137e71}
+html[data-theme="light"] .how-step-copy p{color:#45645f}
+
+/* Como funciona: reserve separate space for copy and portrait screenshots. */
+.how-page .how-step-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr);gap:24px;min-width:0;min-height:0;transform:none}
+.how-page .how-step-copy{width:auto;max-width:none;margin:0}
+.how-page .how-step-image{position:relative;inset:auto;width:100%;max-width:240px;height:auto;aspect-ratio:4 / 5;min-width:0;justify-self:center;align-self:end;overflow:hidden;box-sizing:border-box;padding:24px 5px 0;border:3px solid #859397;border-bottom:0;border-radius:32px 32px 0 0;background:#06131c;box-shadow:inset 0 0 0 2px #263d4b,0 10px 24px #0005;mask-image:linear-gradient(to bottom,#000 0%,#000 76%,transparent 100%);-webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 76%,transparent 100%)}
+.how-page .how-step-image::before{content:'';position:absolute;z-index:2;top:8px;left:50%;width:32%;max-width:70px;height:11px;transform:translateX(-50%);border-radius:20px;background:#010609;box-shadow:0 1px 0 #ffffff10}
+.how-page .how-step-image::after{content:'';position:absolute;z-index:3;top:11px;left:calc(50% + 18px);width:5px;height:5px;border-radius:50%;background:#152e48;box-shadow:inset 0 0 0 1px #203b53}
+.how-page .how-step-image img{display:block;width:100%;height:100%;max-height:none;object-fit:cover;object-position:center top;border-radius:9px 9px 0 0;filter:none}
+@media(max-width:1000px) and (min-width:701px){
+ .how-page .how-step-card{grid-template-columns:1fr;align-content:start}
+ .how-page .how-step-image{max-width:220px}
+}
+@media(max-width:520px){
+ .how-page .how-step-card{grid-template-columns:1fr;gap:22px;padding:24px}
+ .how-page .how-step-copy h2{font-size:23px}
+ .how-page .how-step-copy p{font-size:15px;line-height:1.65}
+ .how-page .how-step-image{max-width:240px}
+}
+/* Home: two phone frames with independently replaceable app screenshots. */
+.home-phone-pair{position:relative;width:min(100%,480px);aspect-ratio:1;isolation:isolate}
+.home-phone{position:absolute;width:49%;aspect-ratio:390 / 844;box-sizing:border-box;padding:23px 5px 7px;overflow:hidden;border:3px solid #83979e;border-radius:30px;background:#06131c;box-shadow:inset 0 0 0 2px #233a48,0 24px 35px #0007}
+.home-phone::before{content:'';position:absolute;z-index:2;top:8px;left:50%;width:32%;height:10px;transform:translateX(-50%);border-radius:20px;background:#010609}
+.home-phone::after{content:'';position:absolute;z-index:3;top:11px;left:calc(50% + 18px);width:4px;height:4px;border-radius:50%;background:#203b53}
+.home-phone-back{left:5%;top:0;transform:rotate(-11deg);z-index:1}
+.home-phone-front{right:5%;top:8%;transform:rotate(10deg);z-index:2}
+.home-page .hero .phone-showcase .home-phone img{display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;object-position:top;border-radius:10px 10px 20px 20px;filter:none;animation:none;transform:none}
+@media(max-width:520px){.home-phone{padding:20px 4px 5px;border-width:2px;border-radius:24px}.home-phone::before{top:7px;height:9px}.home-phone::after{top:10px}.home-phone-pair{width:min(100%,380px)}}
+/* Highlight the central pairing code in the first step. */
+.how-page .how-step-card:first-child .how-step-image img{object-position:center top}
+.how-page .how-step-card:nth-child(2) .how-step-image img{object-position:center 10%}
+
+/* Depoimentos: profile screenshot inside a phone frame. */
+.testimonial-phone .testimonial-profile-phone{position:relative;width:min(100%,210px);z-index:1}
+.testimonial-phone .testimonial-profile-phone img{display:block;width:100%;height:100%;max-height:none;object-fit:cover;object-position:center top;border-radius:10px 10px 20px 20px;mask-image:none;-webkit-mask-image:none;filter:none;animation:none;transform:none}
+@media(max-width:520px){.testimonial-phone .testimonial-profile-phone{width:min(100%,180px)}}
+/* Depoimentos: the introduction occupies the space left by the removed phone. */
+.testimonials-head{grid-template-columns:minmax(0,1fr)}
