@@ -8,33 +8,8 @@
 html[data-theme="light"]{--hw-amber:#b7791f;--hw-water:#1f7fb8}
 [data-motion="full"] body,[data-motion="full"] main{overflow-x:clip}
 
-/* =====================================================================
-   Controle "Animações" + tema (dock fixo)
-   ===================================================================== */
-.hw-dock{position:fixed;left:20px;bottom:20px;z-index:85;display:flex;align-items:flex-end;gap:8px;view-transition-name:hw-dock}
-.hw-dock .theme-toggle{position:static;left:auto;bottom:auto}
-.hw-motion-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:10px 16px;border:1px solid var(--line);border-radius:30px;background:var(--card);color:var(--text);font:inherit;font-size:14px;box-shadow:0 5px 20px #0002;cursor:pointer;transition:border-color .2s ease,transform .25s var(--hw-out)}
-.hw-motion-btn svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;flex:0 0 17px}
-.hw-motion-btn:hover,.hw-motion-btn[aria-expanded="true"]{border-color:var(--cyan)}
-.hw-motion-btn:active{transform:scale(.95)}
-.hw-motion-btn .hw-motion-state{font-size:11px;padding:2px 7px;border-radius:20px;background:#76eee21f;color:var(--cyan);letter-spacing:.02em}
-.hw-motion-panel{position:absolute;left:0;bottom:calc(100% + 10px);width:min(290px,calc(100vw - 24px));padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:0 18px 50px #0007;color:var(--text)}
-.hw-motion-panel[hidden]{display:none}
-[data-motion="full"] .hw-motion-panel:not([hidden]){animation:hw-panel-in .32s var(--hw-out) both}
-@keyframes hw-panel-in{from{opacity:0;transform:translateY(10px) scale(.97)}}
-.hw-motion-panel fieldset{border:0;margin:0;padding:0;display:grid;gap:4px;min-width:0}
-.hw-motion-panel legend{padding:0;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
-.hw-motion-opt{display:flex;align-items:center;gap:12px;min-height:44px;padding:8px 12px;border-radius:10px;cursor:pointer;font-size:15px;line-height:1.3}
-.hw-motion-opt:hover{background:#76eee20d}
-.hw-motion-opt:has(input:checked){background:#76eee214}
-.hw-motion-opt input{accent-color:var(--cyan);width:18px;height:18px;margin:0;flex:0 0 18px}
-.hw-motion-opt small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
-.hw-replay{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:44px;margin-top:12px;padding:10px 14px;border:1px solid #76eee244;border-radius:10px;background:#76eee20f;color:var(--text);font:inherit;font-size:14px;cursor:pointer}
-.hw-replay:hover{border-color:var(--cyan)}
-.hw-replay:disabled{opacity:.55;cursor:not-allowed}
-.hw-replay-hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
-html[data-theme="light"] .hw-motion-panel{box-shadow:0 18px 50px #1d4a3f26}
-@media(max-width:520px){.hw-dock{left:12px;bottom:12px;gap:6px}.hw-motion-btn{font-size:13px;padding:9px 13px}.hw-motion-btn .hw-motion-state{display:none}}
+/* Botão de tema: permanece fixo e estável durante as transições entre páginas. */
+.theme-toggle{view-transition-name:hw-theme}
 
 /* =====================================================================
    Formulários: foco, validação e conclusão (sempre ativos; o movimento só em "full")
@@ -150,7 +125,16 @@ html[data-theme="light"] .hw-status-err{color:#b23b3b}
    INÍCIO — abertura controlada pela rolagem
    ===================================================================== */
 .hw-opening{display:none}
-[data-motion="full"].hw-show-opening .hw-opening{display:block;position:relative;height:calc(100svh + var(--op-d,600px));margin-top:calc(var(--hw-nav-h,104px) * -1);z-index:1}
+.hw-show-opening .hw-opening{display:block;position:relative;height:calc(100svh + var(--op-d,600px));z-index:1}
+[data-motion="full"].hw-show-opening .hw-opening{margin-top:calc(var(--hw-nav-h,104px) * -1)}
+/* Movimento reduzido (pedido pelo sistema): a abertura continua, mas só com opacidade —
+   sem deslocamentos, escalas, parallax, giros ou animações contínuas. */
+[data-motion="reduced"] .hw-opening .hw-op-sticky{height:calc(100svh - var(--hw-nav-h,0px));top:var(--hw-nav-h,0px)}
+[data-motion="reduced"] .hw-opening.is-playing :is(.hw-op-brand-in,.hw-op-brand-in img,.hw-op-tagline,.hw-op-actions,.hw-op-node,.hw-op-bg){animation:hw-fade-in .9s ease both}
+[data-motion="reduced"] .hw-opening.is-playing .hw-op-phone-in{animation:none}
+[data-motion="reduced"] .hw-opening :is(.hw-link,.hw-packet),[data-motion="reduced"] .hw-op-cue::after{animation:none!important}
+[data-motion="reduced"] .hw-opening .hw-packet,[data-motion="reduced"] .hw-op-dust,[data-motion="reduced"] .hw-op-sticky::after,[data-motion="reduced"] .hw-op-phone-in::after{display:none}
+[data-motion="reduced"] .hw-opening .hw-op-phone{opacity:0}
 .hw-op-sticky{position:sticky;top:0;height:100svh;overflow:hidden;display:grid;place-items:center;isolation:isolate}
 .hw-op-bg{position:absolute;inset:0;z-index:-3;background:radial-gradient(ellipse 55% 50% at 50% 48%,#14403f 0%,#0b2225 42%,transparent 78%),radial-gradient(ellipse 80% 60% at 50% 120%,#0f3a3d,transparent 70%),var(--bg)}
 .hw-op-grid{position:absolute;inset:-12% 0;z-index:-2;background-image:linear-gradient(#9af5e50d 1px,transparent 1px),linear-gradient(90deg,#9af5e50d 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse 60% 55% at 50% 50%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 60% 55% at 50% 50%,#000 30%,transparent 75%)}
@@ -171,6 +155,34 @@ html[data-theme="light"] .hw-op-node circle{fill:#ffffffd9}
 .hw-op-phone{position:absolute;left:50%;top:50%;width:clamp(118px,14vw,200px);aspect-ratio:390/844;margin:calc(clamp(118px,14vw,200px) * -1.082) 0 0 calc(clamp(118px,14vw,200px) * -.5);z-index:0;will-change:transform}
 .hw-op-phone-in{width:100%;height:100%;box-sizing:border-box;padding:16px 4px 5px;overflow:hidden;border:3px solid #83979e;border-radius:26px;background:#06131c;box-shadow:inset 0 0 0 2px #233a48,0 30px 50px #000a,0 0 40px #63ebdf1a}
 .hw-op-phone-in img{width:100%;height:100%;object-fit:cover;object-position:top;border-radius:8px 8px 18px 18px}
+/* Celular: profundidade e luz discretas. O reflexo percorre a tela com a rolagem (transform), e um anel
+   acende quando os sensores "chegam" ao app (opacity). */
+.hw-op-phone{transform-style:flat;backface-visibility:hidden}
+.hw-op-phone-in{position:relative}
+.hw-op-phone-in::before,.hw-op-phone-in::after{content:'';position:absolute;pointer-events:none;z-index:1}
+.hw-op-phone-in::after{top:-10%;bottom:-10%;left:0;width:70%;background:linear-gradient(105deg,transparent 20%,#ffffff1c 46%,#ffffff08 54%,transparent 72%);transform:translateX(calc(-110% + var(--op-p,0) * 260%)) skewX(-8deg)}
+.hw-op-phone-in::before{inset:-2px;border-radius:inherit;box-shadow:inset 0 0 0 2px #76eee2,0 0 46px #76eee255;opacity:calc(var(--op-glow,0) * .85)}
+.hw-op-phone-l .hw-op-phone-in::before{box-shadow:inset 0 0 0 2px var(--hw-water),0 0 46px color-mix(in srgb,var(--hw-water) 40%,transparent)}
+.hw-op-phone-r .hw-op-phone-in::before{box-shadow:inset 0 0 0 2px var(--hw-amber),0 0 46px color-mix(in srgb,var(--hw-amber) 40%,transparent)}
+/* Partículas de dados em três profundidades. */
+.hw-op-dust{position:absolute;inset:0;z-index:-2;pointer-events:none}
+.hw-op-dust i{position:absolute;display:block;width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 12px currentColor;color:var(--cyan);opacity:.55}
+.hw-op-dust i.is-water{background:var(--hw-water);color:var(--hw-water)}
+.hw-op-dust i.is-energy{background:var(--hw-amber);color:var(--hw-amber)}
+.hw-op-dust i.d1{width:3px;height:3px;opacity:.35}
+.hw-op-dust i.d3{width:8px;height:8px;opacity:.7}
+.hw-op-dust i::after{content:'';position:absolute;inset:0;border-radius:50%;background:inherit;animation:hw-mote 3.6s ease-in-out infinite;animation-delay:calc(var(--k,0) * -.45s)}
+@keyframes hw-mote{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(2.4);opacity:0}}
+.hw-op-grid{transform-origin:50% 60%}
+.hw-op-house .hw-op-node-hub{transform-box:fill-box;transform-origin:50% 50%}
+/* Entrada cinematográfica: a luz abre como uma íris, uma faixa de brilho atravessa a cena. */
+.hw-op-sticky::after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(100deg,transparent 35%,#a8fff21a 48%,#ffffff12 50%,transparent 62%);transform:translateX(-120%);opacity:0}
+.hw-opening.is-playing .hw-op-sticky::after{animation:hw-flare 1.8s var(--hw-io) .5s both}
+@keyframes hw-flare{0%{transform:translateX(-120%);opacity:1}100%{transform:translateX(120%);opacity:1}}
+.hw-opening.is-playing .hw-op-bg{animation:hw-iris 1.4s var(--hw-out) both}
+@keyframes hw-iris{from{clip-path:circle(0% at 50% 48%);opacity:.3}to{clip-path:circle(150% at 50% 48%)}}
+.hw-opening.is-playing .hw-op-dust{animation:hw-fade-in 1.6s ease .8s both}
+.hw-opening.is-playing .hw-op-grid{animation:hw-fade-in 1.2s ease .3s both}
 .hw-op-center{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 20px;margin-top:-4vh}
 .hw-op-brand{display:inline-block;transform-origin:50% 50%;will-change:transform}
 .hw-op-brand-in{display:flex;align-items:center;gap:var(--op-gap,24px);font-size:var(--op-font,64px);font-weight:500;letter-spacing:-1px;line-height:1.1;color:var(--text)}
@@ -189,7 +201,6 @@ html[data-theme="light"] .hw-op-brand-in .logo-name span{color:#137e71}
 .hw-op-waves .w2{stroke:var(--hw-water);stroke-width:1.5;opacity:.45}
 .hw-op-waves .w3{stroke:var(--hw-amber);stroke-width:1.2;opacity:.4}
 /* Entrada da abertura (independente da rolagem: anima as camadas internas). */
-.hw-opening.is-playing .hw-op-bg{animation:hw-fade-in .9s ease both}
 .hw-opening.is-playing .hw-draw{animation:hw-draw 1.5s var(--hw-io) both;animation-delay:calc(.1s + var(--n,0) * .12s)}
 .hw-opening.is-playing .hw-op-node{animation:hw-node-in .8s var(--hw-spring) both;animation-delay:calc(.7s + var(--n,0) * .14s)}
 .hw-opening.is-playing .hw-link{animation:hw-fade-in .6s ease 1.05s both,hw-flow-dash 1.4s linear infinite}
@@ -349,6 +360,8 @@ html[data-theme="light"] .hs-house .hs-node circle{fill:#fff}
 .hs-phone-back{left:0;top:0;rotate:-9deg}
 .hs-phone-front{right:0;bottom:0;rotate:7deg}
 .hs-phone::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 2px #76eee200;transition:box-shadow .8s ease}
+.hs-phone{backface-visibility:hidden}
+.hs-phone::before{content:'';position:absolute;top:-10%;bottom:-10%;left:0;width:70%;z-index:1;pointer-events:none;background:linear-gradient(105deg,transparent 20%,#ffffff1f 46%,#ffffff08 54%,transparent 72%);transform:translateX(calc(-110% + var(--hs-sheen,1) * 260%)) skewX(-8deg)}
 .hs-progress{display:none}
 /* Modo completo: palco fixo enquanto a rolagem conta a história. */
 [data-motion="full"] .hs-story{height:calc(100svh + var(--hs-d,1800px))}

@@ -18,7 +18,8 @@ Homewise_/
 │   ├── auth.js               # Autenticação Firebase (login, registro e recuperação)
 │   ├── carrinho.js           # Checkout, validação de CPF/CEP, PIX simulado e Firestore
 │   ├── firebase.js           # Inicialização do Firebase (homewise-65bb1), Auth e Firestore
-│   ├── motion.js             # Abertura da sessão e animações ligadas à rolagem (página inicial)
+│   ├── motion-boot.js        # Tema, modo de animação (segue o movimento reduzido do sistema) e abertura a cada carregamento
+│   ├── motion.js             # Abertura reversível pela rolagem e animações de todas as páginas e do hotsite
 │   └── script.js             # Menu mobile, tema dark/light, modais, FAQ e ciclo de planos
 ├── img/                      # Imagens do sistema, fotos da equipe e telas do app
 ├── hotsite/                  # Hotsite especial dedicado à equipe e bastidores

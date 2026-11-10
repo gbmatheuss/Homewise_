@@ -1,5 +1,5 @@
 // HomeWise — motor de motion compartilhado por todas as páginas.
-// • Controle "Animações" (Seguir sistema | Ativadas | Reduzidas), salvo no navegador.
+// • Animações sempre ativas; reduzidas automaticamente quando o sistema pede movimento reduzido.
 // • Um único listener de scroll (passivo + requestAnimationFrame) que só atualiza trilhas
 //   próximas da área visível (IntersectionObserver) e escreve transform/opacity/variáveis CSS.
 // • Revelações executadas uma vez por carregamento, com variações por tipo de conteúdo.
@@ -9,10 +9,7 @@
   if (window.HWMotion) return;
   const root = document.documentElement;
   const body = document.body;
-  const currentScript = document.currentScript;
-  const siteRoot = new URL('../', currentScript ? currentScript.src : location.href);
   const systemQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const PREF_KEY = 'homewise-motion';
 
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const range = (v, a, b) => clamp((v - a) / (b - a));
@@ -68,17 +65,18 @@
     return t;
   }
   let frame = 0;
+  // Trilhas "soft" continuam ativas no movimento reduzido (só mexem em opacidade).
+  const runs = t => isFull() || t.soft;
   function tick() {
     frame = 0;
-    if (!isFull()) return;
     const y = window.scrollY;
-    for (const t of tracks) if (t.active) t.update(y);
+    for (const t of tracks) if (t.active && runs(t)) t.update(y);
   }
   function schedule() { if (!frame) frame = requestAnimationFrame(tick); }
   const measurers = [];
   function measureAll() {
     measurers.forEach(fn => fn());
-    if (isFull()) tracks.forEach(t => t.measure?.());
+    tracks.forEach(t => { if (runs(t)) t.measure?.(); });
     tick();
   }
   let measureTimer = 0;
@@ -157,83 +155,15 @@
   const revealWords = (sel, cfg) => $$(sel).forEach(el => reveal(splitWords(el), 'words', { duration: 1800, ...cfg }));
 
   /* ------------------------------------------------------------------ */
-  /* Preferência "Animações"                                            */
+  /* Modo de animação: automático, sem controle na interface             */
   /* ------------------------------------------------------------------ */
-  function readPref() {
-    try { const v = localStorage.getItem(PREF_KEY); return v === 'full' || v === 'reduced' ? v : 'system'; } catch { return 'system'; }
-  }
   function applyMode() {
-    const pref = readPref();
-    const mode = pref === 'system' ? (systemQuery.matches ? 'reduced' : 'full') : pref;
-    const changed = root.dataset.motion !== mode;
-    root.dataset.motionPref = pref;
+    const mode = systemQuery.matches ? 'reduced' : 'full';
+    if (root.dataset.motion === mode) return;
     root.dataset.motion = mode;
-    syncControl();
-    if (changed) onModeChange();
+    onModeChange();
   }
   systemQuery.addEventListener?.('change', applyMode);
-
-  let controlRefs = null;
-  function buildDock() {
-    const dock = document.createElement('div');
-    dock.className = 'hw-dock';
-    const theme = $('.theme-toggle');
-    if (theme) dock.append(theme);
-    dock.insertAdjacentHTML('beforeend', `
-      <button type="button" class="hw-motion-btn" aria-expanded="false" aria-controls="hw-motion-panel">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12c2.5-5 5-5 7.5 0s5 5 7.5 0 3.3-3.3 5-1.5"/><path d="M2 18c2.5-3 5-3 7.5 0" opacity=".5"/></svg>
-        Animações <span class="hw-motion-state"></span>
-      </button>
-      <div class="hw-motion-panel" id="hw-motion-panel" hidden>
-        <fieldset>
-          <legend>Animações</legend>
-          <label class="hw-motion-opt"><input type="radio" name="hw-motion" value="system"><span>Seguir sistema<small class="hw-system-note"></small></span></label>
-          <label class="hw-motion-opt"><input type="radio" name="hw-motion" value="full"><span>Ativadas<small>Abertura, parallax e transições</small></span></label>
-          <label class="hw-motion-opt"><input type="radio" name="hw-motion" value="reduced"><span>Reduzidas<small>Conteúdo imediato, sem deslocamentos</small></span></label>
-        </fieldset>
-        <button type="button" class="hw-replay"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Rever abertura</button>
-        <p class="hw-replay-hint" hidden>Ative as animações para rever a abertura.</p>
-      </div>`);
-    body.append(dock);
-    const button = $('.hw-motion-btn', dock);
-    const panel = $('.hw-motion-panel', dock);
-    const replay = $('.hw-replay', dock);
-    controlRefs = { dock, button, panel, replay, hint: $('.hw-replay-hint', dock), state: $('.hw-motion-state', dock), note: $('.hw-system-note', dock), radios: $$('input', dock) };
-    const close = (focus = false) => {
-      if (panel.hidden) return;
-      panel.hidden = true;
-      button.setAttribute('aria-expanded', 'false');
-      if (focus) button.focus();
-    };
-    button.addEventListener('click', () => {
-      const open = panel.hidden;
-      panel.hidden = !open;
-      button.setAttribute('aria-expanded', String(open));
-      if (open) (controlRefs.radios.find(r => r.checked) || controlRefs.radios[0]).focus();
-    });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) close(true); });
-    document.addEventListener('pointerdown', e => { if (!dock.contains(e.target)) close(); });
-    controlRefs.radios.forEach(radio => radio.addEventListener('change', () => {
-      try { if (radio.value === 'system') localStorage.removeItem(PREF_KEY); else localStorage.setItem(PREF_KEY, radio.value); } catch {}
-      applyMode();
-    }));
-    replay.addEventListener('click', () => {
-      close();
-      if (page === 'home' && opening) opening.replay();
-      else if (page === 'hotsite' && story) story.replay();
-      else location.href = new URL('index.html#abertura', siteRoot).href;
-    });
-    syncControl();
-  }
-  function syncControl() {
-    if (!controlRefs) return;
-    const pref = root.dataset.motionPref || 'system';
-    controlRefs.radios.forEach(r => { r.checked = r.value === pref; });
-    controlRefs.note.textContent = `Agora: ${systemQuery.matches ? 'reduzidas' : 'ativadas'} no sistema`;
-    controlRefs.state.textContent = isFull() ? 'ativadas' : 'reduzidas';
-    controlRefs.replay.disabled = !isFull();
-    controlRefs.hint.hidden = isFull();
-  }
 
   /* ------------------------------------------------------------------ */
   /* Cabeçalho: compacta com a rolagem e mostra o progresso da página    */
@@ -292,14 +222,38 @@
     const sticky = $('.hw-op-sticky', op), center = $('.hw-op-center', op), brand = $('.hw-op-brand', op);
     const house = $('.hw-op-house', op), waves = $('.hw-op-waves', op), bg = $('.hw-op-bg', op), grid = $('.hw-op-grid', op);
     const phones = $$('.hw-op-phone', op), fades = $$('.hw-op-fade', op);
-    const nodeWater = $('.hw-op-node-water', op), nodeEnergy = $('.hw-op-node-energy', op);
+    const nodeWater = $('.hw-op-node-water', op), nodeEnergy = $('.hw-op-node-energy', op), nodeHub = $('.hw-op-node-hub', op);
     const navbar = $('.navbar'), logo = navbar && $('.logo', navbar);
     $$('.hw-draw', op).forEach((el, i) => el.style.setProperty('--n', i));
     $$('.hw-op-node', op).forEach((el, i) => el.style.setProperty('--n', i));
     $$('.hw-op-waves path', op).forEach((el, i) => el.style.setProperty('--n', i));
+    // Ligações sensor → central agrupadas: separam-se (somem) quando os sensores partem rumo ao app.
+    const linkEls = $$('.hw-link, .hw-packet', house);
+    const links = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    links.setAttribute('class', 'hw-op-links');
+    if (linkEls.length) { linkEls[0].before(links); links.append(...linkEls); }
+    // Partículas de dados em três profundidades (parallax).
+    const dust = document.createElement('div');
+    dust.className = 'hw-op-dust';
+    dust.setAttribute('aria-hidden', 'true');
+    const SEEDS = [[8, 22, 1], [17, 68, 3], [26, 38, 2], [34, 84, 1], [44, 14, 3], [57, 76, 2], [63, 30, 1], [71, 58, 3], [79, 18, 2], [88, 46, 1], [93, 80, 3], [52, 52, 2], [12, 48, 2], [83, 70, 1]];
+    dust.innerHTML = SEEDS.map(([x, y, z], i) => `<i class="d${z}${i % 3 === 0 ? ' is-energy' : i % 3 === 1 ? ' is-water' : ''}" style="left:${x}%;top:${y}%;--k:${i}"></i>`).join('');
+    bg.after(dust);
+    const motes = $$('i', dust).map((el, i) => ({ el, z: SEEDS[i][2], drift: (i % 2 ? 1 : -1) * (6 + (i * 7) % 18) }));
+
     let D = 600, lastWidth = 0, fly = { dx: 0, dy: 0, s: 1 }, waveDrop = 0, narrow = false;
-    const isActive = () => root.classList.contains('hw-show-opening') && isFull();
+    let SW = 1, SH = 1, H = { cx: 0, cy: 0, W: 1000 }, last = { hs: 1, hy: 0, wy: 0 };
+    const isActive = () => root.classList.contains('hw-show-opening');
     new IntersectionObserver(([e]) => op.classList.toggle('is-near', e.isIntersecting)).observe(op);
+    // Trajetória dos celulares: [x0 vw, y0 vh, giro0, x1, y1, giro1, escala1, rotY0, rotY1]
+    const phonePath = () => (narrow ? [31, 40, 12, 29, 21, 2.5, .95, 24, 5] : [37, 36, 14, 24, 4, 3, 1, 30, 7]);
+    function phoneAt(i, pp) {
+      const side = i === 0 ? -1 : 1, [x0, y0, r0, x1, y1, r1, s1, ry0, ry1] = phonePath();
+      return {
+        x: side * lerp(x0, x1, pp) * SW / 100, y: lerp(y0, y1, pp) * SH / 100,
+        r: side * lerp(r0, r1, pp), ry: -side * lerp(ry0, ry1, pp), s: lerp(.8, s1, pp)
+      };
+    }
 
     function measure() {
       if (!isActive() || !logo) return;
@@ -307,9 +261,15 @@
       narrow = w < 700;
       if (w !== lastWidth) { // altura muda com a barra do navegador no celular: só a largura redefine o trecho
         lastWidth = w;
-        D = Math.round(window.innerHeight * (narrow ? .75 : .9));
+        D = Math.round(window.innerHeight * (narrow ? .9 : 1.05));
         op.style.setProperty('--op-d', D + 'px');
       }
+      SW = sticky.clientWidth || w; SH = sticky.clientHeight || window.innerHeight;
+      // Geometria da casa sem as transformações da rolagem (desfaz escala/deslocamento aplicados).
+      const sr = sticky.getBoundingClientRect(), hr = house.getBoundingClientRect();
+      H = { W: hr.width / last.hs, cx: hr.left + hr.width / 2 - sr.left - SW / 2, cy: hr.top + hr.height / 2 - sr.top - SH / 2 - last.hy };
+      const wr = waves.getBoundingClientRect();
+      waveDrop = (sr.bottom - 1) - (wr.top + wr.height / 2 - last.wy);
       root.style.setProperty('--hw-nav-h', navbar.offsetHeight + 'px');
       const img = $('.logo-image', logo), cs = getComputedStyle(logo);
       const K = narrow ? 1.45 : w < 1100 ? 1.8 : 2.1;
@@ -325,60 +285,105 @@
         dy: (ty + logo.offsetHeight / 2) - (by + brand.offsetHeight / 2),
         s: logo.offsetWidth / (brand.offsetWidth || 1)
       };
-      waveDrop = sticky.offsetHeight - 1 - (waves.offsetTop + waves.offsetHeight / 2);
+    }
+    // Leva um sensor da casa até o centro da tela de um celular (coordenadas do SVG, desfazendo a escala da casa).
+    function nodeToPhone(node, nx, ny, phone, t, hs, hy) {
+      const k = 1000 / H.W;
+      const relX = (nx - 500) / k, relY = (ny - 300) / k;
+      const dx = ((phone.x - H.cx) / hs - relX) * k;
+      const dy = ((phone.y - H.cy - hy) / hs - relY) * k;
+      setStyle(node, 'translate', `${(dx * t).toFixed(1)}px ${(dy * t).toFixed(1)}px`);
+      setStyle(node, 'scale', (1 - .55 * t).toFixed(4));
+      setStyle(node, 'opacity', (1 - range(t, .82, 1)).toFixed(3));
+    }
+    // Movimento reduzido: mesma narrativa, apenas com opacidade (nada se desloca, gira ou escala).
+    function updateSoft(p) {
+      const pf = range(p, 0, .26);
+      fades.forEach(el => { setStyle(el, 'opacity', (1 - pf).toFixed(3)); el.classList.toggle('is-gone', pf > .97); });
+      setStyle(brand, 'opacity', (1 - range(p, .3, .6)).toFixed(3));
+      setStyle(house, 'opacity', (1 - .6 * range(p, .2, .9)).toFixed(3));
+      setStyle(links, 'opacity', (1 - range(p, .12, .34)).toFixed(3));
+      [nodeWater, nodeEnergy].forEach(n => setStyle(n, 'opacity', (1 - range(p, .3, .6)).toFixed(3)));
+      phones.forEach((phone, i) => {
+        const s = phoneAt(i, 1);
+        setStyle(phone, 'translate', `${s.x.toFixed(1)}px ${s.y.toFixed(1)}px`);
+        setStyle(phone, 'opacity', range(p, .3, .62).toFixed(3));
+      });
+      setStyle(waves, 'opacity', (1 - range(p, .3, .9)).toFixed(3));
+      setStyle(bg, 'opacity', (1 - range(p, .55, 1)).toFixed(3));
     }
     function update(y) {
       if (!isActive()) return;
       const p = clamp(y / D);
-      const pf = range(p, 0, .28);
+      if (!isFull()) return updateSoft(p);
+      setVar(op, '--op-p', p);
+      // 1. Texto de apresentação sai primeiro.
+      const pf = range(p, 0, .26);
       fades.forEach(el => {
         setStyle(el, 'opacity', (1 - pf).toFixed(3));
         setStyle(el, 'translate', `0 ${(-46 * pf).toFixed(1)}px`);
         el.classList.toggle('is-gone', pf > .97);
       });
+      // 2. A marca viaja até o cabeçalho.
       const pb = easeInOut(range(p, .2, .86));
       setStyle(brand, 'translate', `${(fly.dx * pb).toFixed(1)}px ${(fly.dy * pb).toFixed(1)}px`);
       setStyle(brand, 'scale', (1 + (fly.s - 1) * pb).toFixed(4));
       setStyle(brand, 'opacity', (1 - range(p, .84, .94)).toFixed(3));
+      // 3. A casa recua em profundidade.
       const ph = easeOut(range(p, 0, .9));
-      setStyle(house, 'scale', (1 - .4 * ph).toFixed(4));
-      setStyle(house, 'translate', `0 ${(-7 * ph).toFixed(2)}vh`);
+      const hs = 1 - .4 * ph, hy = -.07 * SH * ph;
+      last.hs = hs; last.hy = hy;
+      setStyle(house, 'scale', hs.toFixed(4));
+      setStyle(house, 'translate', `0 ${hy.toFixed(1)}px`);
       setStyle(house, 'opacity', (1 - .45 * ph).toFixed(3));
-      setStyle(nodeWater, 'translate', `${(90 * ph).toFixed(1)}px ${(-30 * ph).toFixed(1)}px`);
-      setStyle(nodeEnergy, 'translate', `${(-90 * ph).toFixed(1)}px ${(-30 * ph).toFixed(1)}px`);
+      // 4. Celulares sobem e passam de inclinados para quase frontais.
       const pp = easeOut(range(p, .04, .85));
-      phones.forEach((phone, i) => {
-        const side = i === 0 ? -1 : 1;
-        const [x0, y0, r0, x1, y1, r1, s1] = narrow ? [31, 40, 14, 29, 21, 6, .95] : [37, 36, 16, 24, 4, 7, 1];
-        setStyle(phone, 'translate', `${(side * lerp(x0, x1, pp)).toFixed(2)}vw ${lerp(y0, y1, pp).toFixed(2)}vh`);
-        setStyle(phone, 'rotate', `${(side * lerp(r0, r1, pp)).toFixed(2)}deg`);
-        setStyle(phone, 'scale', lerp(.8, s1, pp).toFixed(4));
+      const at = phones.map((phone, i) => {
+        const s = phoneAt(i, pp);
+        setStyle(phone, 'translate', `${s.x.toFixed(1)}px ${s.y.toFixed(1)}px`);
+        setStyle(phone, 'rotate', `${s.r.toFixed(2)}deg`);
+        setStyle(phone, 'scale', s.s.toFixed(4));
+        setStyle(phone, 'transform', `perspective(1100px) rotateY(${s.ry.toFixed(2)}deg)`);
+        return s;
       });
+      // 5. As ligações se desfazem e os sensores de água e energia viajam até as telas do app.
+      setStyle(links, 'opacity', (1 - range(p, .12, .34)).toFixed(3));
+      const pn = easeInOut(range(p, .2, .8));
+      if (at.length === 2) {
+        nodeToPhone(nodeWater, 175, 380, at[0], pn, hs, hy);
+        nodeToPhone(nodeEnergy, 825, 380, at[1], pn, hs, hy);
+      }
+      const glow = Math.sin(Math.PI * range(p, .66, 1));
+      phones.forEach(phone => setVar(phone, '--op-glow', glow));
+      setStyle(nodeHub, 'scale', (1 + .35 * Math.sin(Math.PI * range(p, .2, .8))).toFixed(4));
+      // 6. Camadas de fundo: partículas em parallax, grade que vira piso, ondas que se recolhem.
+      motes.forEach(m => setStyle(m.el, 'translate', `${(m.drift * p).toFixed(1)}px ${(-p * SH * .22 * m.z).toFixed(1)}px`));
+      setStyle(dust, 'opacity', (1 - range(p, .75, 1)).toFixed(3));
+      setStyle(grid, 'transform', `perspective(900px) rotateX(${(52 * easeInOut(range(p, .05, .9))).toFixed(2)}deg) translateY(${(-60 * p).toFixed(1)}px)`);
       const pw = easeInOut(range(p, .18, .92));
+      last.wy = waveDrop * pw;
       setStyle(waves, 'scale', `1 ${(1 - .97 * pw).toFixed(4)}`);
-      setStyle(waves, 'translate', `0 ${(waveDrop * pw).toFixed(1)}px`);
+      setStyle(waves, 'translate', `0 ${last.wy.toFixed(1)}px`);
       setStyle(bg, 'opacity', (1 - range(p, .55, 1)).toFixed(3));
-      setStyle(grid, 'translate', `0 ${(-90 * p).toFixed(1)}px`);
     }
     function play() {
       op.classList.remove('is-playing');
       void op.offsetWidth;
       op.classList.add('is-playing');
     }
-    function replay() {
-      root.classList.add('hw-show-opening');
+    // Troca de modo (o sistema mudou a preferência): remove o que a outra versão escreveu.
+    function reset() {
+      [brand, house, links, waves, bg, grid, dust, nodeWater, nodeEnergy, nodeHub, ...phones, ...fades, ...motes.map(m => m.el)].forEach(el => {
+        ['translate', 'scale', 'rotate', 'transform', 'opacity'].forEach(prop => el.style.removeProperty(prop));
+      });
+      last = { hs: 1, hy: 0, wy: 0 };
       cache = new WeakMap();
-      measureAll();
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      play();
-      schedule();
-      $('.hw-op-actions .btn', op)?.focus({ preventScroll: true });
     }
-    const t = track({ el: op, measure, update });
+    const t = track({ el: op, measure, update, soft: true });
     t.isActive = isActive;
     if (isActive()) play();
     if (location.hash === '#abertura') history.replaceState(null, '', location.pathname + location.search);
-    return { isActive, distance: () => D, replay, play };
+    return { isActive, distance: () => D, play, reset };
   }
 
   /* ------------------------------------------------------------------ */
@@ -579,9 +584,20 @@
     reveal(prices, (el, i) => (i === featuredIndex ? 'fan-c' : i < featuredIndex ? 'fan-l' : 'fan-r'), { delay: el => (el.classList.contains('featured') ? 0 : 200), duration: 1800 });
     reveal('.billing-toggle', 'clip');
     const toggle = $('.billing-toggle');
+    let lastCycle = $('button[aria-pressed="true"]', toggle || body)?.dataset.cycle;
     if (toggle) new MutationObserver(() => {
       if (!isFull()) return;
+      const cycle = $('button[aria-pressed="true"]', toggle)?.dataset.cycle;
+      if (!cycle || cycle === lastCycle) return;
+      const dir = cycle === 'anual' ? 1 : -1;
+      lastCycle = cycle;
       prices.forEach((p, i) => {
+        // Giro 3D curto: o cartão vira para o lado do período escolhido e volta de frente (só transform).
+        p.animate?.([
+          { transform: 'perspective(1200px) rotateY(0deg)' },
+          { transform: `perspective(1200px) rotateY(${dir * 9}deg) scale(.985)`, offset: .4 },
+          { transform: 'perspective(1200px) rotateY(0deg)' }
+        ], { duration: 760, delay: i * 70, easing: 'cubic-bezier(.65,0,.35,1)' });
         p.classList.remove('hw-sweep');
         void p.offsetWidth;
         p.style.setProperty('animation-delay', i * 80 + 'ms');
@@ -708,7 +724,6 @@
   /* ------------------------------------------------------------------ */
   /* HOTSITE — a casa conectada ganha vida com a rolagem                 */
   /* ------------------------------------------------------------------ */
-  let story = null;
   function setupStory() {
     const st = $('.hs-story');
     if (!st) return null;
@@ -748,21 +763,22 @@
         steps.forEach((s, i) => { s.classList.toggle('is-active', i === chapter); s.classList.toggle('is-past', i < chapter); });
       }
       st.classList.toggle('is-final', p >= .9);
+      // Celulares do app: chegam inclinados em 3D e terminam quase de frente, com um reflexo que percorre a tela.
+      const f = easeOut(range(p, .7, .95));
+      hsPhones.forEach((ph, i) => {
+        const side = i === 0 ? 1 : -1;
+        setStyle(ph, 'transform', `perspective(900px) rotateY(${(side * lerp(34, 6, f)).toFixed(2)}deg)`);
+      });
+      setVar(st, '--hs-sheen', range(p, .72, 1));
     }
+    const hsPhones = $$('.hs-phone', st);
     function play() { st.classList.remove('is-playing'); void st.offsetWidth; st.classList.add('is-playing'); }
-    function replay() {
-      cache = new WeakMap();
-      measureAll();
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      play();
-      schedule();
-    }
     track({ el: st, measure, update });
     play();
-    return { replay };
+    return { play };
   }
   function setupHotsite() {
-    story = setupStory();
+    setupStory();
     revealWords('.hotsite-page .textoInicio h1, .project-story-heading h2');
     reveal('.hotsite-page .textoInicio > h3, .hotsite-page .textoInicio > p, .project-story-heading > p', 'fade', { stagger: 120 });
     reveal('.hotsite-page .textoInicio > .btn', 'pop', { delay: () => 300 });
@@ -791,7 +807,7 @@
     if (fullReady) return;
     fullReady = true;
     setupNavbar();
-    if (page === 'home') { opening = setupOpening(); setupHome(); }
+    if (page === 'home') setupHome();
     if (page === 'hotsite') setupHotsite();
     setupCommon();
     if (page === 'how') setupHow();
@@ -804,22 +820,25 @@
   }
   function onModeChange() {
     cache = new WeakMap();
-    if (isFull()) {
-      initFull();
-      if (page === 'home' && opening && !root.classList.contains('hw-show-opening') && window.scrollY < 60) opening.replay();
-      measureAll();
-    }
+    opening?.reset();
+    if (isFull()) initFull();
+    if (opening && window.scrollY < 60) opening.play();
+    measureAll();
   }
 
-  // Sempre ativos (independem do modo): dock, controles segmentados, formulários e menu.
+  // Recarga (F5 / Ctrl+R / botão do navegador): começa no topo para a abertura se recompor inteira.
+  // Uma âncora no endereço (ex.: #conteudo, #equipe) continua sendo respeitada.
+  if ((page === 'home' || page === 'hotsite') && (!location.hash || location.hash === '#abertura') && window.scrollY) window.scrollTo(0, 0);
+
+  // Sempre ativos (independem do modo): controles segmentados, formulários e menu.
   $$('.links').forEach(nav => $$('a', nav).forEach((a, i) => a.style.setProperty('--i', i)));
   $$('.checks, .cta-benefits').forEach(list => $$('li', list).forEach((li, i) => li.style.setProperty('--li', i)));
   ['.billing-toggle', '.auth-tabs', '.payment-tabs'].forEach(sel => segmented($(sel)));
   setupForms();
-  buildDock();
-  if (page === 'hotsite' && !isFull()) story = { replay() {} };
-  if (isFull()) initFull();
-  else if (page === 'hotsite') { /* hotsite estático: a cena já aparece completa no modo reduzido */ }
+  // A abertura da inicial existe nos dois modos (no reduzido, em versão só de opacidade).
+  if (page === 'home') opening = setupOpening();
+  if (isFull()) initFull(); else measureAll();
+  // No modo reduzido o hotsite fica estático: a cena já aparece completa.
 
-  window.HWMotion = { swapValue, replay: () => controlRefs?.replay.click(), applyMode };
+  window.HWMotion = { swapValue, applyMode };
 })();

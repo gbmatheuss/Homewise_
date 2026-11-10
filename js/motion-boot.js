@@ -1,28 +1,26 @@
 // HomeWise — decisões de apresentação tomadas antes da primeira pintura (carregado no <head>).
-// Tema salvo, modo de animação ("Seguir sistema" | "Ativadas" | "Reduzidas") e abertura da sessão.
+// Tema salvo, modo de animação (automático: segue o "movimento reduzido" do sistema) e abertura.
 (function () {
   var root = document.documentElement;
   root.classList.add('hw-js');
   try { if (localStorage.getItem('homewise-theme') === 'light') root.dataset.theme = 'light'; } catch (e) {}
 
-  var pref = 'system';
-  try {
-    var saved = localStorage.getItem('homewise-motion');
-    if (saved === 'full' || saved === 'reduced') pref = saved;
-  } catch (e) {}
+  // As animações fazem parte da experiência padrão. Só são reduzidas quando o dispositivo pede.
   var systemReduced = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
-  root.dataset.motionPref = pref;
-  root.dataset.motion = pref === 'system' ? (systemReduced ? 'reduced' : 'full') : pref;
+  root.dataset.motion = systemReduced ? 'reduced' : 'full';
+  try { localStorage.removeItem('homewise-motion'); sessionStorage.removeItem('homewise-opening'); } catch (e) {} // preferências antigas
 
-  // Abertura da página inicial: primeira entrada da sessão ou pedido explícito (#abertura).
+  // A abertura (inicial e hotsite) roda em todo carregamento, inclusive F5 / Ctrl+R.
+  // Sem âncora no endereço, a recarga começa no topo para a composição inicial aparecer inteira.
   var path = location.pathname;
-  var isHome = /(^|\/)(index\.html)?$/.test(path) && !/\/hotsite\//.test(path);
-  try {
-    if (isHome && (location.hash === '#abertura' || !sessionStorage.getItem('homewise-opening'))) root.classList.add('hw-show-opening');
-    sessionStorage.setItem('homewise-opening', '1');
-  } catch (e) {}
+  var isHotsite = /\/hotsite\//.test(path);
+  var isHome = /(^|\/)(index\.html)?$/.test(path) && !isHotsite;
+  if (isHome) root.classList.add('hw-show-opening');
+  if ((isHome || isHotsite) && (!location.hash || location.hash === '#abertura') && 'scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
 
-  // Transições entre páginas (View Transitions): puladas quando as animações estão reduzidas.
+  // Transições entre páginas (View Transitions): puladas quando o sistema pede movimento reduzido.
   var skip = function (event) { if (root.dataset.motion !== 'full' && event.viewTransition) event.viewTransition.skipTransition(); };
   window.addEventListener('pageswap', skip);
   window.addEventListener('pagereveal', skip);
