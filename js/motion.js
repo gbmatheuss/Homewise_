@@ -34,31 +34,83 @@
   /* ------------------------------------------------------------------ */
   /* Escrita de estilos com cache (evita escrever o mesmo valor a cada frame) */
   /* ------------------------------------------------------------------ */
+  /* ------------------------------------------------------------------ */
+  /* Proteção dos pontos de entrada                                      */
+  /* ------------------------------------------------------------------ */
+  // Todo callback assíncrono (rolagem, rAF, timers, observers, eventos) passa por guard().
+  // Na primeira exceção: diagnóstico no console, desligamento de todos os callbacks e
+  // recuperação para a apresentação estática (nenhum conteúdo fica oculto).
+  let failed = false, failure = null;
+  const cleanups = [];
+  function guard(fn, where) {
+    return function guarded(...args) {
+      if (failed) return undefined;
+      try { return fn.apply(this, args); } catch (error) { fail(error, where); return undefined; }
+    };
+  }
+  function listen(target, type, fn, where, opts) {
+    const g = guard(fn, where);
+    target.addEventListener(type, g, opts);
+    cleanups.push(() => target.removeEventListener(type, g, opts));
+  }
+  function observer(Ctor, fn, where, opts) {
+    const o = new Ctor(guard(fn, where), opts);
+    cleanups.push(() => o.disconnect());
+    return o;
+  }
+  const later = (fn, ms, where) => setTimeout(guard(fn, where), ms);
+  function fail(error, where) {
+    if (failed) return;
+    failed = true;
+    failure = where;
+    console.error(`[HomeWise] Falha no motor de animações (${where}). A página foi mantida na versão estática.`, error);
+    cancelAnimationFrame(frame);
+    clearTimeout(measureTimer);
+    cleanups.splice(0).forEach(c => { try { c(); } catch (e) { console.error('[HomeWise] falha ao desligar um callback', e); } });
+    goStatic();
+  }
+
   let cache = new WeakMap();
+  // Tudo o que o motor escreve fica registrado para poder ser desfeito (troca de modo ou falha).
+  // Entradas de elementos removidos do DOM são descartadas em pruneWritten().
+  const written = new Map();
+  function pruneWritten() { written.forEach((_, el) => { if (!el.isConnected) written.delete(el); }); }
+  function remember(el, key) {
+    let s = written.get(el);
+    if (!s) written.set(el, s = new Set());
+    s.add(key);
+  }
   function put(el, key, value, apply) {
     let c = cache.get(el);
     if (!c) cache.set(el, c = {});
     if (c[key] === value) return;
     c[key] = value;
+    remember(el, key);
     apply(value);
   }
   const setVar = (el, name, v) => put(el, name, typeof v === 'number' ? v.toFixed(4) : v, val => el.style.setProperty(name, val));
   const setStyle = (el, prop, v) => put(el, prop, v, val => { el.style[prop] = val; });
+  function clearWritten() {
+    written.forEach((keys, el) => keys.forEach(k => { if (k.startsWith('--')) el.style.removeProperty(k); else el.style[k] = ''; }));
+    written.clear();
+    cache = new WeakMap();
+  }
 
   /* ------------------------------------------------------------------ */
   /* Motor de rolagem                                                    */
   /* ------------------------------------------------------------------ */
   const tracks = [];
   const gateMap = new Map();
-  const gate = new IntersectionObserver(entries => {
+  const gate = observer(IntersectionObserver, entries => {
     entries.forEach(entry => {
       const t = gateMap.get(entry.target);
       if (!t) return;
       t.active = entry.isIntersecting;
       if (t.active) schedule();
     });
-  }, { rootMargin: '35% 0px 35% 0px' });
+  }, 'observador de visibilidade', { rootMargin: '35% 0px 35% 0px' });
   function track(t) {
+    if (failed) return t;
     tracks.push(t);
     if (t.el) { t.active = false; gateMap.set(t.el, t); gate.observe(t.el); } else t.active = true;
     t.measure?.();
@@ -67,50 +119,62 @@
   let frame = 0;
   // Trilhas "soft" continuam ativas no movimento reduzido (só mexem em opacidade).
   const runs = t => isFull() || t.soft;
-  function tick() {
+  const tick = guard(() => {
     frame = 0;
     const y = window.scrollY;
     for (const t of tracks) if (t.active && runs(t)) t.update(y);
-  }
-  function schedule() { if (!frame) frame = requestAnimationFrame(tick); }
+  }, 'atualização da rolagem');
+  function schedule() { if (!frame && !failed) frame = requestAnimationFrame(tick); }
   const measurers = [];
-  function measureAll() {
+  const measureAll = guard(() => {
+    pruneWritten();
     measurers.forEach(fn => fn());
     tracks.forEach(t => { if (runs(t)) t.measure?.(); });
     tick();
-  }
+  }, 'medição do layout');
   let measureTimer = 0;
-  const queueMeasure = () => { clearTimeout(measureTimer); measureTimer = setTimeout(measureAll, 90); };
-  window.addEventListener('scroll', schedule, { passive: true });
-  window.addEventListener('resize', queueMeasure, { passive: true });
-  if ('ResizeObserver' in window) new ResizeObserver(queueMeasure).observe(body);
-  window.addEventListener('load', queueMeasure, { once: true });
-  document.fonts?.ready.then(queueMeasure);
+  const queueMeasure = () => { if (failed) return; clearTimeout(measureTimer); measureTimer = later(measureAll, 90, 'medição do layout'); };
+  listen(window, 'scroll', schedule, 'evento de rolagem', { passive: true });
+  listen(window, 'resize', queueMeasure, 'evento de redimensionamento', { passive: true });
+  if ('ResizeObserver' in window) observer(ResizeObserver, queueMeasure, 'observador de tamanho').observe(body);
+  listen(window, 'load', queueMeasure, 'evento load', { once: true });
+  document.fonts?.ready.then(guard(queueMeasure, 'carregamento de fontes'));
 
   /* ------------------------------------------------------------------ */
   /* Revelações (uma vez por carregamento)                               */
   /* ------------------------------------------------------------------ */
   const revealConfig = new WeakMap();
   const docOrder = (a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
-  const revealIO = new IntersectionObserver(entries => {
+  const revealIO = observer(IntersectionObserver, entries => {
     entries.filter(e => e.isIntersecting).map(e => e.target).sort(docOrder).forEach((el, i) => {
       revealIO.unobserve(el);
       play(el, i);
     });
-  }, { rootMargin: '0px 0px -8% 0px' });
-  function play(el, i) {
+  }, 'revelação de conteúdo', { rootMargin: '0px 0px -8% 0px' });
+  function play(el, i, instant = false) {
     const cfg = revealConfig.get(el) || {};
-    const delay = cfg.delay ? cfg.delay(el, i) : i * (cfg.stagger ?? 90);
+    const delay = instant ? 0 : cfg.delay ? cfg.delay(el, i) : i * (cfg.stagger ?? 90);
+    if (instant) el.classList.add('hw-instant');
     el.style.setProperty('--hw-d', delay + 'ms');
     el.classList.add('is-in');
     cfg.onIn?.(el);
-    setTimeout(() => {
-      el.classList.remove('hw-pre', 'is-in');
+    later(() => {
+      el.classList.remove('hw-pre', 'is-in', 'hw-instant');
       el.removeAttribute('data-hw');
       el.style.removeProperty('--hw-d');
-    }, (cfg.duration ?? 1400) + delay);
+      if (cfg.settle) queueMeasure(); // medidas que dependem da posição final (linhas de conexão)
+    }, (cfg.duration ?? 1400) + delay, 'fim de revelação');
   }
+  // Teclado: um elemento que recebe foco antes de ser revelado aparece na hora (nunca fica invisível com foco).
+  listen(document, 'focusin', event => {
+    let el = event.target.closest?.('.hw-pre');
+    while (el) { // o próprio elemento e qualquer ancestral ainda em entrada aparecem imediatamente
+      if (!el.classList.contains('is-in')) { revealIO.unobserve(el); play(el, 0, true); } else el.classList.add('hw-instant');
+      el = el.parentElement?.closest('.hw-pre');
+    }
+  }, 'foco por teclado');
   function reveal(targets, variant, cfg = {}) {
+    if (failed) return; // após uma falha nada mais é ocultado
     const list = typeof targets === 'string' ? $$(targets) : [...(targets.length !== undefined ? targets : [targets])];
     list.forEach((el, index) => {
       if (!el || el.dataset.hw || el.dataset.hwDone) return;
@@ -163,7 +227,7 @@
     root.dataset.motion = mode;
     onModeChange();
   }
-  systemQuery.addEventListener?.('change', applyMode);
+  if (systemQuery.addEventListener) listen(systemQuery, 'change', applyMode, 'mudança de preferência de movimento');
 
   /* ------------------------------------------------------------------ */
   /* Cabeçalho: compacta com a rolagem e mostra o progresso da página    */
@@ -244,7 +308,7 @@
     let D = 600, lastWidth = 0, fly = { dx: 0, dy: 0, s: 1 }, waveDrop = 0, narrow = false;
     let SW = 1, SH = 1, H = { cx: 0, cy: 0, W: 1000 }, last = { hs: 1, hy: 0, wy: 0 };
     const isActive = () => root.classList.contains('hw-show-opening');
-    new IntersectionObserver(([e]) => op.classList.toggle('is-near', e.isIntersecting)).observe(op);
+    observer(IntersectionObserver, ([e]) => op.classList.toggle('is-near', e.isIntersecting), 'visibilidade da abertura').observe(op);
     // Trajetória dos celulares: [x0 vw, y0 vh, giro0, x1, y1, giro1, escala1, rotY0, rotY1]
     const phonePath = () => (narrow ? [31, 40, 12, 29, 21, 2.5, .95, 24, 5] : [37, 36, 14, 24, 4, 3, 1, 30, 7]);
     function phoneAt(i, pp) {
@@ -316,7 +380,8 @@
       if (!isActive()) return;
       const p = clamp(y / D);
       if (!isFull()) return updateSoft(p);
-      setVar(op, '--op-p', p);
+      // Só os celulares usam --op-p (reflexo): gravar na raiz recalcularia o estilo de toda a abertura.
+      phones.forEach(phone => setVar(phone, '--op-p', p));
       // 1. Texto de apresentação sai primeiro.
       const pf = range(p, 0, .26);
       fades.forEach(el => {
@@ -371,13 +436,10 @@
       void op.offsetWidth;
       op.classList.add('is-playing');
     }
-    // Troca de modo (o sistema mudou a preferência): remove o que a outra versão escreveu.
+    // Troca de modo: os estilos já foram limpos por clearWritten(); zera a geometria de referência.
     function reset() {
-      [brand, house, links, waves, bg, grid, dust, nodeWater, nodeEnergy, nodeHub, ...phones, ...fades, ...motes.map(m => m.el)].forEach(el => {
-        ['translate', 'scale', 'rotate', 'transform', 'opacity'].forEach(prop => el.style.removeProperty(prop));
-      });
       last = { hs: 1, hy: 0, wy: 0 };
-      cache = new WeakMap();
+      fades.forEach(el => el.classList.remove('is-gone'));
     }
     const t = track({ el: op, measure, update, soft: true });
     t.isActive = isActive;
@@ -468,8 +530,11 @@
     reveal('main .section-sub', 'fade', { delay: () => 200 });
     reveal('main .cards > .card', 'tilt', { stagger: 110 });
     reveal('main .cta, main .support', 'unfold', { stagger: 0 });
+    setupFooterLine();
+  }
+  function setupFooterLine() {
     const footer = $('footer');
-    if (footer) new IntersectionObserver(([e], obs) => { if (e.isIntersecting) { footer.classList.add('hw-footer-in'); obs.disconnect(); } }).observe(footer);
+    if (footer) observer(IntersectionObserver, ([e], obs) => { if (e.isIntersecting) { footer.classList.add('hw-footer-in'); obs.disconnect(); } }, 'rodapé').observe(footer);
   }
 
   /* ------------------------------------------------------------------ */
@@ -479,38 +544,57 @@
     const steps = $('.how-steps');
     if (!steps) return;
     const cards = $$('.how-step-card', steps);
-    reveal(cards, (el, i) => (i % 2 ? 'slide-r' : 'slide-l'), { stagger: 140, duration: 1700 });
+    reveal(cards, (el, i) => (i % 2 ? 'slide-r' : 'slide-l'), { stagger: 140, duration: 1700, settle: true });
     const ns = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(ns, 'svg');
     svg.setAttribute('class', 'hw-steps-line');
     svg.setAttribute('aria-hidden', 'true');
-    steps.prepend(svg);
-    let segments = [], dots = [], top = 0, h = 1;
+    // No fim do contêiner: inserir no início deslocaria os seletores :nth-child das etapas.
+    steps.append(svg);
+    // Os elementos do SVG são criados UMA vez e reaproveitados a cada medição (só "d", "cx" e "cy"
+    // mudam). Assim nenhum caminho descartado fica retido pelo registro de estilos (written).
+    const el = (tag, attrs) => { const n = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
+    const links = cards.slice(1).map(() => {
+      const trackPath = el('path', { class: 'hw-track' });
+      const run = el('path', { class: 'hw-run', pathLength: '1' });
+      run.style.strokeDasharray = '1';
+      run.style.strokeDashoffset = '1';
+      const a = el('circle', { r: 6 }), b = el('circle', { r: 6 });
+      svg.append(trackPath, run, a, b);
+      return { trackPath, run, a, b };
+    });
+    const segments = links.map(l => l.run), dots = links.flatMap(l => [l.a, l.b]);
+    let top = 0, h = 1;
+    // Posição de layout (sem transformações): as etapas podem estar no meio da animação de entrada.
+    function layoutBox(el) {
+      let x = 0, y = 0, n = el;
+      while (n && n !== steps) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+      if (n !== steps) { x -= steps.offsetLeft; y -= steps.offsetTop; } // offsetParent comum acima de .how-steps
+      return { x, y, w: el.offsetWidth, h: el.offsetHeight };
+    }
     function measure() {
-      const base = steps.getBoundingClientRect();
-      const rects = cards.map(c => { const r = c.getBoundingClientRect(); return { l: r.left - base.left, t: r.top - base.top, r: r.right - base.left, b: r.bottom - base.top, cx: r.left - base.left + r.width / 2, cy: r.top - base.top + r.height / 2 }; });
-      svg.setAttribute('viewBox', `0 0 ${base.width} ${base.height}`);
-      svg.innerHTML = '';
-      segments = []; dots = [];
+      const W = steps.clientWidth, Hh = steps.clientHeight, base = steps.getBoundingClientRect();
+      // Etapa já assentada: posição real (inclui o desnível intencional das etapas pares).
+      // Etapa ainda em animação de entrada: posição de layout; é remedida ao terminar (ver play()).
+      const box = c => {
+        if (c.classList.contains('hw-pre')) return layoutBox(c);
+        const r = c.getBoundingClientRect();
+        return { x: r.left - base.left, y: r.top - base.top, w: r.width, h: r.height };
+      };
+      const rects = cards.map(c => { const b = box(c); return { l: b.x, t: b.y, r: b.x + b.w, b: b.y + b.h, cx: b.x + b.w / 2, cy: b.y + b.h / 2 }; });
+      svg.setAttribute('viewBox', `0 0 ${W} ${Hh}`);
       const sameRow = (a, b) => Math.abs(a.t - b.t) < 10;
-      for (let i = 0; i < rects.length - 1; i++) {
+      const r1 = n => Math.round(n * 10) / 10;
+      links.forEach((link, i) => {
         const a = rects[i], b = rects[i + 1];
         let d, p0, p1;
-        if (sameRow(a, b)) { p0 = [a.r, a.cy]; p1 = [b.l, b.cy]; const mx = (p0[0] + p1[0]) / 2; d = `M${p0} C${mx} ${p0[1]} ${mx} ${p1[1]} ${p1}`; }
-        else { p0 = [a.cx, a.b]; p1 = [b.cx, b.t]; const my = (p0[1] + p1[1]) / 2; d = `M${p0} C${p0[0]} ${my} ${p1[0]} ${my} ${p1}`; }
-        const trackPath = document.createElementNS(ns, 'path');
-        trackPath.setAttribute('class', 'hw-track'); trackPath.setAttribute('d', d);
-        const run = document.createElementNS(ns, 'path');
-        run.setAttribute('class', 'hw-run'); run.setAttribute('d', d); run.setAttribute('pathLength', '1');
-        run.style.strokeDasharray = '1'; run.style.strokeDashoffset = '1';
-        svg.append(trackPath, run);
-        segments.push(run);
-        [p0, p1].forEach(([cx, cy]) => {
-          const dot = document.createElementNS(ns, 'circle');
-          dot.setAttribute('cx', cx); dot.setAttribute('cy', cy); dot.setAttribute('r', 6);
-          svg.append(dot); dots.push(dot);
-        });
-      }
+        if (sameRow(a, b)) { p0 = [r1(a.r), r1(a.cy)]; p1 = [r1(b.l), r1(b.cy)]; const mx = r1((p0[0] + p1[0]) / 2); d = `M${p0} C${mx} ${p0[1]} ${mx} ${p1[1]} ${p1}`; }
+        else { p0 = [r1(a.cx), r1(a.b)]; p1 = [r1(b.cx), r1(b.t)]; const my = r1((p0[1] + p1[1]) / 2); d = `M${p0} C${p0[0]} ${my} ${p1[0]} ${my} ${p1}`; }
+        link.trackPath.setAttribute('d', d);
+        link.run.setAttribute('d', d);
+        link.a.setAttribute('cx', p0[0]); link.a.setAttribute('cy', p0[1]);
+        link.b.setAttribute('cx', p1[0]); link.b.setAttribute('cy', p1[1]);
+      });
       top = docTop(steps); h = steps.offsetHeight;
     }
     track({
@@ -585,7 +669,7 @@
     reveal('.billing-toggle', 'clip');
     const toggle = $('.billing-toggle');
     let lastCycle = $('button[aria-pressed="true"]', toggle || body)?.dataset.cycle;
-    if (toggle) new MutationObserver(() => {
+    if (toggle) observer(MutationObserver, () => {
       if (!isFull()) return;
       const cycle = $('button[aria-pressed="true"]', toggle)?.dataset.cycle;
       if (!cycle || cycle === lastCycle) return;
@@ -602,9 +686,9 @@
         void p.offsetWidth;
         p.style.setProperty('animation-delay', i * 80 + 'ms');
         p.classList.add('hw-sweep');
-        setTimeout(() => p.classList.remove('hw-sweep'), 1200 + i * 80);
+        later(() => p.classList.remove('hw-sweep'), 1200 + i * 80, 'troca Mensal/Anual');
       });
-    }).observe(toggle, { subtree: true, attributes: true, attributeFilter: ['aria-pressed'] });
+    }, 'troca Mensal/Anual').observe(toggle, { subtree: true, attributes: true, attributeFilter: ['aria-pressed'] });
   }
 
   // Troca de valor sem números intermediários: o valor antigo sai por cima, o novo entra por baixo.
@@ -629,18 +713,20 @@
       { transform: 'none', clipPath: 'inset(-12% -6% -12% -6%)', opacity: 1 }
     ], { duration: 650, delay: 70, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' });
   }
+  // Chamado por js/script.js: o valor (preço) é sempre aplicado; só a animação é opcional.
+  const animateSwapSafe = guard(animateSwap, 'troca de valor');
   function swapValue(el, text, kind) {
     const old = el.textContent;
     if (old === text) return;
     el.textContent = text;
-    animateSwap(el, old, kind);
+    animateSwapSafe(el, old, kind);
   }
   function watchSwap(el, kind) {
     if (!el) return;
-    new MutationObserver(records => {
+    observer(MutationObserver, records => {
       const removed = records.flatMap(r => [...r.removedNodes]).map(n => n.textContent).join('');
       animateSwap(el, removed, kind);
-    }).observe(el, { childList: true });
+    }, 'troca de valor').observe(el, { childList: true });
   }
 
   /* ------------------------------------------------------------------ */
@@ -660,16 +746,16 @@
       thumb.style.height = active.offsetHeight + 'px';
       thumb.style.transform = `translate(${active.offsetLeft}px, ${active.offsetTop}px)`;
     };
-    new MutationObserver(place).observe(group, { subtree: true, attributes: true, attributeFilter: ['aria-pressed'] });
+    observer(MutationObserver, place, 'controle segmentado').observe(group, { subtree: true, attributes: true, attributeFilter: ['aria-pressed'] });
     measurers.push(place);
     place();
-    requestAnimationFrame(() => requestAnimationFrame(() => group.classList.add('hw-seg-ready')));
+    requestAnimationFrame(guard(() => requestAnimationFrame(guard(() => group.classList.add('hw-seg-ready'), 'controle segmentado')), 'controle segmentado'));
   }
 
   /* ------------------------------------------------------------------ */
   /* Formulários: status, validação, áreas que aparecem                  */
   /* ------------------------------------------------------------------ */
-  const OK_RE = /aprovad|sucesso|copiado|preenchido|ativa e sincronizada/i;
+  const OK_RE = /sucesso|copiado|preenchido|concluída/i;
   const ERR_RE = /não foi possível|inválid|erro|verifique|não encontrado|incorret|precisam ser iguais/i;
   function watchStatus(el) {
     if (!el) return;
@@ -683,30 +769,30 @@
       void el.offsetWidth;
       el.classList.add('hw-status-in');
     };
-    new MutationObserver(run).observe(el, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['data-error'] });
+    observer(MutationObserver, run, 'mensagem de status').observe(el, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['data-error'] });
   }
   function watchAppear(el, stagger) {
     if (!el) return;
-    new MutationObserver(() => {
+    observer(MutationObserver, () => {
       if (el.hidden || !isFull() || !el.animate) return;
       const parts = stagger ? $$(stagger, el) : [el];
       parts.forEach((part, i) => part.animate([{ opacity: 0, transform: 'translateY(14px)' }, { opacity: 1, transform: 'none' }], { duration: 420, delay: i * 70, easing: 'cubic-bezier(.16,1,.3,1)', fill: 'backwards' }));
-    }).observe(el, { attributes: true, attributeFilter: ['hidden'] });
+    }, 'área que aparece').observe(el, { attributes: true, attributeFilter: ['hidden'] });
   }
   function setupForms() {
-    ['#auth-status', '#cart-status', '#account-status', '#cep-feedback'].forEach(id => watchStatus($(id)));
+    ['#auth-status', '#cart-status', '#account-status'].forEach(id => watchStatus($(id)));
     ['#payment-pix', '#payment-card', '#name-field', '#confirm-field', '#account-bar', '#active-sub-banner', '#reset-password'].forEach(id => watchAppear($(id)));
     watchAppear($('#protected-cart'), ':scope > form > fieldset, :scope > form > .btn, :scope > aside');
     watchSwap($('#plan-price'));
     watchSwap($('#auth-title'));
-    document.addEventListener('invalid', event => {
+    listen(document, 'invalid', event => {
       const field = event.target;
       if (!field.classList) return;
       field.classList.remove('hw-invalid');
       void field.offsetWidth;
       field.classList.add('hw-invalid');
-      setTimeout(() => field.classList.remove('hw-invalid'), 800);
-    }, true);
+      later(() => field.classList.remove('hw-invalid'), 800, 'validação de formulário');
+    }, 'validação de formulário', true);
   }
   function setupFormPages() {
     reveal('.auth-intro .cart-summary', 'short', { delay: () => 300 });
@@ -730,11 +816,39 @@
     const pipes = $$('.hs-pipe', st), cables = $$('.hs-cable', st), data = $$('.hs-data-draw', st), uplink = $$('.hs-uplink', st);
     const node = k => $(`.hs-node-${k}`, st), tag = k => $(`.hs-tag[data-tone="${k}"]`, st);
     const steps = $$('.hs-step', st);
+    const sticky = $('.hs-sticky', st), texts = $('.hs-texts', st), final = $('.hs-final', st);
     $$('.hs-structure > *', st).forEach((el, i) => { el.setAttribute('pathLength', '1'); el.style.setProperty('--n', i); });
-    new IntersectionObserver(([e]) => st.classList.toggle('is-near', e.isIntersecting)).observe(st);
-    let D = 1800, top = 0, lastWidth = 0, chapter = -1;
+    $$('.hs-signal', st).forEach((el, i) => el.style.setProperty('--n', i));
+    observer(IntersectionObserver, ([e]) => st.classList.toggle('is-near', e.isIntersecting), 'visibilidade da casa conectada').observe(st);
+    let D = 1800, top = 0, lastWidth = 0, chapter = -1, staged = false;
     const dash = (list, v) => list.forEach(el => setStyle(el, 'strokeDashoffset', (1 - v).toFixed(4)));
     const on = (k, v) => { node(k)?.classList.toggle('on', v); tag(k)?.classList.toggle('on', v); };
+    // O palco fixo só é usado se tudo couber na tela (altura pequena ou zoom alto → layout estático completo).
+    function fits() {
+      if (!isFull() || window.innerHeight < 520 || window.innerWidth < 320) return false;
+      const was = st.classList.contains('hs-staged');
+      st.classList.add('hs-staged');
+      const box = sticky.getBoundingClientRect(), limit = box.bottom - 4;
+      // Conteúdo real (cabeçalho, textos e cena) precisa caber; o padding inferior pode ser comprimido.
+      const parts = [...sticky.children].filter(el => /\bhs-(head|copy|scene)\b/.test(el.className)).map(el => el.getBoundingClientRect());
+      const tallest = Math.max(...[...steps, final].map(el => el.offsetHeight));
+      const textTop = texts.getBoundingClientRect().top;
+      const ok = parts.every(r => r.top >= box.top - 1 && r.bottom <= limit) && textTop + tallest <= limit;
+      st.classList.toggle('hs-staged', was);
+      return ok;
+    }
+    function setStaged(v) {
+      staged = v;
+      st.classList.toggle('hs-staged', v);
+      if (!v) {
+        // Layout estático: todas as etapas, a mensagem final e a cena completa visíveis.
+        st.classList.remove('is-live', 'is-final', 'is-playing');
+        delete st.dataset.chapter;
+        chapter = -1;
+        steps.forEach(s => s.classList.remove('is-active', 'is-past'));
+        ['water', 'energy', 'hub'].forEach(k => on(k, false));
+      }
+    }
     function measure() {
       const w = window.innerWidth;
       if (w !== lastWidth) {
@@ -742,9 +856,12 @@
         D = Math.round(window.innerHeight * (w < 850 ? 2.6 : 3));
         st.style.setProperty('--hs-d', D + 'px');
       }
+      const ok = fits();
+      if (ok !== staged) setStaged(ok);
       top = docTop(st);
     }
     function update(y) {
+      if (!staged) return;
       const p = clamp((y - top) / D);
       setVar(st, '--hs-p', p);
       dash(pipes, range(p, .1, .32));
@@ -772,30 +889,210 @@
       setVar(st, '--hs-sheen', range(p, .72, 1));
     }
     const hsPhones = $$('.hs-phone', st);
-    function play() { st.classList.remove('is-playing'); void st.offsetWidth; st.classList.add('is-playing'); }
+    // Teclado: foco na mensagem final mantém a rolagem no trecho final (o conteúdo focado não some).
+    listen(st, 'focusin', event => {
+      if (!staged || !final.contains(event.target)) return;
+      requestAnimationFrame(guard(() => {
+        const target = Math.round(top + D * .95);
+        if (Math.abs(window.scrollY - target) > 4) window.scrollTo({ top: target, behavior: 'instant' });
+      }, 'foco na casa conectada'));
+    }, 'foco na casa conectada');
+    function play() { if (!staged) return; st.classList.remove('is-playing'); void st.offsetWidth; st.classList.add('is-playing'); }
     track({ el: st, measure, update });
     play();
-    return { play };
+    // Troca para movimento reduzido: volta ao layout estático (os estilos inline já foram limpos).
+    return { play, sync() { const ok = fits(); if (ok !== staged) setStaged(ok); if (ok) measureAll(); } };
   }
+  let story = null;
   function setupHotsite() {
-    setupStory();
-    revealWords('.hotsite-page .textoInicio h1, .project-story-heading h2');
-    reveal('.hotsite-page .textoInicio > h3, .hotsite-page .textoInicio > p, .project-story-heading > p', 'fade', { stagger: 120 });
-    reveal('.hotsite-page .textoInicio > .btn', 'pop', { delay: () => 300 });
-    reveal('.hotsite-page .informacoes > div', 'clip', { stagger: 120 });
-    reveal('.hot-phones', 'orbit', { duration: 1600 });
-    reveal('.hot-brand', 'pop', { delay: () => 500 });
-    reveal('.story-chapter', 'rise', { stagger: 140, onIn: el => setTimeout(() => el.classList.add('on'), 300) });
-    const journey = $('.story-journey');
-    if (journey) {
-      let top = 0, h = 1;
-      track({ el: journey, measure() { top = docTop(journey); h = journey.offsetHeight; }, update(y) { setVar(journey, '--hw-line', range(y + window.innerHeight * .75, top, top + h * .9)); } });
+    story = setupStory();
+    setupHotsiteScenes();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* HOTSITE — cenas reversíveis ligadas à rolagem (após a casa conectada) */
+  /* ------------------------------------------------------------------ */
+  // Cada item tem uma ENTRADA e (0→1) medida pela posição do próprio elemento na janela; cada seção
+  // tem uma SAÍDA x (0→1) quando deixa a tela por cima. Tudo é função de scrollY: descer faz a
+  // composição evoluir, subir a desfaz, e uma nova descida a repete. Nada prende a rolagem.
+  // Posições medidas pelo layout (offsetTop), que ignora as transformações aplicadas pela cena.
+  function layoutTop(el) { let y = 0, n = el; while (n) { y += n.offsetTop; n = n.offsetParent; } return y; }
+  function scene(section, items, hooks = {}) {
+    section.classList.add('hw-scene');
+    items.forEach(it => it.mark !== false && it.el.classList.add('hw-sc'));
+    let tops = [], sTop = 0, sH = 1, K = 1, maxY = 1;
+    track({
+      el: section,
+      measure() {
+        sTop = layoutTop(section); sH = section.offsetHeight;
+        tops = items.map(it => layoutTop(it.el));
+        K = window.innerWidth < 700 ? .55 : 1; // amplitudes menores em telas pequenas
+        maxY = Math.max(1, root.scrollHeight - window.innerHeight);
+        hooks.measure?.(K);
+      },
+      update(y) {
+        const vh = window.innerHeight, atEnd = y >= maxY - 2; // no fim da página tudo está completo
+        const x = range(y, sTop + sH - vh * .45, sTop + sH + vh * .15);
+        items.forEach((it, i) => {
+          const raw = atEnd ? 1 : range(y + vh - tops[i] - (it.delay || 0) * vh, 0, vh * (it.span || .42));
+          it.fn(easeOut(raw), x, K, raw);
+        });
+        hooks.update?.(y, x, K, vh);
+      }
+    });
+  }
+  const px = v => v.toFixed(1) + 'px', dg = v => v.toFixed(2) + 'deg';
+  // Palavras do título sobem de dentro da máscara, em sequência, conforme a entrada.
+  function wordsItem(el, extra = {}) {
+    if (!el) return null;
+    splitWords(el);
+    const words = $$('.hw-wi', el), n = Math.max(1, words.length);
+    return { el, mark: false, ...extra, fn: e => words.forEach((w, i) => {
+      const t = clamp(e * 1.5 - (i / n) * .5);
+      setStyle(w, 'transform', `translateY(${((1 - t) * 108).toFixed(1)}%) rotate(${((1 - t) * 5).toFixed(2)}deg)`);
+    }) };
+  }
+  // Texto: sobe e acende na entrada; na saída sobe um pouco mais devagar (parallax), sem apagar.
+  const riseItem = (el, delay = 0, dist = 36) => el && ({ el, delay, fn: (e, x, K) => {
+    setStyle(el, 'opacity', e.toFixed(3));
+    setStyle(el, 'transform', `translateY(${px(((1 - e) * dist - x * 22) * K)})`);
+  } });
+  const decor = (parent, html, cls) => { const d = document.createElement(parent === 'svg' ? 'div' : 'span'); d.className = cls; d.setAttribute('aria-hidden', 'true'); d.innerHTML = html; return d; };
+
+  function setupHotsiteScenes() {
+    // --- Apresentação (#inicio): título, textos, destaques e o aplicativo em 3D ---
+    const intro = $('.hotsite-page .inicio');
+    if (intro) {
+      const items = [wordsItem($('.textoInicio h1', intro)), riseItem($('.textoInicio > h3', intro), .03), riseItem($('.textoInicio > p', intro), .06)];
+      const btn = $('.textoInicio > .btn', intro);
+      if (btn) items.push({ el: btn, delay: .08, fn: (e, x, K) => { setStyle(btn, 'opacity', e.toFixed(3)); setStyle(btn, 'transform', `translateY(${px((1 - e) * 28 * K)}) scale(${(.9 + .1 * e).toFixed(4)})`); } });
+      $$('.informacoes > div', intro).forEach((card, i) => {
+        const side = i % 2 ? 1 : -1;
+        items.push({ el: card, delay: .04 * i, fn: (e, x, K) => {
+          setStyle(card, 'opacity', e.toFixed(3));
+          setStyle(card, 'transform', `perspective(800px) translateX(${px(side * (1 - e) * 70 * K)}) rotateY(${dg(-side * (1 - e) * 28 * K)}) translateY(${px(-x * 18 * K)})`);
+        } });
+      });
+      // Celulares: chegam inclinados em 3D, giram até ficar quase de frente e seguem em parallax.
+      const visual = $('.hot-visual', intro), pair = visual && $('.home-phone-pair', visual);
+      if (pair) {
+        const back = $('.home-phone-back', pair), front = $('.home-phone-front', pair);
+        const grid = $('.hot-visual-grid', visual), sceneDeco = $('.phone-scene', visual), brand = $('.hot-brand', visual);
+        // Véu da tela (as telas "acendem" com uma linha de varredura) e reflexo que atravessa o vidro.
+        const fx = [back, front].map(ph => {
+          const veil = decor('span', '<i></i>', 'hw-veil'), sheen = decor('span', '', 'hw-sheen');
+          ph.append(veil, sheen);
+          return { veil, band: veil.firstElementChild, sheen };
+        });
+        items.push({ el: visual, mark: false, span: .75, fn: (e, x, K, lin) => {
+          // Assentado (e=1): totalmente de frente; na saída gira levemente para o outro lado.
+          setStyle(pair, 'transform', `perspective(1200px) rotateY(${dg((-26 * (1 - e) + 14 * x) * K)}) rotateX(${dg((1 - e) * 10 * K)}) translateY(${px(((1 - e) * 70 - 34 * e - x * 50) * K)}) scale(${(.9 + .08 * e).toFixed(4)})`);
+          setStyle(back, 'transform', `rotate(-11deg) translateY(${px(((1 - e) * 30 - x * 28) * K)})`);
+          setStyle(front, 'transform', `rotate(10deg) translateY(${px(((1 - e) * 90 - x * 80) * K)})`);
+          fx.forEach((f, i) => {
+            // Progresso linear (sem suavização) para a varredura ser visível; a tela de trás acende primeiro.
+            const s = range(lin, .2 + i * .18, .7 + i * .18);
+            setStyle(f.veil, 'opacity', (1 - s).toFixed(3));
+            setStyle(f.band, 'transform', `translateY(${(-100 + s * 433).toFixed(0)}%)`);
+            setStyle(f.sheen, 'transform', `translateX(${(-130 + (lin * .7 + x * .3) * 300).toFixed(0)}%) skewX(-12deg)`);
+          });
+          if (grid) setStyle(grid, 'transform', `translateY(${px(((1 - e) * 40 - x * 40) * K)})`);
+          if (sceneDeco) { setStyle(sceneDeco, 'opacity', (.25 + .75 * e).toFixed(3)); setStyle(sceneDeco, 'transform', `translateY(${px(((1 - e) * 50 - x * 20) * K)}) scale(${(.92 + .08 * e).toFixed(4)})`); }
+          if (brand) { setStyle(brand, 'opacity', range(e, .4, 1).toFixed(3)); setStyle(brand, 'transform', `translateY(${px((1 - e) * 30 * K - x * 36 * K)}) scale(${(.85 + .15 * e).toFixed(4)})`); }
+        } });
+      }
+      scene(intro, items.filter(Boolean));
     }
-    const visual = $('.hot-visual .home-phone-pair') || $('.hot-phones');
-    if (visual) {
-      visual.classList.add('hw-sl');
-      let top = 0;
-      track({ el: visual, measure() { top = docTop(visual.parentElement); }, update(y) { const s = range(y, top - window.innerHeight * .5, top + window.innerHeight * .6); setStyle(visual, 'translate', `0 ${(-40 * s).toFixed(1)}px`); setStyle(visual, 'rotate', `${(-3 * s).toFixed(2)}deg`); } });
+
+    // --- História do projeto: a linha percorre as etapas; cada uma acende quando é alcançada ---
+    const history = $('.project-story');
+    const journey = history && $('.story-journey', history);
+    if (history && journey) {
+      const chapters = $$('.story-chapter', journey);
+      const dot = decor('span', '', 'hw-journey-dot');
+      journey.append(dot);
+      const items = [wordsItem($('.project-story-heading h2', history)), riseItem($('.project-story-heading > p', history), .04)];
+      const ce = chapters.map(() => 0);
+      chapters.forEach((ch, i) => items.push({ el: ch, mark: true, fn: e => { ce[i] = e; } }));
+      let row = false, jTop = 0, jH = 1, jW = 1;
+      scene(history, items.filter(Boolean), {
+        measure() { row = chapters.length > 1 && chapters.every(c => c.offsetTop === chapters[0].offsetTop); jTop = layoutTop(journey); jH = journey.offsetHeight; jW = journey.clientWidth; },
+        update(y, x, K, vh) {
+          const line = range(y + vh * .75, jTop, jTop + jH * .9);
+          setVar(journey, '--hw-line', line);
+          setStyle(dot, 'transform', `translateX(${px(line * jW * .84)})`);
+          setStyle(dot, 'opacity', clamp(line * 8).toFixed(3));
+          chapters.forEach((ch, i) => {
+            // Em linha (desktop): a linha alcança cada etapa. Empilhadas (celular): entrada de cada uma.
+            const c = row ? clamp((line * chapters.length - i) * 1.4 + .1) : ce[i];
+            ch.classList.toggle('on', c > .55);
+            setStyle(ch, 'opacity', (.4 + .6 * c).toFixed(3));
+            setStyle(ch, 'transform', `translateY(${px(((1 - c) * 34 - x * 16 * (i + 1) / chapters.length) * K)})`);
+          });
+        }
+      });
+    }
+
+    // --- Por que escolher a gente: cartões em profundidade ligados por um fluxo de água e energia ---
+    const values = $('.hotsite-page .escolher');
+    const grid = values && $('.hotsite-values', values);
+    if (values && grid) {
+      const cards = $$(':scope > .card', grid);
+      const flow = decor('span', '<i class="is-water"></i><i class="is-energy"></i>', 'hw-values-flow');
+      grid.prepend(flow);
+      const items = [wordsItem($('.section-title', values))];
+      cards.forEach((card, i) => {
+        const icon = $('.icon', card), mid = (cards.length - 1) / 2;
+        items.push({ el: card, delay: .05 * i, fn: (e, x, K) => {
+          setStyle(card, 'opacity', e.toFixed(3));
+          setStyle(card, 'transform', `perspective(1000px) rotateX(${dg((1 - e) * 26 * K)}) translateY(${px(((1 - e) * 70 - x * (i === mid ? 40 : 22)) * K)}) scale(${(.94 + .06 * e).toFixed(4)})`);
+          if (icon) setStyle(icon, 'transform', `rotate(${dg((1 - e) * -120)}) scale(${(.4 + .6 * e).toFixed(4)})`);
+        } });
+      });
+      items.push({ el: grid, mark: false, span: .6, fn: e => {
+        $$('i', flow).forEach((line, i) => setStyle(line, 'transform', `scaleX(${range(e, i * .12, .8 + i * .12).toFixed(4)})`));
+      } });
+      scene(values, items.filter(Boolean));
+    }
+
+    // --- Equipe: cartões entram em profundidade a partir do centro; as fotos se abrem em círculo ---
+    const team = $('.hotsite-page .equipe');
+    if (team) {
+      const members = $$('.team > .member', team), mid = (members.length - 1) / 2;
+      const items = [wordsItem($('.section-title', team)), riseItem($('.section-sub', team), .03)];
+      members.forEach((m, i) => {
+        const photo = $('.member-photo', m), inner = photo && (photo.firstElementChild || null);
+        let side = Math.sign(i - mid) || 0;
+        items.push({ el: m, delay: Math.abs(i - mid) * .045, fn: (e, x, K) => {
+          const s = side || (i % 2 ? 1 : -1) * .3;
+          setStyle(m, 'opacity', e.toFixed(3));
+          setStyle(m, 'transform', `perspective(900px) rotateY(${dg(s * (1 - e) * 32 * K)}) translateY(${px(((1 - e) * 60 - x * 20) * K)}) scale(${(.92 + .08 * e).toFixed(4)})`);
+          if (photo) setStyle(photo, 'clipPath', `circle(${(20 + e * 55).toFixed(1)}% at 50% 50%)`);
+          if (inner) setStyle(inner, 'transform', `scale(${(1.3 - .3 * e).toFixed(4)})`);
+        } });
+      });
+      scene(team, items.filter(Boolean));
+    }
+
+    // --- Encerramento (download do TCC): composição que se monta e fecha a narrativa ---
+    const finale = $('.hotsite-page .hotsite-download');
+    if (finale) {
+      const ns = 'http://www.w3.org/2000/svg';
+      const waves = document.createElementNS(ns, 'svg');
+      waves.setAttribute('class', 'hw-finale-waves');
+      waves.setAttribute('viewBox', '0 0 1200 120');
+      waves.setAttribute('preserveAspectRatio', 'none');
+      waves.setAttribute('aria-hidden', 'true');
+      waves.innerHTML = `<path class="is-water" pathLength="1" d="${wavePath(1200, 64, 22, 300)}"/><path class="is-energy" pathLength="1" d="${wavePath(1200, 70, 12, 200)}"/>`;
+      finale.prepend(waves);
+      const paths = $$('path', waves);
+      const items = [wordsItem($('h2', finale)), riseItem($('.tcc-unavailable', finale), .05, 30)];
+      items.push({ el: finale, mark: false, span: .5, fn: (e, x, K) => {
+        setStyle(finale, 'transform', `perspective(1000px) rotateX(${dg((1 - e) * 12 * K)}) scale(${(.94 + .06 * e).toFixed(4)})`);
+        setVar(finale, '--hw-glow', e);
+        paths.forEach((p, i) => setStyle(p, 'strokeDashoffset', (1 - range(e, i * .15, .85 + i * .15)).toFixed(4)));
+      } });
+      scene(finale, items.filter(Boolean));
     }
   }
 
@@ -809,36 +1106,84 @@
     setupNavbar();
     if (page === 'home') setupHome();
     if (page === 'hotsite') setupHotsite();
-    setupCommon();
+    // No hotsite, as seções são cenas ligadas à rolagem (setupHotsite); as revelações genéricas
+    // de entrada única ficam só no site institucional.
+    if (page !== 'hotsite') setupCommon(); else setupFooterLine();
     if (page === 'how') setupHow();
     if (page === 'testimonials') setupTestimonials();
-    if (page === 'about' || page === 'hotsite') setupTeam();
+    if (page === 'about') setupTeam();
     if (page === 'pricing') setupPricing();
     if (page === 'faq') setupFaq();
     if (page === 'login' || page === 'cart') setupFormPages();
     measureAll();
   }
+  // Chamado pelo listener (protegido) da preferência de movimento do sistema.
   function onModeChange() {
-    cache = new WeakMap();
+    clearWritten();
     opening?.reset();
-    if (isFull()) initFull();
+    if (isFull()) initFull(); else setupCalm();
+    story?.sync();
     if (opening && window.scrollY < 60) opening.play();
     measureAll();
   }
 
-  // Recarga (F5 / Ctrl+R / botão do navegador): começa no topo para a abertura se recompor inteira.
-  // Uma âncora no endereço (ex.: #conteudo, #equipe) continua sendo respeitada.
-  if ((page === 'home' || page === 'hotsite') && (!location.hash || location.hash === '#abertura') && window.scrollY) window.scrollTo(0, 0);
+  // Movimento reduzido: as seções aparecem só com opacidade (sem deslocamento).
+  let calmReady = false;
+  function setupCalm() {
+    if (calmReady) return;
+    calmReady = true;
+    reveal('main .page-head, main .section-title, main .section-sub, main .card, main .price, main .testimonial, main .member, main .faq-item, main .how-step-card, main .cta, main .support, .story-chapter, .hot-visual', 'calm', { stagger: 60, duration: 900 });
+  }
 
-  // Sempre ativos (independem do modo): controles segmentados, formulários e menu.
-  $$('.links').forEach(nav => $$('a', nav).forEach((a, i) => a.style.setProperty('--i', i)));
-  $$('.checks, .cta-benefits').forEach(list => $$('li', list).forEach((li, i) => li.style.setProperty('--li', i)));
-  ['.billing-toggle', '.auth-tabs', '.payment-tabs'].forEach(sel => segmented($(sel)));
-  setupForms();
-  // A abertura da inicial existe nos dois modos (no reduzido, em versão só de opacidade).
-  if (page === 'home') opening = setupOpening();
-  if (isFull()) initFull(); else measureAll();
-  // No modo reduzido o hotsite fica estático: a cena já aparece completa.
+  // Efeitos contínuos (ondas, órbitas, partículas) pausam fora da área visível.
+  function pauseOffscreen() {
+    const io = observer(IntersectionObserver, entries => entries.forEach(e => e.target.classList.toggle('hw-paused', !e.isIntersecting)), 'pausa fora da tela', { rootMargin: '10% 0px' });
+    $$('.hero, .phone-showcase, .hot-visual, .hw-op-cue').forEach(el => io.observe(el));
+  }
 
-  window.HWMotion = { swapValue, applyMode };
+  // Recuperação: a página volta à apresentação estática com todo o conteúdo visível.
+  // Chamada por fail(), que já registrou o diagnóstico no console.
+  function goStatic() {
+    // Ponto de referência para manter o leitor no mesmo trecho quando a abertura é recolhida.
+    const ref = $('main > :not(.hw-opening)');
+    const before = ref ? ref.getBoundingClientRect().top : 0;
+    const hadOpening = root.classList.contains('hw-show-opening') && window.scrollY > 0;
+    clearWritten();
+    root.dataset.motion = 'static';
+    root.classList.remove('hw-show-opening');
+    $$('.hw-pre').forEach(el => { el.classList.remove('hw-pre', 'is-in', 'hw-instant'); el.removeAttribute('data-hw'); });
+    // Casa conectada e abertura: nenhum estado de cena pode sobreviver. Sem os observers (desligados
+    // na falha), uma entrada pausada (".is-playing" fora da tela) ficaria congelada no 1º quadro.
+    $$('.hs-story, .hw-opening').forEach(el => {
+      el.classList.remove('hs-staged', 'is-playing', 'is-near', 'is-live', 'is-final');
+      el.removeAttribute('data-chapter');
+    });
+    $$('.hs-step').forEach(el => el.classList.remove('is-active', 'is-past'));
+    $$('.hw-paused').forEach(el => el.classList.remove('hw-paused'));
+    if (hadOpening && ref) window.scrollBy(0, ref.getBoundingClientRect().top - before);
+  }
+
+  try {
+    // Recarga (F5 / Ctrl+R / botão do navegador): começa no topo para a abertura se recompor inteira.
+    // Voltar/Avançar no histórico mantém a posição que o navegador restaurar; âncoras são respeitadas.
+    const navType = performance.getEntriesByType?.('navigation')[0]?.type;
+    if ((page === 'home' || page === 'hotsite') && navType === 'reload' && (!location.hash || location.hash === '#abertura') && window.scrollY) window.scrollTo(0, 0);
+
+    // Sempre ativos (independem do modo): controles segmentados, formulários e menu.
+    $$('.links').forEach(nav => $$('a', nav).forEach((a, i) => a.style.setProperty('--i', i)));
+    $$('.checks, .cta-benefits').forEach(list => $$('li', list).forEach((li, i) => li.style.setProperty('--li', i)));
+    ['.billing-toggle', '.auth-tabs', '.payment-tabs'].forEach(sel => segmented($(sel)));
+    setupForms();
+    pauseOffscreen();
+    // A abertura da inicial existe nos dois modos (no reduzido, em versão só de opacidade).
+    if (page === 'home') opening = setupOpening();
+    if (isFull()) initFull(); else { setupCalm(); measureAll(); }
+    // Sinal para js/motion-boot.js: o motor iniciou corretamente (sem falha durante a inicialização).
+    if (!failed) root.classList.add('hw-motion-on');
+  } catch (error) {
+    fail(error, 'inicialização');
+  }
+
+  // status(): diagnóstico (falha e local; tamanho do registro de estilos escritos).
+  window.HWMotion = { swapValue, applyMode, status: () => ({ failed, where: failure, written: written.size }) };
 })();

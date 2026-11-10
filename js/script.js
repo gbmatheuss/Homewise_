@@ -1,5 +1,5 @@
 // Interações compartilhadas pelas páginas HomeWise.
-// Modo efetivo de animação definido por js/motion-boot.js (controle "Animações"); sem ele, segue o sistema.
+// Modo de animação definido por js/motion-boot.js (automático, segue o movimento reduzido do sistema).
 const prefersReducedMotion = () => {
   const mode = document.documentElement.dataset.motion;
   return mode ? mode !== 'full' : window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -38,7 +38,8 @@ modal.setAttribute('aria-labelledby', 'modalTitle');
 modal.setAttribute('aria-describedby', 'modalText');
 modal.setAttribute('aria-hidden', 'true');
 modal.querySelector('.close').setAttribute('aria-label', 'Fechar janela');
-let previousFocus;
+modal.querySelectorAll('button').forEach(button => { button.type = 'button'; });
+let previousFocus, inertTargets = [];
 function openModal(title, text) {
   previousFocus = document.activeElement;
   document.getElementById('modalTitle').textContent = title;
@@ -46,6 +47,9 @@ function openModal(title, text) {
   modal.classList.add('show');
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
+  // O fundo fica inerte (sem clique, foco ou leitura) enquanto o modal está aberto.
+  inertTargets = [...document.body.children].filter(el => el !== modal && !el.inert && el.tagName !== 'SCRIPT');
+  inertTargets.forEach(el => { el.inert = true; });
   modal.querySelector('[data-close]').focus();
 }
 window.openModal = openModal;
@@ -54,6 +58,8 @@ function closeModal() {
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden', 'true');
   document.body.classList.remove('modal-open');
+  inertTargets.forEach(el => { el.inert = false; });
+  inertTargets = [];
   previousFocus?.focus();
 }
 document.querySelectorAll('.links').forEach((nav, index) => {
@@ -77,6 +83,8 @@ document.querySelectorAll('.links').forEach((nav, index) => {
   document.addEventListener('keydown', event => {if (event.key === 'Escape' && nav.classList.contains('is-open')) {close(); toggle.focus();}});
   window.matchMedia('(min-width: 851px)').addEventListener('change', close);
 });
+// Só esconde os links no celular quando o botão "Menu" existe (ver css/style.css).
+document.documentElement.classList.add('hw-menu-ready');
 // Troca o valor exibido de uma vez (sem números intermediários) e só suaviza a aparência.
 function swapText(el, text, kind) {
   if (el.textContent === text) return;
@@ -113,8 +121,7 @@ document.addEventListener('click', event => {
   const download = event.target.closest('[data-download]');
   if (download && (download.tagName !== 'A' || download.getAttribute('href') === '#')) {event.preventDefault(); openModal('HomeWise em breve', 'O aplicativo ainda não possui um link de download disponível. Enquanto isso, conheça os recursos na página Como funciona.');}
   if (event.target.closest('[data-support]')) {event.preventDefault(); openModal('Suporte HomeWise', 'Consulte as perguntas frequentes para saber mais sobre instalação, dispositivos e planos. O canal de atendimento ainda não está disponível neste projeto.');}
-  const placeholder = event.target.closest('a[href*="SEU_LINKEDIN_AQUI"]');
-  if (placeholder) {event.preventDefault(); showToast('O perfil desta pessoa ainda não foi informado.');}
+  if (event.target.closest('[data-tcc-unavailable]')) {event.preventDefault(); openModal('Documento do TCC indisponível', 'O documento do Trabalho de Conclusão de Curso ainda não foi publicado nesta página. Quando a versão final estiver disponível, o download será liberado aqui.');}
 });
 document.querySelectorAll('.faq-q').forEach((button, index) => {
   const answer = button.parentElement.querySelector('.faq-a');

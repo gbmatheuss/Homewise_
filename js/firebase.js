@@ -47,16 +47,19 @@ export const firebaseReady = (async () => {
   return {auth, sdk, db, firestoreSdk};
 })();
 
-export async function obterPerfilWeb(uid) {
-  try {
-    const {db, firestoreSdk} = await firebaseReady;
-    const snap = await firestoreSdk.getDoc(firestoreSdk.doc(db, 'usuarios', uid));
-    return snap.exists() ? snap.data() : null;
-  } catch {
-    return null;
-  }
+// Contrato de dados conhecido (compartilhado com o app): documento usuarios/{uid} com
+// nome, email, dispositivo_id, cpf, telefone, cep, residencia, endereco_detalhado,
+// plano ("basico" | "plus" | "premium"), plano_nome, ciclo_assinatura, status_assinatura.
+// O site NÃO grava plano/status_assinatura: isso exige confirmação de pagamento no servidor.
+
+// Lê o perfil. Erros (rede, permissão) são propagados para que a interface possa informá-los.
+export async function lerPerfilWeb(uid) {
+  const {db, firestoreSdk} = await firebaseReady;
+  const snap = await firestoreSdk.getDoc(firestoreSdk.doc(db, 'usuarios', uid));
+  return snap.exists() ? snap.data() : null;
 }
 
+// Usado apenas na criação da conta (dados cadastrais básicos, sem assinatura).
 export async function salvarPerfilWeb(uid, dados) {
   const {db, firestoreSdk} = await firebaseReady;
   await firestoreSdk.setDoc(

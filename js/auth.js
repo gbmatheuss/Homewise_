@@ -45,8 +45,9 @@ form.addEventListener('submit', async event => {
     const email = byId('auth-email').value.trim();
     if (mode === 'register') {
       const {user} = await sdk.createUserWithEmailAndPassword(auth, email, password.value);
-      // A criação da conta já foi concluída mesmo se a atualização do nome ou Firestore falhar.
-      try {await sdk.updateProfile(user, {displayName: name});} catch {}
+      // A conta já foi criada mesmo se o nome ou o perfil não forem salvos: avisa em vez de ignorar.
+      let profileSaved = true;
+      try {await sdk.updateProfile(user, {displayName: name});} catch {profileSaved = false;}
       try {
         await salvarPerfilWeb(user.uid, {
           nome: name,
@@ -54,7 +55,13 @@ form.addEventListener('submit', async event => {
           dispositivo_id: '',
           criado_em: new Date()
         });
-      } catch {}
+      } catch {profileSaved = false;}
+      if (!profileSaved) {
+        form.reset();
+        message('Conta criada, mas não foi possível salvar todos os dados do perfil. Você pode continuar normalmente; complete o perfil depois pelo aplicativo. Redirecionando…', true);
+        setTimeout(() => location.replace('carrinho.html' + planQuery), 4000);
+        return;
+      }
     } else { await sdk.signInWithEmailAndPassword(auth, email, password.value); }
     form.reset();
     location.replace('carrinho.html' + planQuery);

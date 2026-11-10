@@ -1,5 +1,5 @@
 /* HomeWise — linguagem de motion de todo o site.
-   O modo efetivo fica em html[data-motion="full"|"reduced"] (js/motion-boot.js, antes da 1ª pintura).
+   O modo fica em html[data-motion]: "full" (padrão), "reduced" (o sistema pede movimento reduzido) ou "static" (recuperação se o motor falhar), definido por js/motion-boot.js antes da 1ª pintura.
    Tudo o que se move é escopado em [data-motion="full"]; sem JS ou em "reduced" a página fica estática.
    Propriedades animadas: transform/translate/scale/rotate, opacity, clip-path (revelações pontuais)
    e stroke-dashoffset (linhas que se desenham). */
@@ -364,51 +364,54 @@ html[data-theme="light"] .hs-house .hs-node circle{fill:#fff}
 .hs-phone::before{content:'';position:absolute;top:-10%;bottom:-10%;left:0;width:70%;z-index:1;pointer-events:none;background:linear-gradient(105deg,transparent 20%,#ffffff1f 46%,#ffffff08 54%,transparent 72%);transform:translateX(calc(-110% + var(--hs-sheen,1) * 260%)) skewX(-8deg)}
 .hs-progress{display:none}
 /* Modo completo: palco fixo enquanto a rolagem conta a história. */
-[data-motion="full"] .hs-story{height:calc(100svh + var(--hs-d,1800px))}
-[data-motion="full"] .hs-sticky{position:sticky;top:0;height:100svh;width:100%;max-width:none;padding:22px max(32px,calc((100% - 1240px) / 2)) 34px;overflow:hidden;align-content:stretch}
-[data-motion="full"] .hs-step{position:absolute;left:0;right:0;top:0;opacity:0;transform:translateY(26px);transition:opacity .5s ease,transform .7s var(--hw-out);visibility:hidden}
-[data-motion="full"] .hs-step.is-active{opacity:1;transform:none;visibility:visible}
-[data-motion="full"] .hs-step.is-past{transform:translateY(-26px)}
-[data-motion="full"] .hs-steps{position:relative;min-height:150px}
-[data-motion="full"] .hs-final{opacity:0;transform:translateY(24px);clip-path:inset(0 0 100% 0);visibility:hidden;transition:opacity .5s ease,transform .8s var(--hw-out),clip-path .8s var(--hw-out),visibility 0s .8s}
-[data-motion="full"] .hs-story.is-final .hs-final{opacity:1;transform:none;clip-path:inset(-10% -10% -10% -10%);visibility:visible;transition-delay:0s}
-[data-motion="full"] .hs-story.is-final .hs-steps{opacity:.0;transition:opacity .4s ease}
-[data-motion="full"] .hs-story.is-final .hs-steps{pointer-events:none}
-[data-motion="full"] .hs-scene{translate:calc(var(--hs-f,0) * -12%) calc(var(--hs-f,0) * -2%);scale:calc(1 - var(--hs-f,0) * .16)}
-[data-motion="full"] .hs-phones{translate:calc((1 - var(--hs-f,0)) * 120%) calc((1 - var(--hs-f,0)) * 30%);rotate:calc((1 - var(--hs-f,0)) * 14deg);opacity:calc(var(--hs-f,0) * 1.6)}
-[data-motion="full"] .hs-house .hs-node{scale:0;transition:scale .7s var(--hw-spring)}
-[data-motion="full"] .hs-house .hs-node.on{scale:1}
-[data-motion="full"] .hs-tag{opacity:0;translate:0 10px;transition:opacity .45s ease,translate .6s var(--hw-out)}
-[data-motion="full"] .hs-tag.on{opacity:1;translate:0 0}
-[data-motion="full"] .hs-house :is(.hs-pipe,.hs-cable,.hs-uplink,.hs-data-draw){stroke-dasharray:1;stroke-dashoffset:1}
-[data-motion="full"] .hs-house .hs-data{opacity:0;transition:opacity .5s ease}
-[data-motion="full"] .hs-story.is-live .hs-house .hs-data{opacity:1;animation:hw-flow-dash 1.2s linear infinite}
-[data-motion="full"] .hs-story.is-live .hs-signal{animation:hs-signal 2.2s ease-out infinite}
-[data-motion="full"] .hs-story.is-live .hs-signal:nth-of-type(2){animation-delay:.7s}
-[data-motion="full"] .hs-story.is-live .hs-signal:nth-of-type(3){animation-delay:1.4s}
+.hs-story.hs-staged{height:calc(100svh + var(--hs-d,1800px))}
+.hs-staged .hs-sticky{position:sticky;top:0;height:100svh;width:100%;max-width:none;padding:22px max(32px,calc((100% - 1240px) / 2)) 34px;overflow:hidden;align-content:stretch}
+.hs-staged .hs-step{position:absolute;left:0;right:0;top:0;opacity:0;transform:translateY(26px);transition:opacity .5s ease,transform .7s var(--hw-out);visibility:hidden}
+.hs-staged .hs-step.is-active{opacity:1;transform:none;visibility:visible}
+.hs-staged .hs-step.is-past{transform:translateY(-26px)}
+.hs-staged .hs-steps{position:relative;min-height:150px}
+.hs-staged .hs-final{opacity:0;transform:translateY(24px);clip-path:inset(0 0 100% 0);visibility:hidden;transition:opacity .5s ease,transform .8s var(--hw-out),clip-path .8s var(--hw-out),visibility 0s .8s}
+.hs-story.hs-staged.is-final .hs-final{opacity:1;transform:none;clip-path:inset(-10% -10% -10% -10%);visibility:visible;transition-delay:0s}
+.hs-story.hs-staged.is-final .hs-steps{opacity:.0;transition:opacity .4s ease}
+.hs-story.hs-staged.is-final .hs-steps{pointer-events:none}
+.hs-staged .hs-scene{translate:calc(var(--hs-f,0) * -12%) calc(var(--hs-f,0) * -2%);scale:calc(1 - var(--hs-f,0) * .16)}
+.hs-staged .hs-phones{translate:calc((1 - var(--hs-f,0)) * 120%) calc((1 - var(--hs-f,0)) * 30%);rotate:calc((1 - var(--hs-f,0)) * 14deg);opacity:calc(var(--hs-f,0) * 1.6)}
+.hs-staged .hs-house .hs-node{scale:0;transition:scale .7s var(--hw-spring)}
+.hs-staged .hs-house .hs-node.on{scale:1}
+.hs-staged .hs-tag{opacity:0;translate:0 10px;transition:opacity .45s ease,translate .6s var(--hw-out)}
+.hs-staged .hs-tag.on{opacity:1;translate:0 0}
+.hs-staged .hs-house :is(.hs-pipe,.hs-cable,.hs-uplink,.hs-data-draw){stroke-dasharray:1;stroke-dashoffset:1}
+.hs-staged .hs-house .hs-data{opacity:0;transition:opacity .5s ease}
+.hs-story.hs-staged.is-live .hs-house .hs-data{opacity:1;animation:hw-flow-dash 1.2s linear infinite}
+.hs-story.hs-staged.is-live .hs-signal{animation:hs-signal 2.2s ease-out infinite}
+.hs-story.hs-staged.is-live .hs-signal{animation-delay:calc(var(--n,0) * .7s)}
 @keyframes hs-signal{0%{opacity:.9;scale:.4}100%{opacity:0;scale:1.6}}
 .hs-signal{transform-box:fill-box;transform-origin:50% 100%}
-[data-motion="full"] .hs-story.is-final .hs-house .hs-window{fill:#76eee224}
-[data-motion="full"] .hs-story.is-final .hs-phone::after{box-shadow:inset 0 0 0 2px #76eee266,0 0 40px #76eee233}
-[data-motion="full"] .hs-story[data-chapter="1"] .hs-bg-water,[data-motion="full"] .hs-story[data-chapter="2"] .hs-bg-energy,[data-motion="full"] .hs-story[data-chapter="3"] .hs-bg-app,[data-motion="full"] .hs-story[data-chapter="4"] .hs-bg-app{opacity:1}
-[data-motion="full"] .hs-progress{display:block;position:absolute;left:0;right:0;bottom:0;height:3px;background:#76eee214}
-[data-motion="full"] .hs-progress span{position:absolute;inset:0;transform-origin:0 50%;transform:scaleX(var(--hs-p,0));background:linear-gradient(90deg,var(--hw-water),var(--cyan),var(--hw-amber))}
-[data-motion="full"] .hs-grid{translate:0 calc(var(--hs-p,0) * -60px)}
-.hs-story.is-playing .hs-structure>*{stroke-dasharray:1;animation:hw-draw 1.6s var(--hw-io) both;animation-delay:calc(var(--n,0) * .1s)}
-.hs-story.is-playing .hs-fixture{animation:hw-fade-in .8s ease 1.2s both}
-.hs-story.is-playing .hs-head{animation:hw-rise-in .8s var(--hw-out) .2s both}
-.hs-story.is-playing .hs-copy{animation:hw-rise-in 1s var(--hw-out) .5s both}
-.hs-story:not(.is-near) *{animation-play-state:paused!important}
+.hs-story.hs-staged.is-final .hs-house .hs-window{fill:#76eee224}
+.hs-story.hs-staged.is-final .hs-phone::after{box-shadow:inset 0 0 0 2px #76eee266,0 0 40px #76eee233}
+.hs-story.hs-staged[data-chapter="1"] .hs-bg-water,.hs-story.hs-staged[data-chapter="2"] .hs-bg-energy,.hs-story.hs-staged[data-chapter="3"] .hs-bg-app,.hs-story.hs-staged[data-chapter="4"] .hs-bg-app{opacity:1}
+.hs-staged .hs-progress{display:block;position:absolute;left:0;right:0;bottom:0;height:3px;background:#76eee214}
+.hs-staged .hs-progress span{position:absolute;inset:0;transform-origin:0 50%;transform:scaleX(var(--hs-p,0));background:linear-gradient(90deg,var(--hw-water),var(--cyan),var(--hw-amber))}
+.hs-staged .hs-grid{translate:0 calc(var(--hs-p,0) * -60px)}
+/* Entrada e pausa da casa só existem com o palco ativo (.hs-staged), o único caso em que o JS as aciona.
+   Assim, sem o palco (modo estático, reduzido ou falha do motor), nada fica congelado no 1º quadro. */
+.hs-story.hs-staged.is-playing .hs-structure>*{stroke-dasharray:1;animation:hw-draw 1.6s var(--hw-io) both;animation-delay:calc(var(--n,0) * .1s)}
+.hs-story.hs-staged.is-playing .hs-fixture{animation:hw-fade-in .8s ease 1.2s both}
+.hs-story.hs-staged.is-playing .hs-head{animation:hw-rise-in .8s var(--hw-out) .2s both}
+.hs-story.hs-staged.is-playing .hs-copy{animation:hw-rise-in 1s var(--hw-out) .5s both}
+.hs-story.hs-staged:not(.is-near) *{animation-play-state:paused!important}
+/* Recuperação estática: a casa aparece completa e parada, mesmo que algum estado tenha sobrado. */
+[data-motion="static"] .hs-story *{animation:none!important}
 @media(max-width:850px){
  .hs-sticky{grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto;width:calc(100% - 40px);gap:18px}
  .hs-scene{grid-column:1;grid-row:2}
  .hs-copy{grid-column:1;grid-row:3}
  .hs-phones{width:40%;right:-2%;bottom:-8%}
- [data-motion="full"] .hs-sticky{grid-template-rows:auto minmax(0,1fr) auto;padding:14px 20px calc(18px + env(safe-area-inset-bottom));gap:8px;align-content:start}
- [data-motion="full"] .hs-scene{align-self:center;max-height:100%;width:auto;max-width:100%;justify-self:center;height:min(100%,calc((100vw - 40px) * .65))}
- [data-motion="full"] .hs-copy{align-self:end;padding-bottom:58px}
- [data-motion="full"] .hs-steps{min-height:132px}
- [data-motion="full"] .hs-scene{translate:calc(var(--hs-f,0) * -10%) calc(var(--hs-f,0) * -4%);scale:calc(1 - var(--hs-f,0) * .1)}
+ .hs-staged .hs-sticky{grid-template-rows:auto minmax(0,1fr) auto;padding:14px 20px calc(18px + env(safe-area-inset-bottom));gap:8px;align-content:start}
+ .hs-staged .hs-scene{align-self:center;max-height:100%;width:auto;max-width:100%;justify-self:center;height:min(100%,calc((100vw - 40px) * .65))}
+ .hs-staged .hs-copy{align-self:end;padding-bottom:58px}
+ .hs-staged .hs-steps{min-height:132px}
+ .hs-staged .hs-scene{translate:calc(var(--hs-f,0) * -10%) calc(var(--hs-f,0) * -4%);scale:calc(1 - var(--hs-f,0) * .1)}
  .hs-title{font-size:clamp(28px,7.4vw,40px);margin-bottom:14px}
  .hs-step h3{font-size:18px}.hs-step p{font-size:14px;line-height:1.6}
  .hs-tag{font-size:10px;padding:5px 8px}.hs-tag strong{font-size:11px}
@@ -419,7 +422,6 @@ html[data-theme="light"] .hs-house .hs-node circle{fill:#fff}
  .hs-phone{border-width:2px;border-radius:16px;padding:9px 3px 4px}
  .hs-final .btn{flex:1 1 auto}
 }
-@media(max-height:620px) and (max-width:850px){[data-motion="full"] .hs-title{display:none}}
 
 /* HOTSITE — história do projeto: a linha percorre as etapas e cada número acende ao ser alcançado. */
 [data-motion="full"] .story-journey::before{transform-origin:0 50%;transform:scaleX(var(--hw-line,0));background:linear-gradient(90deg,var(--hw-water),var(--cyan),var(--hw-amber));height:2px;opacity:.7}
@@ -429,7 +431,70 @@ html[data-theme="light"] .hs-house .hs-node circle{fill:#fff}
 [data-motion="full"] .story-chapter::after{transform-origin:0 50%;transform:scaleX(0);transition:transform 1.2s var(--hw-out) .2s}
 [data-motion="full"] .story-chapter.on::after{transform:scaleX(1)}
 .hs-texts{position:relative}
-[data-motion="full"] .hs-texts{min-height:170px}
-[data-motion="full"] .hs-final{position:absolute;left:0;right:0;top:0;margin-top:0}
-@media(max-width:850px){[data-motion="full"] .hs-texts{min-height:150px}}
+.hs-staged .hs-texts{min-height:170px}
+.hs-staged .hs-final{position:absolute;left:0;right:0;top:0;margin-top:0}
+@media(max-width:850px){.hs-staged .hs-texts{min-height:150px}}
 [data-motion="full"] .hotsite-page main{padding-top:0}
+
+/* =====================================================================
+   Robustez, acessibilidade e movimento reduzido (auditoria)
+   ===================================================================== */
+/* Efeitos contínuos pausam fora da área visível (classe aplicada por IntersectionObserver). */
+.hw-paused,.hw-paused *,.hw-paused::before,.hw-paused::after,.hw-paused *::before,.hw-paused *::after{animation-play-state:paused!important}
+/* Logo do cabeçalho: fica oculto durante a abertura, mas nunca recebe foco invisível. */
+[data-motion="full"] .hw-nav .nav>.logo:focus-visible{opacity:1!important;scale:1!important}
+/* Movimento reduzido: entradas apenas com opacidade (sem deslocamento, escala ou giro). */
+[data-motion="reduced"] .hw-pre[data-hw="calm"]{opacity:0}
+[data-motion="reduced"] .hw-pre.is-in[data-hw="calm"]{opacity:1;transition:opacity .7s ease var(--hw-d,0ms)!important}
+/* Movimento reduzido: a abertura mantém os fades e o desenho das linhas (nada se desloca). */
+[data-motion="reduced"] .hw-opening.is-playing :is(.hw-op-brand-in,.hw-op-brand-in img,.hw-op-tagline,.hw-op-actions,.hw-op-node,.hw-op-bg){animation:hw-fade-in .9s ease both!important}
+[data-motion="reduced"] .hw-opening.is-playing .hw-draw{animation:hw-draw 1.5s var(--hw-io) both!important;animation-delay:calc(.1s + var(--n,0) * .12s)!important}
+[data-motion="reduced"] .hw-opening.is-playing .hw-op-waves path{animation:hw-draw 1.6s var(--hw-io) both!important;animation-delay:calc(.2s + var(--n,0) * .15s)!important}
+[data-motion="reduced"] .hw-opening .hw-op-phone{transition:none!important}
+/* Foco por teclado em um elemento ainda em entrada: aparece na hora, sem transição. */
+.hw-pre.hw-instant,.hw-pre.hw-instant *{transition:none!important}
+
+/* =====================================================================
+   HOTSITE — cenas reversíveis ligadas à rolagem (js/motion.js: setupHotsiteScenes)
+   Transform/opacity escritos pela rolagem não têm transição (acompanham o scroll sem atraso);
+   o hover usa as propriedades individuais translate/scale, que se somam ao transform da cena.
+   ===================================================================== */
+.hw-veil,.hw-sheen,.hw-journey-dot,.hw-values-flow,.hw-finale-waves{display:none}
+[data-motion="full"] .hw-scene .hw-sc,[data-motion="full"] .hw-scene :is(.hw-wi,.home-phone-pair,.home-phone,.icon,.member-photo,.member-photo>*,.hot-brand,.phone-scene,.hot-visual-grid,.story-chapter){transition:none}
+[data-motion="full"] .hw-scene .hw-sc:focus-within{opacity:1!important}
+/* Apresentação: telas que acendem (véu + linha de varredura) e reflexo no vidro. */
+[data-motion="full"] .hw-scene .hw-veil{display:block;position:absolute;inset:0;z-index:1;border-radius:inherit;overflow:hidden;pointer-events:none;background:#020a0e;opacity:0}
+.hw-veil i{position:absolute;left:0;right:0;top:0;height:30%;background:linear-gradient(180deg,transparent,#76eee21f 40%,#c9fff740 50%,#76eee21f 60%,transparent)}
+[data-motion="full"] .hw-scene .hw-sheen{display:block;position:absolute;top:-10%;bottom:-10%;left:0;width:48%;z-index:3;pointer-events:none;background:linear-gradient(100deg,transparent 20%,#ffffff1a 47%,#ffffff08 55%,transparent 78%);transform:translateX(-130%)}
+[data-motion="full"] .hw-scene .home-phone-pair{transform-style:flat;will-change:transform}
+/* História: ponto de luz que percorre a linha das etapas. */
+[data-motion="full"] .hw-scene .hw-journey-dot{display:block;position:absolute;left:8%;top:33px;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;z-index:0;pointer-events:none;background:#e2fffb;box-shadow:0 0 0 4px #76eee233,0 0 18px #76eee2}
+html[data-theme="light"] .hw-journey-dot{background:#137e71;box-shadow:0 0 0 4px #137e7126}
+/* Por que escolher a gente: fluxo de água e energia que liga os cartões. */
+[data-motion="full"] .hw-scene .hotsite-values{position:relative}
+[data-motion="full"] .hw-scene .hotsite-values>.card{position:relative;z-index:1}
+[data-motion="full"] .hw-scene .hw-values-flow{display:block;position:absolute;left:3%;right:3%;top:62px;height:8px;z-index:0;pointer-events:none}
+.hw-values-flow i{position:absolute;left:0;right:0;height:2px;border-radius:2px;transform:scaleX(0)}
+.hw-values-flow .is-water{top:0;transform-origin:0 50%;background:linear-gradient(90deg,var(--hw-water),#76eee2aa 60%,transparent);box-shadow:0 0 10px color-mix(in srgb,var(--hw-water) 50%,transparent)}
+.hw-values-flow .is-energy{top:6px;transform-origin:100% 50%;background:linear-gradient(270deg,var(--hw-amber),#f2c14e88 60%,transparent);box-shadow:0 0 10px color-mix(in srgb,var(--hw-amber) 45%,transparent)}
+/* Encerramento: ondas de água e energia se desenham sob o convite final. */
+[data-motion="full"] .hw-scene.hotsite-download{position:relative;overflow:hidden;isolation:isolate;box-shadow:0 0 calc(var(--hw-glow,0) * 70px) #76eee21f}
+[data-motion="full"] .hw-scene .hw-finale-waves{display:block;position:absolute;left:0;right:0;bottom:-4px;width:100%;height:96px;z-index:-1;fill:none;pointer-events:none;overflow:visible}
+.hw-finale-waves path{vector-effect:non-scaling-stroke;stroke-dasharray:1;stroke-dashoffset:1;stroke-linecap:round}
+.hw-finale-waves .is-water{stroke:var(--hw-water);stroke-width:1.6;opacity:.55}
+.hw-finale-waves .is-energy{stroke:var(--hw-amber);stroke-width:1.2;opacity:.45}
+/* Microinterações (hover e foco). */
+@media(hover:hover){
+ [data-motion="full"] .hw-scene .hotsite-values>.card{transition:translate .45s var(--hw-out),border-color .35s ease,box-shadow .35s ease}
+ [data-motion="full"] .hw-scene .hotsite-values>.card:hover{translate:0 -8px;border-color:#76eee266;box-shadow:0 22px 44px #0006,0 0 0 1px #76eee22e}
+ [data-motion="full"] .hw-scene .hotsite-values>.card .icon{transition:scale .55s var(--hw-spring),box-shadow .4s ease}
+ [data-motion="full"] .hw-scene .hotsite-values>.card:hover .icon{scale:1.14;box-shadow:0 0 26px #76eee244}
+ [data-motion="full"] .hw-scene .member{transition:translate .45s var(--hw-out),border-color .35s ease,box-shadow .35s ease}
+ [data-motion="full"] .hw-scene .member:hover{translate:0 -8px;border-color:#76eee255;box-shadow:0 22px 44px #0006}
+ [data-motion="full"] .hw-scene .member .member-photo>img{transition:scale .6s var(--hw-out)}
+ [data-motion="full"] .hw-scene .member:hover .member-photo>img{scale:1.08}
+ [data-motion="full"] .hw-scene .informacoes>div h3>span{transition:scale .5s var(--hw-spring),rotate .5s var(--hw-out)}
+ [data-motion="full"] .hw-scene .informacoes>div:hover h3>span{scale:1.18;rotate:-8deg}
+ [data-motion="full"] .hw-scene .home-phone-pair:hover .home-phone-front{translate:0 -6px;transition:translate .5s var(--hw-out)}
+}
+@media(max-width:850px){[data-motion="full"] .hw-scene .hw-journey-dot,[data-motion="full"] .hw-scene .hw-values-flow{display:none}}

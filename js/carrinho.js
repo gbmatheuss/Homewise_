@@ -1,23 +1,29 @@
+// Checkout DEMONSTRATIVO do HomeWise (TCC).
+// • Não grava assinatura, plano nem dados no Firestore: o documento usuarios/{uid} é compartilhado
+//   com o aplicativo, e conceder ou cancelar uma assinatura exige confirmação de pagamento em um
+//   backend confiável (ex.: Cloud Function + gateway), que este projeto não possui.
+// • O perfil é lido SOMENTE para exibir a situação da assinatura; nenhum dado pessoal dele é exibido.
+// • Dados pessoais e endereço são exemplos fictícios fixos (carrinho.html); não há consultas externas
+//   (ViaCEP removido). O cartão de teste é validado apenas no navegador e apagado ao concluir.
 import {
   firebaseReady,
   selectedPlan,
   selectedCycle,
   plans,
-  planIds,
   idToPlanName,
   formatPlanPrice,
   buildPlanQuery,
   authMessage,
-  obterPerfilWeb,
-  salvarPerfilWeb
+  lerPerfilWeb
 } from './firebase.js';
 
-const purchaseForm = document.getElementById('purchase-form');
-const planSelect = document.getElementById('cart-plan-select');
-const cycleSelect = document.getElementById('cart-cycle-select');
-const statusEl = document.getElementById('cart-status');
-const cancelBtn = document.getElementById('cancel-sub-btn');
-const activeBanner = document.getElementById('active-sub-banner');
+const byId = id => document.getElementById(id);
+const purchaseForm = byId('purchase-form');
+const planSelect = byId('cart-plan-select');
+const cycleSelect = byId('cart-cycle-select');
+const statusEl = byId('cart-status');
+const subBanner = byId('active-sub-banner');
+const submitBtn = byId('submit-purchase');
 
 const planBenefitsMap = {
   'Básico': [
@@ -46,281 +52,256 @@ let currentPlan = selectedPlan;
 let currentCycle = selectedCycle;
 let paymentMethod = 'pix';
 let authenticatedUser = null;
+let busy = false;
+
+function setStatus(text, error = false) {
+  statusEl.textContent = text;
+  statusEl.dataset.error = String(error);
+}
 
 planSelect.value = currentPlan;
 cycleSelect.value = currentCycle;
 
 function updateSummaryUI() {
-  document.getElementById('selected-plan').textContent = `Plano HomeWise ${currentPlan}`;
-  document.getElementById('plan-price').textContent = formatPlanPrice(currentPlan, currentCycle);
-  const benefitsList = document.getElementById('plan-benefits');
+  byId('selected-plan').textContent = `Plano HomeWise ${currentPlan}`;
+  byId('plan-price').textContent = formatPlanPrice(currentPlan, currentCycle);
+  const benefitsList = byId('plan-benefits');
   benefitsList.innerHTML = '';
   for (const item of planBenefitsMap[currentPlan] || []) {
     const li = document.createElement('li');
     li.textContent = item;
     benefitsList.append(li);
   }
-  const newUrl = location.pathname + buildPlanQuery(currentPlan, currentCycle);
-  history.replaceState(null, '', newUrl);
+  history.replaceState(null, '', location.pathname + buildPlanQuery(currentPlan, currentCycle));
 }
-
 updateSummaryUI();
 
 planSelect.addEventListener('change', () => {
-  if (Object.hasOwn(plans, planSelect.value)) {
-    currentPlan = planSelect.value;
-    updateSummaryUI();
-  }
+  if (busy || !Object.hasOwn(plans, planSelect.value)) return;
+  currentPlan = planSelect.value;
+  updateSummaryUI();
 });
-
 cycleSelect.addEventListener('change', () => {
+  if (busy) return;
   currentCycle = cycleSelect.value === 'anual' ? 'anual' : 'mensal';
   updateSummaryUI();
 });
 
-function renderActiveBanner(perfil) {
-  const planoAtivoId = perfil?.plano;
-  const statusAssinatura = perfil?.status_assinatura;
-  if (planoAtivoId && statusAssinatura !== 'cancelada' && idToPlanName[planoAtivoId]) {
-    const nomePlano = idToPlanName[planoAtivoId];
-    const ciclo = perfil.ciclo_assinatura === 'anual' ? 'Anual' : 'Mensal';
-    activeBanner.hidden = false;
-    activeBanner.textContent = `Assinatura atual ativa: HomeWise ${nomePlano} (${ciclo})`;
-    cancelBtn.hidden = false;
+/* ------------------------------------------------------------------ */
+/* Situação da assinatura (somente leitura, sem dados pessoais)        */
+/* ------------------------------------------------------------------ */
+// Estados conhecidos no código do projeto. Só "ativa" é exibida como ativa;
+// qualquer outro valor (inclusive desconhecido) é mostrado como não ativo, sem suposições.
+const STATUS_LABELS = {
+  ativa: 'ativa',
+  cancelada: 'cancelada',
+  pendente: 'com pagamento pendente',
+  expirada: 'expirada',
+  suspensa: 'suspensa'
+};
+function renderSubscription(perfil, failed = false) {
+  subBanner.classList.remove('is-active', 'is-inactive', 'is-error');
+  if (failed) {
+    subBanner.hidden = false;
+    subBanner.classList.add('is-error');
+    subBanner.textContent = 'Não foi possível consultar a assinatura da sua conta agora. Isso não afeta a simulação.';
+    return;
+  }
+  const status = typeof perfil?.status_assinatura === 'string' ? perfil.status_assinatura.trim().toLowerCase() : '';
+  const nomePlano = idToPlanName[perfil?.plano];
+  if (!status && !nomePlano) { subBanner.hidden = true; return; }
+  const ciclo = perfil?.ciclo_assinatura === 'anual' ? 'Anual' : perfil?.ciclo_assinatura === 'mensal' ? 'Mensal' : '';
+  const plano = nomePlano ? `HomeWise ${nomePlano}${ciclo ? ` (${ciclo})` : ''}` : 'Assinatura HomeWise';
+  subBanner.hidden = false;
+  if (status === 'ativa' && nomePlano) {
+    subBanner.classList.add('is-active');
+    subBanner.textContent = `Assinatura atual ativa: ${plano}.`;
   } else {
-    activeBanner.hidden = true;
-    cancelBtn.hidden = true;
+    subBanner.classList.add('is-inactive');
+    subBanner.textContent = status
+      ? `${plano}: ${STATUS_LABELS[status] || `situação "${status}" (não confirmada como ativa)`}.`
+      : `${plano}: situação não informada.`;
   }
 }
 
-function validarCPF(cpfFormatado) {
-  const cpf = cpfFormatado.replace(/\D/g, '');
-  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) return false;
-  for (let t = 9; t < 11; t++) {
-    let soma = 0;
-    for (let i = 0; i < t; i++) soma += Number(cpf[i]) * (t + 1 - i);
-    const digito = ((soma * 10) % 11) % 10;
-    if (Number(cpf[t]) !== digito) return false;
-  }
-  return true;
-}
-
+/* ------------------------------------------------------------------ */
+/* Conta (Firebase Authentication)                                     */
+/* ------------------------------------------------------------------ */
 try {
   const {auth, sdk} = await firebaseReady;
+  let session = 0;
   sdk.onAuthStateChanged(auth, async user => {
+    const mine = ++session;
     authenticatedUser = user;
-    document.getElementById('protected-cart').hidden = !user;
-    document.getElementById('account-bar').hidden = !user;
+    byId('protected-cart').hidden = !user;
+    byId('account-bar').hidden = !user;
     if (!user) {
       location.replace('login.html' + buildPlanQuery(currentPlan, currentCycle));
       return;
     }
-    document.getElementById('account-status').textContent = '';
-    document.getElementById('account-email').textContent = 'Conectado como ' + user.email;
-    if (!document.getElementById('nome').value) {
-      document.getElementById('nome').value = user.displayName || '';
+    byId('account-status').textContent = '';
+    byId('account-email').textContent = 'Conectado como ' + user.email;
+    // Leitura separada do formulário: apenas plano/ciclo/status são usados.
+    let perfil = null;
+    try {
+      perfil = await lerPerfilWeb(user.uid);
+    } catch (error) {
+      console.error('[HomeWise] falha ao consultar a assinatura:', error);
+      if (mine === session) renderSubscription(null, true);
+      return;
     }
-
-    const perfil = await obterPerfilWeb(user.uid);
-    if (perfil) {
-      if (perfil.nome && !document.getElementById('nome').value) document.getElementById('nome').value = perfil.nome;
-      if (perfil.cpf && !document.getElementById('cpf').value) document.getElementById('cpf').value = perfil.cpf;
-      if (perfil.telefone && !document.getElementById('telefone').value) document.getElementById('telefone').value = perfil.telefone;
-      if (perfil.cep && !document.getElementById('cep').value) document.getElementById('cep').value = perfil.cep;
-      if (perfil.endereco_detalhado) {
-        const end = perfil.endereco_detalhado;
-        if (end.rua) document.getElementById('endereco').value = end.rua;
-        if (end.numero) document.getElementById('numero').value = end.numero;
-        if (end.complemento) document.getElementById('complemento').value = end.complemento;
-        if (end.bairro) document.getElementById('bairro').value = end.bairro;
-        if (end.cidade) document.getElementById('cidade').value = end.cidade;
-        if (end.estado) document.getElementById('estado').value = end.estado;
-      }
-      renderActiveBanner(perfil);
-    }
+    if (mine !== session) return; // a conta mudou enquanto a leitura acontecia
+    renderSubscription(perfil && {plano: perfil.plano, ciclo_assinatura: perfil.ciclo_assinatura, status_assinatura: perfil.status_assinatura});
   });
 
-  document.getElementById('sign-out').onclick = async event => {
+  byId('sign-out').onclick = async event => {
     event.target.disabled = true;
     try {
       await sdk.signOut(auth);
     } catch (error) {
-      document.getElementById('account-status').textContent = authMessage(error);
+      byId('account-status').textContent = authMessage(error);
       event.target.disabled = false;
     }
   };
-} catch {
-  document.getElementById('account-status').textContent = 'Não foi possível verificar sua conta. Verifique sua conexão e recarregue a página.';
+} catch (error) {
+  console.error('[HomeWise] falha ao iniciar a autenticação:', error);
+  byId('account-status').textContent = 'Não foi possível verificar sua conta. Verifique sua conexão e recarregue a página.';
 }
 
-const maskField = (id, format) => document.getElementById(id)?.addEventListener('input', event => {
-  event.target.value = format(event.target.value.replace(/\D/g, ''));
-});
+/* ------------------------------------------------------------------ */
+/* Cartão de teste: máscaras e validação (somente no navegador)        */
+/* ------------------------------------------------------------------ */
+const cardFields = ['card-name', 'card-number', 'card-expiry', 'card-cvv'].map(byId);
+const maskField = (el, format) => el.addEventListener('input', () => { el.value = format(el.value.replace(/\D/g, '')); });
+maskField(byId('card-number'), d => d.slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 '));
+maskField(byId('card-expiry'), d => d.slice(0, 4).replace(/^(\d{2})(\d)/, '$1/$2'));
+maskField(byId('card-cvv'), d => d.slice(0, 4));
+// Qualquer edição limpa o erro personalizado daquele campo.
+cardFields.forEach(el => el.addEventListener('input', () => el.setCustomValidity('')));
 
-maskField('cpf', digits => digits.slice(0, 11).replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3}\.\d{3})(\d)/, '$1.$2').replace(/(\d{3}\.\d{3}\.\d{3})(\d)/, '$1-$2'));
-maskField('cep', digits => digits.slice(0, 8).replace(/^(\d{5})(\d)/, '$1-$2'));
-maskField('telefone', digits => {
-  digits = digits.slice(0, 11);
-  if (digits.length <= 2) return digits;
-  const local = digits.slice(2);
-  const split = local.length > 8 ? 5 : 4;
-  return '(' + digits.slice(0, 2) + ') ' + local.slice(0, split) + (local.length > split ? '-' + local.slice(split) : '');
-});
-maskField('card-number', digits => digits.slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 '));
-maskField('card-expiry', digits => digits.slice(0, 4).replace(/^(\d{2})(\d)/, '$1/$2'));
-maskField('card-cvv', digits => digits.slice(0, 4));
-
-const cpfInput = document.getElementById('cpf');
-cpfInput.addEventListener('input', () => {
-  const digits = cpfInput.value.replace(/\D/g, '');
-  if (digits.length === 11 && !validarCPF(cpfInput.value)) {
-    cpfInput.setCustomValidity('Informe um CPF válido.');
-  } else {
-    cpfInput.setCustomValidity('');
+function luhn(digits) {
+  let sum = 0;
+  for (let i = 0; i < digits.length; i++) {
+    let d = Number(digits[digits.length - 1 - i]);
+    if (i % 2) { d *= 2; if (d > 9) d -= 9; }
+    sum += d;
   }
-});
+  return sum % 10 === 0;
+}
+function cardProblem() {
+  const name = byId('card-name').value.trim();
+  const number = byId('card-number').value.replace(/\D/g, '');
+  const exp = byId('card-expiry').value.replace(/\D/g, '');
+  const cvv = byId('card-cvv').value.replace(/\D/g, '');
+  if (name.length < 3) return ['card-name', 'Informe o nome impresso no cartão (fictício).'];
+  if (number.length !== 16 || !luhn(number)) return ['card-number', 'Número de cartão inválido. Use um número fictício de teste, como 4111 1111 1111 1111.'];
+  const month = Number(exp.slice(0, 2)), year = 2000 + Number(exp.slice(2, 4));
+  const now = new Date();
+  if (exp.length !== 4 || month < 1 || month > 12) return ['card-expiry', 'Informe a validade no formato MM/AA.'];
+  if (year < now.getFullYear() || (year === now.getFullYear() && month < now.getMonth() + 1)) return ['card-expiry', 'A validade informada já passou.'];
+  if (cvv.length < 3) return ['card-cvv', 'O CVV deve ter 3 ou 4 dígitos.'];
+  return null;
+}
 
-// Busca automática de CEP via ViaCEP
-const cepInput = document.getElementById('cep');
-const cepFeedback = document.getElementById('cep-feedback');
-let lastLookedUpCep = '';
-cepInput.addEventListener('input', async () => {
-  const digits = cepInput.value.replace(/\D/g, '');
-  if (digits.length !== 8 || digits === lastLookedUpCep) return;
-  lastLookedUpCep = digits;
-  cepFeedback.textContent = 'Buscando CEP…';
-  try {
-    const res = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
-    const data = await res.json();
-    if (data && !data.erro) {
-      if (data.logradouro) document.getElementById('endereco').value = data.logradouro;
-      if (data.bairro) document.getElementById('bairro').value = data.bairro;
-      if (data.localidade) document.getElementById('cidade').value = data.localidade;
-      if (data.uf) document.getElementById('estado').value = data.uf;
-      cepFeedback.textContent = 'Endereço preenchido!';
-    } else {
-      cepFeedback.textContent = 'CEP não encontrado.';
-    }
-  } catch {
-    cepFeedback.textContent = '';
-  }
-});
-
-// Alternância de forma de pagamento
-document.querySelectorAll('[data-pay-method]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    paymentMethod = btn.dataset.payMethod === 'cartao' ? 'cartao' : 'pix';
-    document.querySelectorAll('[data-pay-method]').forEach(other => {
-      const active = other.dataset.payMethod === paymentMethod;
-      other.setAttribute('aria-pressed', String(active));
-      other.classList.toggle('btn-primary', active);
-    });
-    const isCard = paymentMethod === 'cartao';
-    document.getElementById('payment-pix').hidden = isCard;
-    document.getElementById('payment-card').hidden = !isCard;
-    document.getElementById('card-name').required = isCard;
-    document.getElementById('card-number').required = isCard;
-    document.getElementById('card-expiry').required = isCard;
-    document.getElementById('card-cvv').required = isCard;
+/* ------------------------------------------------------------------ */
+/* Forma de pagamento: só os campos do método ativo participam         */
+/* ------------------------------------------------------------------ */
+function setPaymentMethod(method) {
+  paymentMethod = method === 'cartao' ? 'cartao' : 'pix';
+  const isCard = paymentMethod === 'cartao';
+  document.querySelectorAll('[data-pay-method]').forEach(btn => {
+    const active = btn.dataset.payMethod === paymentMethod;
+    btn.setAttribute('aria-pressed', String(active));
+    btn.classList.toggle('btn-primary', active);
   });
+  byId('payment-pix').hidden = isCard;
+  byId('payment-card').hidden = !isCard;
+  // Campos do método inativo ficam desabilitados (fora da validação do formulário),
+  // e nenhum erro de uma tentativa anterior permanece em nenhum dos métodos.
+  cardFields.forEach(el => {
+    el.setCustomValidity('');
+    el.disabled = !isCard;
+    el.required = isCard;
+  });
+  setStatus('');
+}
+document.querySelectorAll('[data-pay-method]').forEach(btn => {
+  btn.addEventListener('click', () => { if (!busy) setPaymentMethod(btn.dataset.payMethod); });
 });
+setPaymentMethod('pix');
 
-document.getElementById('copy-pix').addEventListener('click', async () => {
-  const code = document.getElementById('pix-code').textContent;
+byId('copy-pix').addEventListener('click', async () => {
+  const codeEl = byId('pix-code');
   try {
-    await navigator.clipboard.writeText(code);
-    statusEl.textContent = 'Código PIX demonstrativo copiado para a área de transferência!';
+    if (!navigator.clipboard?.writeText) throw new Error('API de área de transferência indisponível');
+    await navigator.clipboard.writeText(codeEl.textContent);
+    setStatus('Código PIX demonstrativo copiado para a área de transferência.');
   } catch {
-    statusEl.textContent = 'Código PIX selecionado.';
+    // Sem permissão de cópia: seleciona o código para o usuário copiar manualmente.
+    const range = document.createRange();
+    range.selectNodeContents(codeEl);
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    setStatus('Não foi possível copiar automaticamente. O código foi selecionado: use Ctrl+C (ou "Copiar" no celular).', true);
   }
 });
 
-const birthday = document.getElementById('nascimento');
-const today = new Date();
-birthday.max = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
-
-cancelBtn.addEventListener('click', async () => {
-  if (!authenticatedUser) return;
-  cancelBtn.disabled = true;
-  statusEl.textContent = 'Cancelando assinatura…';
-  try {
-    await salvarPerfilWeb(authenticatedUser.uid, {
-      plano: null,
-      plano_nome: null,
-      status_assinatura: 'cancelada'
-    });
-    renderActiveBanner(null);
-    statusEl.textContent = 'Sua assinatura foi cancelada com sucesso. A alteração já está sincronizada com o aplicativo.';
-  } catch {
-    statusEl.textContent = 'Não foi possível cancelar a assinatura. Tente novamente.';
-  } finally {
-    cancelBtn.disabled = false;
+/* ------------------------------------------------------------------ */
+/* Simulação de pagamento (sem gravação e sem ações concorrentes)      */
+/* ------------------------------------------------------------------ */
+let cardFieldsLocked = [];
+function lock(value) {
+  busy = value;
+  purchaseForm.setAttribute('aria-busy', String(value));
+  submitBtn.disabled = value;
+  planSelect.disabled = cycleSelect.disabled = value;
+  document.querySelectorAll('[data-pay-method], #copy-pix').forEach(b => { b.disabled = value; });
+  if (value) {
+    cardFieldsLocked = cardFields.filter(el => !el.disabled);
+    cardFieldsLocked.forEach(el => { el.readOnly = true; });
+  } else {
+    cardFieldsLocked.forEach(el => { el.readOnly = false; });
+    cardFieldsLocked = [];
   }
-});
+}
 
 purchaseForm.addEventListener('submit', async event => {
   event.preventDefault();
+  if (busy) return;
   if (!authenticatedUser) {
     location.replace('login.html' + buildPlanQuery(currentPlan, currentCycle));
     return;
   }
-  if (!validarCPF(cpfInput.value)) {
-    cpfInput.setCustomValidity('Informe um CPF válido.');
-    purchaseForm.reportValidity();
-    return;
-  }
-  if (paymentMethod === 'cartao') {
-    const cardDigits = document.getElementById('card-number').value.replace(/\D/g, '');
-    const expDigits = document.getElementById('card-expiry').value.replace(/\D/g, '');
-    const expMonth = Number(expDigits.slice(0, 2));
-    if (cardDigits.length < 16 || expDigits.length < 4 || expMonth < 1 || expMonth > 12) {
-      statusEl.textContent = 'Verifique o número (16 dígitos) e a validade (MM/AA) do cartão.';
+  const method = paymentMethod;
+  if (method === 'cartao') {
+    cardFields.forEach(el => el.setCustomValidity(''));
+    if (!purchaseForm.reportValidity()) return;
+    const problem = cardProblem();
+    if (problem) {
+      const [id, text] = problem;
+      byId(id).setCustomValidity(text);
+      byId(id).reportValidity();
+      setStatus(text, true);
       return;
     }
+  } else if (!purchaseForm.reportValidity()) {
+    return;
   }
-  const submitBtn = document.getElementById('submit-purchase');
-  submitBtn.disabled = true;
-  statusEl.textContent = 'Processando simulação de pagamento e ativando sua assinatura…';
-
-  const rua = document.getElementById('endereco').value.trim();
-  const numero = document.getElementById('numero').value.trim();
-  const complemento = document.getElementById('complemento').value.trim();
-  const bairro = document.getElementById('bairro').value.trim();
-  const cidade = document.getElementById('cidade').value.trim();
-  const estado = document.getElementById('estado').value;
-  const enderecoFormatado = `${rua}, ${numero}${complemento ? ' (' + complemento + ')' : ''} - ${bairro}, ${cidade}/${estado}`;
-  const planoId = planIds[currentPlan] || 'plus';
-
+  const plan = currentPlan, cycle = currentCycle;
+  lock(true);
+  setStatus('Processando a simulação…');
   try {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    const dadosAtualizados = {
-      nome: document.getElementById('nome').value.trim(),
-      cpf: cpfInput.value.trim(),
-      telefone: document.getElementById('telefone').value.trim(),
-      cep: cepInput.value.trim(),
-      residencia: enderecoFormatado,
-      endereco_detalhado: {rua, numero, complemento, bairro, cidade, estado},
-      plano: planoId,
-      plano_nome: currentPlan,
-      ciclo_assinatura: currentCycle,
-      status_assinatura: 'ativa',
-      metodo_pagamento: paymentMethod,
-      assinado_em: new Date()
-    };
-    await salvarPerfilWeb(authenticatedUser.uid, dadosAtualizados);
-    renderActiveBanner(dadosAtualizados);
-    const metodoLabel = paymentMethod === 'pix' ? 'PIX Instantâneo' : 'Cartão de Crédito';
-    const valorFormatado = formatPlanPrice(currentPlan, currentCycle);
-    statusEl.textContent = `Pagamento via ${metodoLabel} aprovado! Assinatura HomeWise ${currentPlan} (${currentCycle}) ativa e sincronizada com o aplicativo.`;
-    if (typeof window.openModal === 'function') {
-      window.openModal(
-        'Pagamento Aprovado!',
-        `Seu plano HomeWise ${currentPlan} (${valorFormatado}) foi ativado via ${metodoLabel} e já está sincronizado com o aplicativo HomeWise.`
-      );
-    }
-  } catch {
-    statusEl.textContent = 'Não foi possível salvar a assinatura na nuvem. Verifique sua conexão e tente novamente.';
+    await new Promise(resolve => setTimeout(resolve, 900));
+    const metodoLabel = method === 'pix' ? 'PIX' : 'cartão de crédito';
+    const valor = formatPlanPrice(plan, cycle);
+    cardFields.forEach(el => { el.value = ''; el.setCustomValidity(''); }); // o cartão de teste nunca é guardado
+    setStatus(`Simulação concluída: HomeWise ${plan} (${cycle}) via ${metodoLabel}. Nenhum valor foi cobrado e nenhuma assinatura foi ativada.`);
+    window.openModal?.(
+      'Simulação concluída',
+      `Este é um ambiente de demonstração acadêmica (TCC). O pagamento do plano HomeWise ${plan} (${valor}) via ${metodoLabel} foi apenas simulado: nenhum valor foi cobrado e a assinatura da sua conta não foi alterada.`
+    );
   } finally {
-    submitBtn.disabled = false;
+    lock(false);
   }
 });

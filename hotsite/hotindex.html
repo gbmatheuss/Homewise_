@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HomeWise - Nossa Equipe</title>
+    <title>Nossa Equipe | HomeWise</title>
+    <meta name="description" content="Conheça a equipe e a história do HomeWise, projeto de TCC que monitora o consumo de água e energia da casa com sensores e um aplicativo.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="style.css">
@@ -22,7 +23,7 @@
             <div class="hs-bg-layer hs-bg-app" aria-hidden="true"></div>
             <div class="hs-grid" aria-hidden="true"></div>
             <div class="hs-head">
-                <a class="hs-brand" href="../index.html" aria-label="HomeWise — página inicial"><img src="../img/logo_Homewise.png" alt=""><span>Home<strong>Wise</strong></span></a>
+                <a class="hs-brand" href="../index.html" aria-label="HomeWise — página inicial"><img src="../img/logo_Homewise-480.png" alt=""><span>Home<strong>Wise</strong></span></a>
                 <a class="btn hs-skip" href="#inicio">Ir para o conteúdo <i class="fa-solid fa-arrow-down"></i></a>
             </div>
             <div class="hs-copy">
@@ -100,7 +101,7 @@
                 uma proposta em um projeto completo.
             </p>
 
-            <button class="btn btn-primary" type="button" onclick="conhecerEquipe()">Conheça agora <i class="fa-solid fa-arrow-right"></i></button>
+            <a class="btn btn-primary" href="#equipe">Conheça a equipe <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
 
             <div class="informacoes">
                 <div>
@@ -110,7 +111,7 @@
 
                 <div>
                     <h3><span aria-hidden="true"><i class="fa-solid fa-shield-halved"></i></span> Privacidade</h3>
-                    <p>Seus dados estão seguros e protegidos com a gente.</p>
+                    <p>Os dados de consumo ficam vinculados à conta de cada usuário, com acesso por login.</p>
                 </div>
             </div>
         </div>
@@ -121,14 +122,14 @@
                 <div class="phone-scene" aria-hidden="true"><span class="phone-orbit phone-orbit-back"></span><span class="phone-orbit phone-orbit-front"></span><span class="phone-platform"></span><span class="phone-spark phone-spark-one"></span><span class="phone-spark phone-spark-two"></span></div>
                 <div class="home-phone-pair">
                     <div class="home-phone home-phone-back">
-                        <img src="../img/04-energia-ano.png" alt="Tela de acompanhamento do consumo de energia do HomeWise">
+                        <img loading="lazy" decoding="async" src="../img/04-energia-ano.png" alt="Tela de acompanhamento do consumo de energia do HomeWise" width="390" height="844">
                     </div>
                     <div class="home-phone home-phone-front">
-                        <img src="../img/02-inicio.png" alt="Tela inicial do HomeWise com o consumo de água e energia">
+                        <img loading="lazy" decoding="async" src="../img/02-inicio.png" alt="Tela inicial do HomeWise com o consumo de água e energia" width="390" height="844">
                     </div>
                 </div>
             </div>
-            <div class="hot-brand"><img src="../img/logo_Homewise.png" alt=""><span>Home<strong>Wise</strong></span></div>
+            <div class="hot-brand"><img src="../img/logo_Homewise-480.png" alt=""><span>Home<strong>Wise</strong></span></div>
         </div>
     </section>
 
@@ -205,21 +206,21 @@
         <div class="team pessoas">
 
             <div class="member pessoa">
-         <div class="member-photo foto"><img src="../img/foto_fafabot.png" alt="Foto de Rafael Aquino"></div>
+         <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/foto_fafabot-360.jpg" alt="Foto de Rafael Aquino"></div>
                 <h3>Rafael Aquino</h3>
                 <span>Desenvolvedor Front-end</span>
                 <small>Responsável pela construção visual e organização das interfaces.</small>
             </div>
 
             <div class="member pessoa">
-                <div class="member-photo foto"><img src="../img/foto_matheus.png" alt="Foto de Matheus Luiz"></div>
+                <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/foto_matheus-360.jpg" alt="Foto de Matheus Luiz"></div>
                 <h3>Matheus Luiz</h3>
                 <span>Desenvolvedor Back-end</span>
                 <small>Atua na lógica, integração dos recursos e funcionamento do sistema.</small>
             </div>
 
             <div class="member pessoa">
-                    <div class="member-photo foto"><img src="../img/Foto_ambires.jpg" alt="Foto de Gabriel Ambires"></div>
+                    <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/Foto_ambires-360.jpg" alt="Foto de Gabriel Ambires"></div>
                 <h3>Gabriel Ambires</h3>
                 <span>Desenvolvedor</span>
                 <small>Contribui para a programação, testes e evolução das funcionalidades.</small>
@@ -233,7 +234,7 @@
             </div>
 
             <div class="member pessoa">
-                        <div class="member-photo foto"><img src="../img/foto_luiz.png" alt="Foto de Luiz Roberto"></div>
+                        <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/foto_luiz-360.jpg" alt="Foto de Luiz Roberto"></div>
                 <h3>Luiz Roberto</h3>
                 <span>Desenvolvedor Mobile</span>
                 <small>Contribui para a adaptação do projeto em dispositivos móveis.</small>
@@ -244,14 +245,16 @@
         <section class="container cta hotsite-download">
 
         <h2>Baixe nosso TCC</h2>
-        <div class="textoInicio downloadTcc">
-            <button class="btn btn-primary" type="button" onclick="baixarAgora()"><i class="fa-solid fa-download"></i> Baixe agora</button>
+        <div class="textoInicio downloadTcc tcc-unavailable">
+            <button class="btn" type="button" aria-disabled="true" aria-describedby="tcc-status" data-tcc-unavailable><i class="fa-regular fa-clock" aria-hidden="true"></i> Download em breve</button>
+            <p id="tcc-status">O documento do TCC ainda não foi publicado nesta página.</p>
         </div>
    
     </section>
 </main>
-<footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
+<footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.
+    <nav class="footer-links" aria-label="Site principal"><a href="../index.html">Voltar ao site principal</a><a href="../como-funciona.html">Como funciona</a><a href="../precos.html">Planos</a></nav>
+</div></footer>
 <script src="../js/script.js"></script><script src="../js/motion.js"></script>
-<script src="script.js"></script>
 </body>
 </html>

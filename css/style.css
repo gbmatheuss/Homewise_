@@ -262,9 +262,11 @@ footer{font-size:14px;line-height:1.8;margin-top:88px;padding:36px 0}
 .faq-q{transition:background-color .2s ease}.faq-q:active{background-color:#76eee20a}
 .billing-toggle .btn{transition:transform .3s var(--motion-ease),border-color .3s ease,box-shadow .3s ease,color .2s ease}
 .billing-toggle .btn[aria-pressed="true"]{box-shadow:inset 0 1px #c7fff321,0 0 0 1px #76eee233,0 6px 22px #0004}
-/* Movimento reduzido: segue o controle "Animações" (html[data-motion]); sem JS, segue o sistema. */
-html[data-motion="reduced"]{scroll-behavior:auto}html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-motion="reduced"] *::after{transition:none!important;animation:none!important}
-@media(prefers-reduced-motion:reduce){html:not([data-motion]){scroll-behavior:auto}html:not([data-motion]) *,html:not([data-motion]) *::before,html:not([data-motion]) *::after{transition:none!important;animation:none!important}}
+/* Movimento reduzido (automático: html[data-motion="reduced"] quando o sistema pede; sem JS ou no
+   modo estático de recuperação, segue a mídia do sistema). Sem deslocamentos nem animações
+   contínuas; transições de cor e opacidade continuam (css/motion.css libera fades pontuais). */
+html[data-motion="reduced"]{scroll-behavior:auto}html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-motion="reduced"] *::after{transition-property:opacity,color,background-color,border-color!important;animation:none!important}
+@media(prefers-reduced-motion:reduce){html:not([data-motion="full"]){scroll-behavior:auto}html:not([data-motion="full"]):not([data-motion="reduced"]) *,html:not([data-motion="full"]):not([data-motion="reduced"]) *::before,html:not([data-motion="full"]):not([data-motion="reduced"]) *::after{transition:none!important;animation:none!important}}
 
 
 /* Planos: valores em destaque e superficies com luz sutil. */
@@ -407,3 +409,35 @@ html[data-theme="light"] .how-step-copy p{color:#45645f}
 @media(max-width:520px){.testimonial-phone .testimonial-profile-phone{width:min(100%,180px)}}
 /* Depoimentos: the introduction occupies the space left by the removed phone. */
 .testimonials-head{grid-template-columns:minmax(0,1fr)}
+
+/* ===== Auditoria: checkout demonstrativo, estados de assinatura, créditos e hotsite ===== */
+.demo-notice{display:flex;gap:12px;align-items:flex-start;max-width:760px;margin-top:22px;padding:14px 18px;border:1px solid #f2c14e55;border-radius:14px;background:#f2c14e12;color:var(--text);font-size:15px;line-height:1.6}
+.demo-notice i{color:#f2c14e;margin-top:4px}
+html[data-theme="light"] .demo-notice{background:#fff6dc;border-color:#b7791f55}
+html[data-theme="light"] .demo-notice i{color:#8a5a12}
+.active-sub-banner.is-inactive{background:#2a2412;border-color:#f2c14e55;color:#f6e3b4}
+.active-sub-banner.is-error{background:#2c1717;border-color:#e8747466;color:#f8caca}
+html[data-theme="light"] .active-sub-banner.is-inactive{background:#fff6dc;border-color:#b7791f55;color:#5c3d0c}
+html[data-theme="light"] .active-sub-banner.is-error{background:#fde8e8;border-color:#b23b3b55;color:#7a1f1f}
+#cart-status[data-error="true"],#cep-feedback[data-error="true"]{color:#f3a0a0}
+html[data-theme="light"] #cart-status[data-error="true"],html[data-theme="light"] #cep-feedback[data-error="true"]{color:#b23b3b}
+html[data-theme="light"] #cart-status{color:#0f6b60}
+/* Link social ainda não informado: não é link, apenas indica a pendência. */
+.social-links .social-pending{display:inline-grid;place-items:center;opacity:.45;cursor:not-allowed}
+.social-links .social-pending svg{width:20px;height:20px;fill:currentColor}
+/* Hotsite: download do TCC indisponível e retorno ao site principal. */
+.tcc-unavailable{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.tcc-unavailable p{margin:0;font-size:15px;color:var(--muted);max-width:420px;line-height:1.6}
+.btn[aria-disabled="true"]{opacity:.75;cursor:not-allowed}
+.footer-links{display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center;margin-top:10px}
+.footer-links a{color:var(--cyan);text-decoration:underline;text-underline-offset:3px}
+/* Menu sem script.js: os links ficam visíveis (o botão "Menu" só existe quando o script carrega). */
+@media(max-width:850px){html:not(.hw-menu-ready) .links{display:flex}}
+/* Telas baixas (inclui zoom alto): o botão de tema vira só ícone para não cobrir o conteúdo.
+   O nome acessível continua no aria-label definido por js/script.js. */
+@media(max-height:560px){.theme-toggle{font-size:0;gap:0;padding:11px;border-radius:50%;left:12px;bottom:12px}.theme-toggle i{font-size:15px}}
+/* Checkout: dados de exemplo fixos (somente leitura), claramente identificados. */
+.demo-tag{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:20px;border:1px solid #f2c14e55;background:#f2c14e14;color:#f6dd9a;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
+html[data-theme="light"] .demo-tag{background:#fff6dc;border-color:#b7791f55;color:#6b4a10}
+.demo-data input[readonly]{cursor:default;color:var(--muted);border-style:dashed}
+.demo-data .cart-note{margin:14px 0 0}
