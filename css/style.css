@@ -206,6 +206,11 @@ footer{font-size:14px;line-height:1.8;margin-top:88px;padding:36px 0}
 .about-page .social-links a{width:36px;height:36px;background:#a0f5de06;border-color:#a4e9de26}
 .about-page .social-links a:hover{background:#73eadb1a;border-color:#8aebd975;box-shadow:0 0 15px #73eadb15}
 .about-page .about-cta{background:radial-gradient(ellipse at 90% 50%,#6ae5d526,transparent 58%),linear-gradient(120deg,#14272b,#090f12)}
+/* Cards da equipe: cargo em linhas equilibradas, descrição sem palavra sozinha na última linha
+   e termos compostos (ex.: Back-end) sem quebra no hífen. */
+.member .role,.member.pessoa>span{text-wrap:balance}
+.member>p,.member>small{text-wrap:pretty}
+.hw-nowrap{white-space:nowrap}
 @media(max-width:1100px){.about-page .team{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:850px){.about-page .team{grid-template-columns:repeat(2,minmax(0,1fr))}.about-page .page-head{padding-top:32px}}
 @media(max-width:520px){.about-page .team{grid-template-columns:1fr;gap:16px}.about-page .member{padding:26px}.about-page .member p{font-size:15px}.about-page .member h3{font-size:21px}.about-page .role{font-size:14px}.about-page .team-section{padding-bottom:36px}}
@@ -409,6 +414,9 @@ html[data-theme="light"] .how-step-copy p{color:#45645f}
 @media(max-width:520px){.testimonial-phone .testimonial-profile-phone{width:min(100%,180px)}}
 /* Depoimentos: the introduction occupies the space left by the removed phone. */
 .testimonials-head{grid-template-columns:minmax(0,1fr)}
+/* Depoimentos: legenda discreta indicando que os relatos são ilustrativos (sem caixa de destaque). */
+.testimonials-head .lead+.testimonials-note{margin-top:14px}
+.testimonials-note{font-size:13px;line-height:1.6;color:var(--muted);letter-spacing:.01em}
 
 /* ===== Auditoria: checkout demonstrativo, estados de assinatura, créditos e hotsite ===== */
 .demo-notice{display:flex;gap:12px;align-items:flex-start;max-width:760px;margin-top:22px;padding:14px 18px;border:1px solid #f2c14e55;border-radius:14px;background:#f2c14e12;color:var(--text);font-size:15px;line-height:1.6}
