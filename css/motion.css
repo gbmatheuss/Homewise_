@@ -42,8 +42,6 @@ html[data-theme="light"] .hw-status-err{color:#b23b3b}
 @media(hover:hover){[data-motion="full"] .btn:hover::before{transform:translateX(120%);transition:transform .75s var(--hw-out)}}
 [data-motion="full"] .btn i{transition:transform .35s var(--hw-out)}
 @media(hover:hover){[data-motion="full"] .btn:hover .fa-arrow-right{transform:translateX(4px)}[data-motion="full"] .btn:hover .fa-arrow-down,[data-motion="full"] .btn:hover .fa-download{transform:translateY(2px)}}
-[data-motion="full"] .menu-toggle i{display:inline-block;animation:hw-icon-in .35s var(--hw-out)}
-@keyframes hw-icon-in{from{transform:rotate(-90deg) scale(.5);opacity:0}}
 [data-motion="full"] .links.is-open a{animation:hw-menu-in .45s var(--hw-out) both;animation-delay:calc(var(--i,0) * 45ms)}
 @keyframes hw-menu-in{from{opacity:0;transform:translateX(-22px)}}
 [data-motion="full"] .faq-q:hover span{transform:translateY(2px)}
@@ -51,7 +49,9 @@ html[data-theme="light"] .hw-status-err{color:#b23b3b}
 
 /* Transições entre páginas (Chrome/Edge): o cabeçalho e o dock permanecem; o conteúdo troca. */
 @view-transition{navigation:auto}
-.navbar{view-transition-name:hw-nav}
+/* O nome só existe durante a transição: um view-transition-name permanente torna o cabeçalho uma
+   "backdrop root" no Chrome/Edge e anula o desfoque (backdrop-filter) do fundo do cabeçalho. */
+html:active-view-transition .navbar{view-transition-name:hw-nav}
 ::view-transition-old(root){animation:hw-vt-out .22s ease both}
 ::view-transition-new(root){animation:hw-vt-in .5s var(--hw-out) both}
 @keyframes hw-vt-out{to{opacity:0;transform:translateY(-14px)}}
@@ -225,12 +225,25 @@ html[data-theme="light"] .hw-op-brand-in .logo-name span{color:#137e71}
 @keyframes hw-rise-in{from{opacity:0;transform:translateY(26px)}}
 @keyframes hw-phone-rise{from{opacity:0;transform:translateY(55vh) rotate(8deg)}}
 @media(max-width:700px){
- .hw-op-house{width:150vw;margin:calc(150vw * -.36) 0 0 -75vw}
+ /* 130vw: a casa continua dominante e os sensores de água e energia (x 14% e 86%) ficam dentro da tela. */
+ .hw-op-house{width:130vw;margin:calc(130vw * -.36) 0 0 -65vw}
  .hw-op-phone{width:27vw;margin:calc(27vw * -1.082) 0 0 -13.5vw}
  .hw-op-phone-in{border-radius:18px;padding:11px 3px 4px;border-width:2px}
  .hw-op-tagline{font-size:16px;max-width:320px;margin-top:16px}
  .hw-op-actions{margin-top:22px}
  .hw-op-waves{bottom:5vh;height:90px}
+}
+/* Telas baixas (celular na horizontal, zoom de 200%): casa e celulares medidos também pela altura,
+   para que nada passe da tela nem cubra a marca, a frase e o botão. */
+@media(max-height:500px){
+ .hw-op-house{--hw-hw:min(130vw,150vh,1000px);width:var(--hw-hw);margin:calc(var(--hw-hw) * -.36) 0 0 calc(var(--hw-hw) * -.5)}
+ .hw-op-phone{--hw-pw:clamp(70px,20vh,118px);width:var(--hw-pw);margin:calc(var(--hw-pw) * -1.082) 0 0 calc(var(--hw-pw) * -.5)}
+ .hw-op-phone-in{border-radius:14px;padding:8px 3px 3px;border-width:2px}
+ .hw-op-center{margin-top:var(--hw-nav-h,0px)}
+ .hw-op-tagline{font-size:15px;line-height:1.5;margin-top:8px;max-width:440px}
+ .hw-op-actions{margin-top:12px;gap:6px}
+ .hw-op-cue{font-size:11px}.hw-op-cue::after{height:14px}
+ .hw-op-waves{bottom:3vh;height:70px}
 }
 
 /* INÍCIO — seções depois da abertura */
@@ -434,6 +447,14 @@ html[data-theme="light"] .hs-house .hs-node circle{fill:#fff}
 .hs-staged .hs-texts{min-height:170px}
 .hs-staged .hs-final{position:absolute;left:0;right:0;top:0;margin-top:0}
 @media(max-width:850px){.hs-staged .hs-texts{min-height:150px}}
+/* Celular: etapas e mensagem final ocupam a mesma célula, então a área reserva a altura da maior
+   delas e os botões finais não invadem a folga do botão de tema (antes a mensagem absoluta vazava). */
+@media(max-width:850px){.hs-staged .hs-texts{display:grid}.hs-staged .hs-texts>*{grid-area:1 / 1}.hs-staged .hs-final{position:relative}}
+/* Etiquetas da casa ficam acima dos celulares do app (a da central era coberta por eles). */
+.hs-tag{z-index:2}
+@media(max-width:520px){.hs-tag{transform:translate(-50%,calc(-100% - 14px))}.hs-tag[data-place="below"]{transform:translate(-50%,14px)}}
+/* Celulares de 320px: marca e "Ir para o conteúdo" cabem em uma linha (o botão quebrava em duas). */
+@media(max-width:359px){.hs-head{gap:10px}.hs-brand{font-size:18px;gap:7px}.hs-brand img{width:30px;height:30px}.hs-head .btn{font-size:12px;padding:8px 10px;gap:6px}}
 [data-motion="full"] .hotsite-page main{padding-top:0}
 
 /* =====================================================================

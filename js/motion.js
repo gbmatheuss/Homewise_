@@ -336,7 +336,8 @@
       waveDrop = (sr.bottom - 1) - (wr.top + wr.height / 2 - last.wy);
       root.style.setProperty('--hw-nav-h', navbar.offsetHeight + 'px');
       const img = $('.logo-image', logo), cs = getComputedStyle(logo);
-      const K = narrow ? 1.45 : w < 1100 ? 1.8 : 2.1;
+      // Telas baixas (celular na horizontal, zoom alto): marca menor para caber com a frase e o botão.
+      const K = window.innerHeight < 500 ? 1.15 : narrow ? 1.45 : w < 1100 ? 1.8 : 2.1;
       op.style.setProperty('--op-img', img.offsetWidth * K + 'px');
       op.style.setProperty('--op-font', parseFloat(cs.fontSize) * K + 'px');
       op.style.setProperty('--op-gap', (parseFloat(cs.columnGap) || 12) * K + 'px');
@@ -891,7 +892,9 @@
     const hsPhones = $$('.hs-phone', st);
     // Teclado: foco na mensagem final mantém a rolagem no trecho final (o conteúdo focado não some).
     listen(st, 'focusin', event => {
-      if (!staged || !final.contains(event.target)) return;
+      // Só foco por teclado: no toque/clique o link já está visível, e reposicionar a rolagem aqui
+      // cancelaria a navegação até a âncora (ex.: "Conheça a equipe" voltava para a casa).
+      if (!staged || !final.contains(event.target) || !event.target.matches(':focus-visible')) return;
       requestAnimationFrame(guard(() => {
         const target = Math.round(top + D * .95);
         if (Math.abs(window.scrollY - target) > 4) window.scrollTo({ top: target, behavior: 'instant' });
