@@ -459,3 +459,43 @@ html[data-theme="light"] #cart-status{color:#0f6b60}
 
 /* Mesmo desenho e proporção do X anterior, sem depender da fonte externa. */
 .close .hw-close-icon{width:.625em;height:1em;fill:currentColor}
+
+/* Ícone de conta no cabeçalho (criado por js/script.js; destino definido por js/account.js). */
+.account-link{display:inline-flex;align-items:center;justify-content:center;position:relative;flex-shrink:0;width:42px;height:42px;border:1px solid #ffffff29;border-radius:50%;background:linear-gradient(180deg,#ffffff08,#ffffff02);color:var(--text);transition:background .2s,border-color .2s,box-shadow .2s,transform .2s}
+.account-link:hover{background:#ffffff0e;border-color:#76eee288;box-shadow:0 8px 26px #0005;transform:translateY(-2px)}
+.account-link:active{transform:translateY(0)}
+.account-link:focus-visible{outline-offset:3px}
+.account-link .hw-account-icon{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.account-link[aria-current="page"]{border-color:#76eee288}
+/* Com login: ponto discreto na cor da marca. */
+.account-link.is-signed-in::after{content:'';position:absolute;top:2px;right:2px;width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 2px var(--bg)}
+.account-link[aria-busy="true"]{opacity:.6;cursor:progress}
+html[data-theme="light"] .account-link{background:#e0eee8;color:#214e45;border-color:#326b5538}
+html[data-theme="light"] .account-link.is-signed-in::after{background:#137e71;box-shadow:0 0 0 2px #f6fcf9}
+@media(max-width:850px){.account-link{width:40px;height:40px}}
+@media(prefers-reduced-motion:reduce){.account-link,.account-link:hover{transition:none;transform:none}}
+
+/* Mostrar/ocultar senha (js/script.js). */
+.password-wrap{position:relative;display:block}
+.field .password-wrap input{padding-right:54px}
+.password-toggle{position:absolute;top:50%;right:4px;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--muted);transition:color .2s,background-color .2s}
+.password-toggle:hover{color:var(--text);background:#ffffff0a}
+.password-toggle:focus-visible{outline-offset:-2px}
+.password-toggle:disabled{opacity:.5;cursor:not-allowed}
+.password-toggle .hw-eye-icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+html[data-theme="light"] .password-toggle{color:#315d50}
+html[data-theme="light"] .password-toggle:hover{color:#173633;background:#137e710f}
+
+/* Minha conta (perfil.html). */
+.profile-page #profile-status{color:var(--muted)}
+.profile-card{max-width:640px;margin-bottom:90px}
+.profile-card h2+.profile-data,.profile-card h2+.active-sub-banner{margin-top:0}
+.profile-card h2:not(:first-child){margin-top:30px}
+.profile-data{display:grid;gap:14px;margin:0 0 6px}
+.profile-data div{display:grid;gap:2px;min-width:0}
+.profile-data dt{font-size:13px;color:var(--muted)}
+.profile-data dd{margin:0;font-size:17px;color:var(--text);overflow-wrap:anywhere}
+.profile-card .active-sub-banner{font-size:14px}
+.profile-actions{margin-top:8px}
+/* Telas muito estreitas (até 360px): logo um pouco menor para o menu e o ícone de conta caberem na mesma linha. */
+@media(max-width:360px){.nav{gap:8px}.logo{font-size:24px;gap:6px}.logo-image{width:54px;height:54px}}

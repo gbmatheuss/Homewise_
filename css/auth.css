@@ -3,3 +3,6 @@
 /* "Trocar plano": área de toque de pelo menos 40px de altura, sem mudar o visual. */
 .auth-intro .cart-summary a{display:inline-block;padding:9px 0;margin:-9px 0}
 @media(max-width:760px){.auth-layout{grid-template-columns:1fr;gap:28px;padding-top:32px}.auth-intro h1{font-size:38px}.auth-tabs{flex-wrap:wrap}}
+/* Acesso direto (ícone de conta): sem o card de plano, a introdução fica centralizada ao lado do formulário. */
+.auth-layout.is-generic{align-items:center}
+.auth-intro .cart-summary[hidden]{display:none}

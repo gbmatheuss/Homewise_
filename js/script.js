@@ -97,6 +97,48 @@ document.querySelectorAll('.links').forEach((nav, index) => {
 });
 // Só esconde os links no celular quando o botão "Menu" existe (ver css/style.css).
 document.documentElement.classList.add('hw-menu-ready');
+// Ícone de conta no canto direito do cabeçalho. Sem login aponta para login.html; js/account.js
+// consulta o Firebase Authentication já configurado e, com login, troca o destino para perfil.html.
+// Nenhuma página pública exige login: o ícone só decide para onde levar.
+const accountNav = document.querySelector('.navbar .nav');
+if (accountNav) {
+  const account = document.createElement('a');
+  account.className = 'account-link';
+  account.href = 'login.html?destino=perfil';
+  account.setAttribute('aria-label', 'Entrar na sua conta');
+  account.title = 'Entrar na sua conta';
+  account.innerHTML = '<svg class="hw-account-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="4"/><path d="M4 20.5c1.4-3.6 4.4-5.5 8-5.5s6.6 1.9 8 5.5"/></svg>';
+  if (/\/(login|perfil)\.html$/.test(location.pathname)) account.setAttribute('aria-current', 'page');
+  accountNav.append(account);
+  import('./account.js').catch(() => {});
+}
+// Botão de olho em todo campo de senha: mostra/oculta sem apagar o texto e sem enviar o formulário.
+const eyeIcon = '<svg class="hw-eye-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+const eyeOffIcon = '<svg class="hw-eye-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-2.9 3.8M6.6 6.6C3.7 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6M9.9 9.9a3 3 0 0 0 4.2 4.2M3 3l18 18"/></svg>';
+document.querySelectorAll('input[type="password"]').forEach((input, index) => {
+  if (!input.id) input.id = 'hw-password-' + index;
+  const wrap = document.createElement('span');
+  wrap.className = 'password-wrap';
+  input.before(wrap);
+  wrap.append(input);
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'password-toggle';
+  toggle.setAttribute('aria-controls', input.id);
+  const setVisible = visible => {
+    input.type = visible ? 'text' : 'password';
+    toggle.setAttribute('aria-pressed', String(visible));
+    toggle.setAttribute('aria-label', visible ? 'Ocultar senha' : 'Mostrar senha');
+    toggle.title = visible ? 'Ocultar senha' : 'Mostrar senha';
+    toggle.innerHTML = visible ? eyeOffIcon : eyeIcon;
+  };
+  setVisible(false);
+  toggle.addEventListener('click', () => setVisible(input.type === 'password'));
+  wrap.append(toggle);
+  // Ao enviar ou limpar o formulário a senha volta a ficar oculta (o valor digitado é mantido no envio).
+  input.form?.addEventListener('submit', () => setVisible(false), true);
+  input.form?.addEventListener('reset', () => setVisible(false));
+});
 // Troca o valor exibido de uma vez (sem números intermediários) e só suaviza a aparência.
 function swapText(el, text, kind) {
   if (el.textContent === text) return;

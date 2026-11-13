@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Sua conta | HomeWise</title><meta name="description" content="Crie sua conta ou entre no HomeWise para continuar com o plano escolhido."><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/auth.css"><link rel="stylesheet" href="css/motion.css"><script src="js/motion-boot.js"></script></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Sua conta | HomeWise</title><meta name="description" content="Entre na sua conta HomeWise ou cadastre-se para acessar o HomeWise."><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/auth.css"><link rel="stylesheet" href="css/motion.css"><script src="js/motion-boot.js"></script></head>
 <body>
 <header class="navbar"><div class="container nav"><a href="index.html" class="logo"><img class="logo-image" src="img/logo_Homewise-480.png" alt=""><span class="logo-name">Home<span>Wise</span></span></a><a href="precos.html" class="btn">Ver planos</a></div></header>
-<main class="container auth-layout">
-<section class="auth-intro"><span class="badge">● Primeiro, sua conta</span><h1>Sua casa mais<br><span class="gradient">inteligente.</span></h1><p class="lead">Crie sua conta ou entre para continuar com o plano escolhido.</p><div class="cart-summary"><h2>Plano selecionado</h2><p id="auth-plan"></p><p id="auth-price" class="cart-total"></p><a href="precos.html">Trocar plano</a></div></section>
+<main class="container auth-layout is-generic" id="auth-layout">
+<section class="auth-intro"><span class="badge" id="auth-badge">● Sua conta</span><h1>Sua casa mais<br><span class="gradient">inteligente.</span></h1><p class="lead" id="auth-lead">Entre na sua conta ou cadastre-se para acessar o HomeWise.</p><div class="cart-summary" id="auth-plan-card" hidden><h2>Plano selecionado</h2><p id="auth-plan"></p><p id="auth-price" class="cart-total"></p><a href="precos.html">Trocar plano</a></div></section>
 <section class="cart-form auth-card" aria-labelledby="auth-title">
 <div class="auth-tabs"><button type="button" class="btn btn-primary" id="tab-register" aria-pressed="true">Criar conta</button><button type="button" class="btn" id="tab-login" aria-pressed="false">Já tenho conta</button></div>
 <h2 id="auth-title">Crie sua conta</h2>

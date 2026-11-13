@@ -1,10 +1,25 @@
-import {firebaseReady, selectedPlan, selectedCycle, formatPlanPrice, planQuery, authMessage, salvarPerfilWeb} from './firebase.js';
+import {firebaseReady, plans, selectedPlan, selectedCycle, formatPlanPrice, planQuery, authMessage, salvarPerfilWeb} from './firebase.js';
 const byId = id => document.getElementById(id);
 const form = byId('auth-form'), fields = byId('auth-fields'), status = byId('auth-status');
 const password = byId('auth-password'), confirm = byId('auth-confirm');
 let mode = 'register', busy = false, client;
-byId('auth-plan').textContent = `${selectedPlan} (${selectedCycle === 'anual' ? 'Ciclo anual • 15% OFF' : 'Ciclo mensal'})`;
-byId('auth-price').textContent = formatPlanPrice(selectedPlan, selectedCycle);
+// Contexto da página, decidido só pela URL desta visita (nada é lido de localStorage/sessionStorage):
+// • Fluxo de contratação: a URL traz um plano válido (?plano=…&ciclo=…), vindo de precos.html ou do
+//   redirecionamento do checkout → mostra o plano escolhido e, depois de entrar, segue para o checkout.
+// • Acesso direto (ícone de conta, ?destino=perfil, ou login.html sem plano) → texto genérico, sem
+//   card de plano, e depois de entrar vai para o perfil. O destino é sempre um valor fixo (sem
+//   redirecionamento aberto).
+const params = new URLSearchParams(location.search);
+const planFlow = params.get('destino') !== 'perfil' && Object.hasOwn(plans, params.get('plano') ?? '');
+const afterAuth = planFlow ? 'carrinho.html' + planQuery : 'perfil.html';
+if (planFlow) {
+  byId('auth-layout').classList.remove('is-generic');
+  byId('auth-badge').textContent = '● Primeiro, sua conta';
+  byId('auth-lead').textContent = 'Crie sua conta ou entre para continuar com o plano escolhido.';
+  byId('auth-plan').textContent = `${selectedPlan} (${selectedCycle === 'anual' ? 'Ciclo anual • 15% OFF' : 'Ciclo mensal'})`;
+  byId('auth-price').textContent = formatPlanPrice(selectedPlan, selectedCycle);
+  byId('auth-plan-card').hidden = false;
+}
 function message(text, error = false) { status.textContent = text; status.dataset.error = String(error); }
 function setMode(next) {
   if (busy) return;
@@ -59,12 +74,12 @@ form.addEventListener('submit', async event => {
       if (!profileSaved) {
         form.reset();
         message('Conta criada, mas não foi possível salvar todos os dados do perfil. Você pode continuar normalmente; complete o perfil depois pelo aplicativo. Redirecionando…', true);
-        setTimeout(() => location.replace('carrinho.html' + planQuery), 4000);
+        setTimeout(() => location.replace(afterAuth), 4000);
         return;
       }
     } else { await sdk.signInWithEmailAndPassword(auth, email, password.value); }
     form.reset();
-    location.replace('carrinho.html' + planQuery);
+    location.replace(afterAuth);
   } catch (error) {message(authMessage(error), true); lock(false);}
 });
 byId('reset-password').onclick = async () => {
@@ -78,6 +93,6 @@ byId('reset-password').onclick = async () => {
 };
 try {
   client = await firebaseReady;
-  if (client.auth.currentUser) {location.replace('carrinho.html' + planQuery);}
+  if (client.auth.currentUser) {location.replace(afterAuth);}
   else {fields.disabled = false; message('');}
 } catch (error) {message('Não foi possível carregar o acesso. Verifique sua conexão e recarregue a página. ' + authMessage(error), true);}

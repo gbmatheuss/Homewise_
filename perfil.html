@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Minha conta | HomeWise</title><meta name="description" content="Veja os dados da sua conta HomeWise e a situação do seu plano."><meta name="robots" content="noindex"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/motion.css"><script src="js/motion-boot.js"></script></head>
+<body class="profile-page">
+<header class="navbar"><div class="container nav"><a href="index.html" class="logo"><img class="logo-image" src="img/logo_Homewise-480.png" alt=""><span class="logo-name">Home<span>Wise</span></span></a><nav class="links"><a href="index.html">Início</a><a href="depoimentos.html">Depoimentos</a><a href="como-funciona.html">Como funciona</a><a href="sobre.html">Sobre Nós</a><a href="precos.html">Preços</a><a href="faq.html">FAQ</a></nav><a href="#" class="btn btn-blue" data-download>Baixar agora <i class="fa-solid fa-download"></i></a></div></header>
+<main class="container">
+<section class="page-head"><span class="badge">● Minha conta</span><h1>Olá, <span class="gradient" id="profile-greeting">bem-vindo.</span></h1><p class="lead">Confira os dados da sua conta e a situação do seu plano.</p></section>
+<p id="profile-status" role="status" aria-live="polite">Verificando sua conta…</p>
+<section class="cart-summary profile-card" id="profile-card" aria-labelledby="profile-title" hidden>
+<h2 id="profile-title">Dados da conta</h2>
+<dl class="profile-data">
+<div><dt>Nome</dt><dd id="profile-name">—</dd></div>
+<div><dt>E-mail</dt><dd id="profile-email">—</dd></div>
+</dl>
+<h2>Plano</h2>
+<p id="profile-plan" class="active-sub-banner">Consultando…</p>
+<p class="cart-note">Os dados são apenas exibidos aqui. Alterações de cadastro e de assinatura são feitas pelo aplicativo HomeWise.</p>
+<div class="actions profile-actions"><a class="btn btn-primary" href="precos.html">Ver planos</a><button type="button" class="btn" id="profile-sign-out">Sair da conta</button></div>
+</section>
+<noscript><p>Ative o JavaScript para ver sua conta.</p></noscript>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
+<script src="js/script.js"></script><script src="js/motion.js"></script><script type="module" src="js/perfil.js"></script>
+</body></html>
