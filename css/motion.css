@@ -376,6 +376,10 @@ html[data-theme="light"] .hs-house .hs-node circle{fill:#fff}
 .hs-phone{backface-visibility:hidden}
 .hs-phone::before{content:'';position:absolute;top:-10%;bottom:-10%;left:0;width:70%;z-index:1;pointer-events:none;background:linear-gradient(105deg,transparent 20%,#ffffff1f 46%,#ffffff08 54%,transparent 72%);transform:translateX(calc(-110% + var(--hs-sheen,1) * 260%)) skewX(-8deg)}
 .hs-progress{display:none}
+/* Sem o palco (movimento reduzido, estático ou falha do motor) o .hs-sticky não corta nada (overflow:hidden só
+   existe em .hs-staged). O celular frontal, girado 7°, passava da margem lateral e criava rolagem horizontal
+   (ex.: +17px em 768px). Aqui os celulares ficam alinhados à borda da cena, sem sair dela. */
+.hs-story:not(.hs-staged) .hs-phones{right:0}
 /* Modo completo: palco fixo enquanto a rolagem conta a história. */
 .hs-story.hs-staged{height:calc(100svh + var(--hs-d,1800px))}
 .hs-staged .hs-sticky{position:sticky;top:0;height:100svh;width:100%;max-width:none;padding:22px max(32px,calc((100% - 1240px) / 2)) 34px;overflow:hidden;align-content:stretch}
@@ -420,6 +424,7 @@ html[data-theme="light"] .hs-house .hs-node circle{fill:#fff}
  .hs-scene{grid-column:1;grid-row:2}
  .hs-copy{grid-column:1;grid-row:3}
  .hs-phones{width:40%;right:-2%;bottom:-8%}
+ .hs-story:not(.hs-staged) .hs-phones{right:1%}
  .hs-staged .hs-sticky{grid-template-rows:auto minmax(0,1fr) auto;padding:14px 20px calc(18px + env(safe-area-inset-bottom));gap:8px;align-content:start}
  .hs-staged .hs-scene{align-self:center;max-height:100%;width:auto;max-width:100%;justify-self:center;height:min(100%,calc((100vw - 40px) * .65))}
  .hs-staged .hs-copy{align-self:end;padding-bottom:58px}
