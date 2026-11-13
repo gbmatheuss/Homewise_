@@ -1,38 +1,38 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Carrinho | HomeWise</title><meta name="description" content="Checkout demonstrativo do HomeWise (TCC): simulação de pagamento sem cobrança real."><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/motion.css"><script src="js/motion-boot.js"></script></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Carrinho | HomeWise</title><meta name="description" content="Checkout do HomeWise: revise o plano e escolha a forma de pagamento. Nenhum valor é cobrado."><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"><link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/motion.css"><script src="js/motion-boot.js"></script></head>
 <body class="cart-page">
 <header class="navbar"><div class="container nav"><a href="index.html" class="logo"><img class="logo-image" src="img/logo_Homewise-480.png" alt=""><span class="logo-name">Home<span>Wise</span></span></a><nav class="links"><a class="" href="index.html">Início</a><a class="" href="depoimentos.html">Depoimentos</a><a class="" href="como-funciona.html">Como funciona</a><a class="" href="sobre.html">Sobre Nós</a><a href="precos.html">Preços</a><a class="" href="faq.html">FAQ</a></nav><a href="#" class="btn btn-blue" data-download>Baixar agora <i class="fa-solid fa-download"></i></a></div></header>
 <main class="container">
-<section class="page-head"><span class="badge">● Seu carrinho</span><h1>Dados para sua <span class="gradient">compra.</span></h1><p class="lead">Revise o plano, escolha a forma de pagamento e simule a compra.</p><p class="demo-notice" role="note"><i class="fa-solid fa-flask" aria-hidden="true"></i> <span><strong>Ambiente de demonstração (TCC).</strong> O pagamento é apenas simulado e nenhum valor é cobrado. Os dados pessoais e o endereço abaixo são fictícios e fixos, e o cartão de teste é verificado somente no seu navegador, sem ser armazenado. Esta página apenas consulta a situação da assinatura da sua conta, sem alterá-la.</span></p></section>
+<section class="page-head"><span class="badge">● Seu carrinho</span><h1>Dados para sua <span class="gradient">compra.</span></h1><p class="lead">Revise o plano, escolha a forma de pagamento e simule o pagamento.</p></section>
 <p id="account-status" role="status" aria-live="polite">Verificando sua conta…</p>
 <div id="account-bar" hidden><span id="account-email"></span> <button type="button" class="btn" id="sign-out">Sair da conta</button></div>
 <div class="cart-layout" id="protected-cart" hidden>
 <form id="purchase-form" class="cart-form">
 <!-- Dados de exemplo FIXOS: a demonstração não coleta nem exibe dados pessoais reais. -->
-<fieldset class="demo-data"><legend>Dados pessoais <span class="demo-tag">Exemplo fictício</span></legend><div class="cart-fields">
-<div class="field field-wide"><label for="nome">Nome completo</label><input id="nome" value="Cliente Demonstração" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
+<fieldset class="demo-data"><legend>Dados pessoais</legend><div class="cart-fields">
+<div class="field field-wide"><label for="nome">Nome completo</label><input id="nome" value="Cliente HomeWise" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
 <div class="field"><label for="cpf">CPF</label><input id="cpf" value="000.000.000-00" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
 <div class="field"><label for="telefone">Número de telefone</label><input id="telefone" value="(11) 90000-0000" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
 </div></fieldset>
-<fieldset class="demo-data"><legend>Endereço da residência <span class="demo-tag">Exemplo fictício</span></legend><div class="cart-fields">
+<fieldset class="demo-data"><legend>Endereço da residência</legend><div class="cart-fields">
 <div class="field"><label for="cep">CEP</label><input id="cep" value="00000-000" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
 <div class="field field-wide"><label for="endereco">Rua ou avenida</label><input id="endereco" value="Rua Exemplo" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
 <div class="field"><label for="numero">Número</label><input id="numero" value="123" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
-<div class="field"><label for="complemento">Complemento</label><input id="complemento" value="Casa demonstrativa" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
-<div class="field"><label for="bairro">Bairro</label><input id="bairro" value="Bairro Demonstração" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
+<div class="field"><label for="complemento">Complemento</label><input id="complemento" value="Casa" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
+<div class="field"><label for="bairro">Bairro</label><input id="bairro" value="Centro" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
 <div class="field"><label for="cidade">Cidade</label><input id="cidade" value="São Paulo" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
 <div class="field"><label for="estado">Estado</label><input id="estado" value="SP" readonly autocomplete="off" aria-describedby="demo-data-note"></div>
 </div>
-<p class="cart-note" id="demo-data-note">Dados fictícios e fixos, usados apenas para ilustrar o checkout. Nenhum dado pessoal é solicitado nesta demonstração.</p>
+<p class="cart-note" id="demo-data-note">Dados de exemplo preenchidos automaticamente. Nenhum dado pessoal é solicitado nesta etapa.</p>
 </fieldset>
-<fieldset><legend>Forma de pagamento (Simulação)</legend>
+<fieldset><legend>Forma de pagamento</legend>
 <div class="payment-tabs" role="group" aria-label="Forma de pagamento">
-  <button type="button" class="btn btn-primary" data-pay-method="pix" aria-pressed="true"><i class="fa-brands fa-pix"></i> PIX (simulado)</button>
+  <button type="button" class="btn btn-primary" data-pay-method="pix" aria-pressed="true"><i class="fa-brands fa-pix"></i> PIX</button>
   <button type="button" class="btn" data-pay-method="cartao" aria-pressed="false"><i class="fa-solid fa-credit-card"></i> Cartão de crédito</button>
 </div>
 <div id="payment-pix" class="payment-panel">
-  <p class="cart-note">Ambiente de demonstração acadêmica (TCC): o QR Code e o código abaixo são ilustrativos e não realizam pagamentos. Ao confirmar, a compra é apenas simulada.</p>
+  <p class="cart-note">O QR Code e o código abaixo são ilustrativos e não realizam pagamentos.</p>
   <div class="pix-box pix-grid">
     <div class="pix-qr-wrap" aria-label="QR Code PIX demonstrativo">
       <svg viewBox="0 0 120 120" class="pix-qr-svg" role="img" aria-label="QR Code PIX">
@@ -41,8 +41,8 @@
       </svg>
     </div>
     <div class="pix-details">
-      <span class="pix-label">Código PIX Copia e Cola (Demonstrativo)</span>
-      <code id="pix-code">00020126580014BR.GOV.BCB.PIX0136homewise-tcc-assinatura-demo5204000053039865802BR5916HOMEWISEMONITORA6009SAOPAULO62070503***6304ABCD</code>
+      <span class="pix-label">Código PIX Copia e Cola</span>
+      <code id="pix-code">00020126580014BR.GOV.BCB.PIX0136homewise-assinatura-checkout5204000053039865802BR5916HOMEWISEMONITORA6009SAOPAULO62070503***6304ABCD</code>
       <button type="button" class="btn" id="copy-pix"><i class="fa-regular fa-copy"></i> Copiar código PIX</button>
     </div>
   </div>
@@ -57,8 +57,8 @@
   </div>
 </div>
 </fieldset>
-<p class="cart-note">Simulação sem cobrança real. A assinatura da sua conta no aplicativo HomeWise não é alterada por esta página.</p>
-<button type="submit" class="btn btn-primary" id="submit-purchase"><i class="fa-solid fa-circle-check"></i> Simular pagamento (demonstração)</button>
+<p class="cart-note">Não há cobrança real nem contratação de assinatura. A assinatura da sua conta no aplicativo HomeWise não é alterada por esta página.</p>
+<button type="submit" class="btn btn-primary" id="submit-purchase"><i class="fa-solid fa-circle-check"></i> Simular pagamento</button>
 <p id="cart-status" role="status" aria-live="polite"></p>
 </form>
 <aside class="cart-summary">

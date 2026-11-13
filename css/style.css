@@ -418,11 +418,7 @@ html[data-theme="light"] .how-step-copy p{color:#45645f}
 .testimonials-head .lead+.testimonials-note{margin-top:14px}
 .testimonials-note{font-size:13px;line-height:1.6;color:var(--muted);letter-spacing:.01em}
 
-/* ===== Auditoria: checkout demonstrativo, estados de assinatura, créditos e hotsite ===== */
-.demo-notice{display:flex;gap:12px;align-items:flex-start;max-width:760px;margin-top:22px;padding:14px 18px;border:1px solid #f2c14e55;border-radius:14px;background:#f2c14e12;color:var(--text);font-size:15px;line-height:1.6}
-.demo-notice i{color:#f2c14e;margin-top:4px}
-html[data-theme="light"] .demo-notice{background:#fff6dc;border-color:#b7791f55}
-html[data-theme="light"] .demo-notice i{color:#8a5a12}
+/* ===== Auditoria: checkout, estados de assinatura, créditos e hotsite ===== */
 .active-sub-banner.is-inactive{background:#2a2412;border-color:#f2c14e55;color:#f6e3b4}
 .active-sub-banner.is-error{background:#2c1717;border-color:#e8747466;color:#f8caca}
 html[data-theme="light"] .active-sub-banner.is-inactive{background:#fff6dc;border-color:#b7791f55;color:#5c3d0c}
@@ -444,9 +440,7 @@ html[data-theme="light"] #cart-status{color:#0f6b60}
 /* Telas baixas (inclui zoom alto) e celulares em retrato: o botão de tema vira só ícone para não
    cobrir o conteúdo. O nome acessível continua no aria-label definido por js/script.js. */
 @media(max-height:560px),(max-width:520px){.theme-toggle{font-size:0;gap:0;padding:13px;border-radius:50%;left:12px;bottom:12px}.theme-toggle .hw-theme-icon{width:17px;height:17px}}
-/* Checkout: dados de exemplo fixos (somente leitura), claramente identificados. */
-.demo-tag{display:inline-block;margin-left:8px;padding:2px 9px;border-radius:20px;border:1px solid #f2c14e55;background:#f2c14e14;color:#f6dd9a;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;vertical-align:middle}
-html[data-theme="light"] .demo-tag{background:#fff6dc;border-color:#b7791f55;color:#6b4a10}
+/* Checkout: dados de exemplo fixos (somente leitura). */
 .demo-data input[readonly]{cursor:default;color:var(--muted);border-style:dashed}
 .demo-data .cart-note{margin:14px 0 0}
 /* Navegação mobile: botão só com ícone, quadrado, compacto e centralizado. */

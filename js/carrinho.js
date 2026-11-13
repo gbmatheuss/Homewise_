@@ -235,7 +235,7 @@ byId('copy-pix').addEventListener('click', async () => {
   try {
     if (!navigator.clipboard?.writeText) throw new Error('API de área de transferência indisponível');
     await navigator.clipboard.writeText(codeEl.textContent);
-    setStatus('Código PIX demonstrativo copiado para a área de transferência.');
+    setStatus('Código PIX copiado para a área de transferência.');
   } catch {
     // Sem permissão de cópia: seleciona o código para o usuário copiar manualmente.
     const range = document.createRange();
@@ -299,7 +299,7 @@ purchaseForm.addEventListener('submit', async event => {
     setStatus(`Simulação concluída: HomeWise ${plan} (${cycle}) via ${metodoLabel}. Nenhum valor foi cobrado e nenhuma assinatura foi ativada.`);
     window.openModal?.(
       'Simulação concluída',
-      `Este é um ambiente de demonstração acadêmica (TCC). O pagamento do plano HomeWise ${plan} (${valor}) via ${metodoLabel} foi apenas simulado: nenhum valor foi cobrado e a assinatura da sua conta não foi alterada.`
+      `O pagamento do plano HomeWise ${plan} (${valor}) via ${metodoLabel} foi apenas simulado: nenhum valor foi cobrado e a assinatura da sua conta não foi alterada.`
     );
   } finally {
     lock(false);
