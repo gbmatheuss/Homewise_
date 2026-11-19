@@ -337,7 +337,7 @@
       root.style.setProperty('--hw-nav-h', navbar.offsetHeight + 'px');
       const img = $('.logo-image', logo), cs = getComputedStyle(logo);
       // Telas baixas (celular na horizontal, zoom alto): marca menor para caber com a frase e o botão.
-      const K = window.innerHeight < 500 ? 1.15 : narrow ? 1.45 : w < 1100 ? 1.8 : 2.1;
+      const K = window.innerHeight < 500 ? 1.4 : narrow ? 2 : w < 1100 ? 2.5 : 3;
       op.style.setProperty('--op-img', img.offsetWidth * K + 'px');
       op.style.setProperty('--op-font', parseFloat(cs.fontSize) * K + 'px');
       op.style.setProperty('--op-gap', (parseFloat(cs.columnGap) || 12) * K + 'px');
@@ -490,10 +490,112 @@
     reveal('.hero .badge', 'clip');
     reveal('.hero .lead', 'fade', { stagger: 0, delay: () => 250 });
     reveal($$('.hero .actions .btn'), 'pop', { delay: (el, i) => 380 + i * 90 });
+    reveal($$('.hero-proof li'), 'short', { delay: (el, i) => 560 + i * 80 });
+    reveal($$('.hero-chip'), 'pop', { delay: (el, i) => 700 + i * 140, duration: 1600 });
+    reveal('.stats', 'unfold', { stagger: 0 });
+    reveal($$('.demo-tab'), 'slide-l', { stagger: 90 });
+    reveal('.demo-stage', 'orbit', { stagger: 0, duration: 1600 });
+    reveal($$('.flow-node'), 'rise', { stagger: 120 });
     const features = $('.home-page main > .section');
     if (features) band(features);
     const cta = $('.home-page .cta');
     if (cta) liveCta(cta);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Contadores: os números reais já estão no HTML; no modo completo      */
+  /* contam a partir de zero quando entram na tela (uma vez).            */
+  /* ------------------------------------------------------------------ */
+  const counters = [];
+  function setupCounters() {
+    const els = $$('[data-count]').filter(el => !counters.some(c => c.el === el));
+    if (!els.length) return;
+    const io = observer(IntersectionObserver, entries => entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      const c = counters.find(k => k.el === e.target);
+      if (!c) return;
+      const t0 = performance.now(), dur = 1400;
+      const step = guard(now => {
+        const p = clamp((now - t0) / dur);
+        c.el.textContent = String(Math.round(c.target * easeOut(p)));
+        if (p < 1 && !c.done) c.raf = requestAnimationFrame(step); else c.el.textContent = String(c.target);
+      }, 'contador');
+      c.raf = requestAnimationFrame(step);
+    }), 'contadores', { rootMargin: '0px 0px -12% 0px' });
+    els.forEach(el => {
+      const target = parseInt(el.dataset.count, 10);
+      if (!Number.isFinite(target)) return;
+      counters.push({ el, target, raf: 0, done: false });
+      el.textContent = '0';
+      io.observe(el);
+    });
+  }
+  // Troca de modo ou falha: todos os números voltam ao valor final.
+  function restoreCounters() {
+    counters.forEach(c => { c.done = true; cancelAnimationFrame(c.raf); c.el.textContent = String(c.target); });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Luz que acompanha o ponteiro nos cartões (só dispositivos com hover) */
+  /* ------------------------------------------------------------------ */
+  function setupSpotlight() {
+    if (!window.matchMedia('(hover: hover)').matches) return;
+    let pending = null, raf = 0;
+    const apply = guard(() => {
+      raf = 0;
+      if (!pending) return;
+      const { card, x, y } = pending;
+      const r = card.getBoundingClientRect();
+      setVar(card, '--mx', ((x - r.left) / r.width * 100).toFixed(1) + '%');
+      setVar(card, '--my', ((y - r.top) / r.height * 100).toFixed(1) + '%');
+    }, 'luz dos cartões');
+    listen(document, 'pointermove', event => {
+      const card = event.target.closest?.('.card, .price, .member');
+      if (!card) return;
+      pending = { card, x: event.clientX, y: event.clientY };
+      if (!raf) raf = requestAnimationFrame(apply);
+    }, 'luz dos cartões', { passive: true });
+    cleanups.push(() => cancelAnimationFrame(raf));
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Névoa do cursor em toda a página (mesma luz dos cartões, global)     */
+  /* Uma única camada fixa na janela (pointer-events: none). Duas manchas */
+  /* seguem o mouse com atrasos diferentes, formando o rastro. O laço de   */
+  /* animação só roda enquanto as manchas ainda não alcançaram o cursor.  */
+  /* ------------------------------------------------------------------ */
+  function setupCursorGlow() {
+    if ($('.hw-cursor-glow')) return; // uma única camada por página (site principal e hotsite)
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return; // só com mouse
+    const layer = document.createElement('div');
+    layer.className = 'hw-cursor-glow';
+    layer.setAttribute('aria-hidden', 'true');
+    layer.innerHTML = '<i class="hw-glow-smoke"></i><i class="hw-glow-core"></i>';
+    body.append(layer);
+    const [smoke, core] = layer.children;
+    let tx = 0, ty = 0, sx = 0, sy = 0, cx = 0, cy = 0, raf = 0, seen = false;
+    const place = (el, x, y) => { el.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0)`; };
+    const step = guard(() => {
+      raf = 0;
+      sx += (tx - sx) * .09; sy += (ty - sy) * .09; // névoa: atrasa mais (rastro)
+      cx += (tx - cx) * .24; cy += (ty - cy) * .24; // núcleo: acompanha de perto
+      place(smoke, sx, sy);
+      place(core, cx, cy);
+      if (Math.abs(tx - sx) + Math.abs(ty - sy) > .4) raf = requestAnimationFrame(step);
+    }, 'névoa do cursor');
+    listen(window, 'pointermove', event => {
+      if (event.pointerType !== 'mouse' || !isFull()) return;
+      tx = event.clientX; ty = event.clientY;
+      if (!seen) { seen = true; sx = cx = tx; sy = cy = ty; }
+      layer.classList.add('is-on');
+      if (!raf) raf = requestAnimationFrame(step);
+    }, 'névoa do cursor', { passive: true });
+    // O mouse saiu da janela (ou ela perdeu o foco): a névoa se apaga.
+    const off = () => layer.classList.remove('is-on');
+    listen(document.documentElement, 'mouseleave', off, 'névoa do cursor');
+    listen(window, 'blur', off, 'névoa do cursor');
+    cleanups.push(() => { cancelAnimationFrame(raf); layer.remove(); });
   }
   // Fundo que se acende enquanto a seção ocupa a tela e se apaga ao sair.
   function band(section) {
@@ -910,6 +1012,9 @@
   function setupHotsite() {
     story = setupStory();
     setupHotsiteScenes();
+    // Capítulo novo do HomeWise 2.0: números do projeto (revelação única).
+    revealWords('.hs-numbers h2');
+    reveal($$('.hs-numbers .stat'), 'pop', { stagger: 100, duration: 1600 });
   }
 
   /* ------------------------------------------------------------------ */
@@ -1118,10 +1223,12 @@
     if (page === 'pricing') setupPricing();
     if (page === 'faq') setupFaq();
     if (page === 'login' || page === 'cart') setupFormPages();
+    setupCounters();
     measureAll();
   }
   // Chamado pelo listener (protegido) da preferência de movimento do sistema.
   function onModeChange() {
+    restoreCounters();
     clearWritten();
     opening?.reset();
     if (isFull()) initFull(); else setupCalm();
@@ -1135,13 +1242,13 @@
   function setupCalm() {
     if (calmReady) return;
     calmReady = true;
-    reveal('main .page-head, main .section-title, main .section-sub, main .card, main .price, main .testimonial, main .member, main .faq-item, main .how-step-card, main .cta, main .support, .story-chapter, .hot-visual', 'calm', { stagger: 60, duration: 900 });
+    reveal('main .page-head, main .section-title, main .section-sub, main .card, main .price, main .testimonial, main .member, main .faq-item, main .how-step-card, main .cta, main .support, .story-chapter, .hot-visual, main .stats, main .flow-node, main .demo-stage, .hs-numbers .stat', 'calm', { stagger: 60, duration: 900 });
   }
 
   // Efeitos contínuos (ondas, órbitas, partículas) pausam fora da área visível.
   function pauseOffscreen() {
     const io = observer(IntersectionObserver, entries => entries.forEach(e => e.target.classList.toggle('hw-paused', !e.isIntersecting)), 'pausa fora da tela', { rootMargin: '10% 0px' });
-    $$('.hero, .phone-showcase, .hot-visual, .hw-op-cue').forEach(el => io.observe(el));
+    $$('.hero, .phone-showcase, .hot-visual, .hw-op-cue, .bento, .flow, .hs-numbers').forEach(el => io.observe(el));
   }
 
   // Recuperação: a página volta à apresentação estática com todo o conteúdo visível.
@@ -1151,6 +1258,7 @@
     const ref = $('main > :not(.hw-opening)');
     const before = ref ? ref.getBoundingClientRect().top : 0;
     const hadOpening = root.classList.contains('hw-show-opening') && window.scrollY > 0;
+    restoreCounters();
     clearWritten();
     root.dataset.motion = 'static';
     root.classList.remove('hw-show-opening');
@@ -1177,6 +1285,8 @@
     $$('.checks, .cta-benefits').forEach(list => $$('li', list).forEach((li, i) => li.style.setProperty('--li', i)));
     ['.billing-toggle', '.auth-tabs', '.payment-tabs'].forEach(sel => segmented($(sel)));
     setupForms();
+    setupSpotlight();
+    setupCursorGlow();
     pauseOffscreen();
     // A abertura da inicial existe nos dois modos (no reduzido, em versão só de opacidade).
     if (page === 'home') opening = setupOpening();

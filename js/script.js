@@ -172,10 +172,7 @@ document.addEventListener('click', event => {
     event.preventDefault();
     window.location.href = 'login.html?plano=' + encodeURIComponent(plan.dataset.plan) + '&ciclo=' + encodeURIComponent(selectedCycle);
   }
-  const download = event.target.closest('[data-download]');
-  if (download && (download.tagName !== 'A' || download.getAttribute('href') === '#')) {event.preventDefault(); openModal('HomeWise em breve', 'O aplicativo ainda não possui um link de download disponível. Enquanto isso, conheça os recursos na página Como funciona.');}
   if (event.target.closest('[data-support]')) {event.preventDefault(); openModal('Suporte HomeWise', 'Consulte as perguntas frequentes para saber mais sobre instalação, dispositivos e planos. O canal de atendimento ainda não está disponível neste projeto.');}
-  if (event.target.closest('[data-tcc-unavailable]')) {event.preventDefault(); openModal('Documento do TCC indisponível', 'O documento do Trabalho de Conclusão de Curso ainda não foi publicado nesta página. Quando a versão final estiver disponível, o download será liberado aqui.');}
 });
 document.querySelectorAll('.faq-q').forEach((button, index) => {
   const answer = button.parentElement.querySelector('.faq-a');
@@ -206,6 +203,38 @@ function animateAnswer(item, answer, opening) {
     if (!item.classList.contains('open')) answer.hidden = true;
   };
 }
+// Demonstração do aplicativo (index.html): abas acessíveis que trocam a captura exibida no celular.
+// Padrão WAI-ARIA de abas com foco itinerante: setas, Home e End movem a seleção.
+document.querySelectorAll('[data-demo]').forEach(demo => {
+  const tabs = [...demo.querySelectorAll('[role="tab"]')];
+  const panel = demo.querySelector('[role="tabpanel"]');
+  const screens = panel ? [...panel.querySelectorAll('.demo-screens img')] : [];
+  const activeDesc = demo.querySelector('.demo-active-desc');
+  if (!tabs.length || !panel) return;
+  const select = (index, focus) => {
+    tabs.forEach((tab, i) => {
+      const on = i === index;
+      tab.setAttribute('aria-selected', String(on));
+      tab.tabIndex = on ? 0 : -1;
+    });
+    const tab = tabs[index];
+    panel.setAttribute('aria-labelledby', tab.id);
+    panel.dataset.tone = tab.dataset.tone || 'brand';
+    const screen = Number(tab.dataset.screen);
+    screens.forEach((img, i) => img.classList.toggle('is-active', i === screen));
+    if (activeDesc) activeDesc.textContent = tab.querySelector('small')?.textContent || '';
+    if (focus) tab.focus();
+  };
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => select(i, false));
+    tab.addEventListener('keydown', event => {
+      const keys = {ArrowDown: i + 1, ArrowRight: i + 1, ArrowUp: i - 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1};
+      if (!(event.key in keys)) return;
+      event.preventDefault();
+      select((keys[event.key] + tabs.length) % tabs.length, true);
+    });
+  });
+});
 let toastTimer;
 function showToast(message) {
   const toast = document.getElementById('toast');

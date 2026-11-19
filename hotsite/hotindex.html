@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nossa Equipe | HomeWise</title>
     <meta name="description" content="Conheça a equipe e a história do HomeWise, projeto de TCC que monitora o consumo de água e energia da casa com sensores e um aplicativo.">
+    <meta name="theme-color" content="#050e14"><link rel="icon" type="image/png" href="../img/logo_Homewise-480.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="style.css">
-    
-<link rel="stylesheet" href="../css/motion.css"><script src="../js/motion-boot.js"></script></head>
+    <link rel="stylesheet" href="../css/motion.css">
+    <script src="../js/motion-boot.js"></script>
+</head>
 <body class="hotsite-page about-page">
 <main>
-
-    
-
+    <!-- Capítulo 0 — a casa conectada ganha vida com a rolagem (js/motion.js: setupStory). -->
     <section class="hs-story" aria-labelledby="hs-title">
         <div class="hs-sticky">
             <div class="hs-bg" aria-hidden="true"></div>
@@ -24,10 +25,10 @@
             <div class="hs-grid" aria-hidden="true"></div>
             <div class="hs-head">
                 <a class="hs-brand" href="../index.html" aria-label="HomeWise — página inicial"><img src="../img/logo_Homewise-480.png" alt=""><span>Home<strong>Wise</strong></span></a>
-                <a class="btn hs-skip" href="#inicio">Ir para o conteúdo <i class="fa-solid fa-arrow-down"></i></a>
+                <a class="btn hs-skip" href="#numeros">Ir para o conteúdo <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
             </div>
             <div class="hs-copy">
-                <span class="hs-kicker">Casa conectada</span>
+                <span class="hs-kicker">TCC SENAI · Casa conectada</span>
                 <h2 class="hs-title" id="hs-title">Uma casa que <span class="gradient">ganha vida.</span></h2>
                 <div class="hs-texts">
                     <ol class="hs-steps">
@@ -39,7 +40,7 @@
                     </ol>
                     <div class="hs-final">
                         <p>Água, energia e a sua casa conectadas em um só aplicativo.</p>
-                        <a class="btn btn-primary" href="../index.html">Conheça agora <i class="fa-solid fa-arrow-right"></i></a>
+                        <a class="btn btn-primary" href="../index.html">Conheça agora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
                         <a class="btn" href="#equipe">Conheça a equipe</a>
                     </div>
                 </div>
@@ -88,10 +89,24 @@
             <div class="hs-progress" aria-hidden="true"><span></span></div>
         </div>
     </section>
-    <section id="inicio" class="container page-head inicio">
 
+    <!-- Capítulo 1 — números do projeto (todos factuais). -->
+    <section class="container hs-numbers" id="numeros" tabindex="-1" aria-labelledby="numeros-titulo">
+        <span class="hs-chapter" aria-hidden="true"><b>01</b> O projeto</span>
+        <h2 id="numeros-titulo">Um TCC que virou <span class="gradient">produto.</span></h2>
+        <div class="hs-numbers-grid">
+            <div class="stat" data-tone="brand"><strong><span data-count="5">5</span></strong><p>integrantes, do back-end ao aplicativo</p></div>
+            <div class="stat" data-tone="water"><strong><span data-count="2">2</span></strong><p>sensores: vazão de água e energia elétrica</p></div>
+            <div class="stat" data-tone="energy"><strong><span data-count="1">1</span></strong><p>central Wi-Fi que reúne todas as leituras</p></div>
+            <div class="stat" data-tone="warn"><strong><span data-count="3">3</span></strong><p>planos propostos: Básico, Plus e Premium</p></div>
+        </div>
+    </section>
+
+    <!-- Capítulo 2 — apresentação da equipe -->
+    <section id="inicio" class="container page-head inicio">
         <div class="textoInicio">
-            <h1>CONHEÇA<br><span class="gradient">NOSSA EQUIPE</span></h1>
+            <span class="hs-chapter" aria-hidden="true"><b>02</b> Quem somos</span>
+            <h1>Conheça<br><span class="gradient">nossa equipe</span></h1>
 
             <h3>Por trás da HomeWise, existe uma equipe.</h3>
 
@@ -133,11 +148,12 @@
         </div>
     </section>
 
+    <!-- Capítulo 3 — história -->
     <section class="container section project-story" id="historia" aria-labelledby="historia-titulo">
         <div class="project-story-heading">
-             
-                <h2 id="historia-titulo">Como surgiu a história <span class="gradient">do projeto.</span></h2>
-                <p>Uma necessidade do dia a dia. Uma equipe com ideias. Um propósito em comum.</p>
+            <span class="hs-chapter" aria-hidden="true"><b>03</b> A história</span>
+            <h2 id="historia-titulo">Como surgiu a história <span class="gradient">do projeto.</span></h2>
+            <p>Uma necessidade do dia a dia. Uma equipe com ideias. Um propósito em comum.</p>
         </div>
         <div class="story-journey">
             <article class="story-chapter">
@@ -157,14 +173,13 @@
             </article>
         </div>
     </section>
-
+    <!-- Capítulo 4 — valores -->
     <section class="container section escolher" id="sobre">
-
-        <h2 class="section-title">Porque escolher a gente?</h2>
+        <span class="hs-chapter hs-chapter-center" aria-hidden="true"><b>04</b> Nossos valores</span>
+        <h2 class="section-title">Por que escolher a gente?</h2>
 
         <div class="cards hotsite-values">
-
-            <div class="card">
+            <div class="card" data-tone="brand">
                 <div class="icon"><i class="fa-solid fa-lightbulb"></i></div>
                 <h3>Inovação</h3>
                 <p>
@@ -174,8 +189,8 @@
                 </p>
             </div>
 
-            <div class="card">
-                <div class="icon"><i class="fa-solid fa-bolt"></i></div>
+            <div class="card" data-tone="water">
+                <div class="icon"><i class="fa-solid fa-hand-pointer"></i></div>
                 <h3>Praticidade</h3>
                 <p>
                     Pensamos no HomeWise para ser simples de entender e fácil
@@ -184,7 +199,7 @@
                 </p>
             </div>
 
-            <div class="card">
+            <div class="card" data-tone="energy">
                 <div class="icon"><i class="fa-solid fa-handshake"></i></div>
                 <h3>Compromisso</h3>
                 <p>
@@ -193,20 +208,18 @@
                     planejado com atenção em cada detalhe.
                 </p>
             </div>
-
         </div>
-
     </section>
 
+    <!-- Capítulo 5 — equipe -->
     <section class="container section team-section equipe" id="equipe">
-
+        <span class="hs-chapter hs-chapter-center" aria-hidden="true"><b>05</b> A equipe</span>
         <h2 class="section-title">Nossa equipe</h2>
         <p class="section-sub">Conheça os desenvolvedores por trás do HomeWise</p>
 
         <div class="team pessoas">
-
             <div class="member pessoa">
-         <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/foto_fafabot-360.jpg" alt="Foto de Rafael Aquino"></div>
+                <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/foto_fafabot-360.jpg" alt="Foto de Rafael Aquino"></div>
                 <h3>Rafael Aquino</h3>
                 <span>Desenvolvedor Back-end</span>
                 <small>Responsável pela lógica, banco de dados e integração do sistema.</small>
@@ -220,36 +233,38 @@
             </div>
 
             <div class="member pessoa">
-                    <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/Foto_ambires-360.jpg" alt="Foto de Gabriel Ambires"></div>
+                <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/Foto_ambires-360.jpg" alt="Foto de Gabriel Ambires"></div>
                 <h3>Gabriel Ambires</h3>
                 <span>Desenvolvedor Mobile</span>
                 <small>Desenvolve o aplicativo, priorizando desempenho e usabilidade.</small>
             </div>
 
             <div class="member pessoa">
-                <div class="member-photo foto">AA</div>
+                <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/foto_ayran-360.jpg" alt="Foto de Ayran Alves"></div>
                 <h3>Ayran Alves</h3>
                 <span>Desenvolvedor Front-end</span>
                 <small>Responsável pelas interfaces e pela organização visual do projeto.</small>
             </div>
 
             <div class="member pessoa">
-                        <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/foto_luiz-360.jpg" alt="Foto de Luiz Roberto"></div>
+                <div class="member-photo foto"><img loading="lazy" decoding="async" src="../img/foto_luiz-360.jpg" alt="Foto de Luiz Roberto"></div>
                 <h3>Luiz Roberto</h3>
                 <span>Documentação e Integração da Equipe</span>
                 <small>Responsável pela documentação e pelo alinhamento da equipe.</small>
             </div>
-
         </div>
-        </section>
-        <section class="container cta hotsite-download">
+    </section>
 
-        <h2>Baixe nosso TCC</h2>
+    <!-- Encerramento -->
+    <section class="container cta hotsite-download">
+        <div>
+            <span class="hs-chapter" aria-hidden="true"><b>06</b> Encerramento</span>
+            <h2>Baixe nosso TCC</h2>
+        </div>
         <div class="textoInicio downloadTcc tcc-unavailable">
-            <button class="btn" type="button" aria-disabled="true" aria-describedby="tcc-status" data-tcc-unavailable><i class="fa-regular fa-clock" aria-hidden="true"></i> Download em breve</button>
-            <p id="tcc-status">O documento do TCC ainda não foi publicado nesta página.</p>
+            <a class="btn" href="https://drive.google.com/file/d/1woHxJBFRRzBt68NQuOqKpUIFT6NLz-KE/view?usp=sharing" target="_blank" rel="noopener noreferrer" aria-describedby="tcc-status"><i class="fa-solid fa-file-pdf" aria-hidden="true"></i> Baixar o TCC (PDF)<span class="sr-only"> (abre em nova aba)</span></a>
+            <p id="tcc-status">Documentação final do HomeWise, em PDF, disponível no Google Drive.</p>
         </div>
-   
     </section>
 </main>
 <footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.
