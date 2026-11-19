@@ -46,7 +46,7 @@ Homewise_/
 
 | Página | Arquivo | Descrição |
 |---|---|---|
-| **Início** | [`index.html`](index.html) | Hero com vitrine realista em molduras de smartphone com capturas do app, benefícios e CTA. |
+| **Início** | [`index.html`](index.html) | Abertura cinematográfica, hero com capturas do app, indicadores com regras reais do app, recursos em grade bento, demonstração interativa das telas, fluxo sensor → app e CTA. |
 | **Como Funciona** | [`como-funciona.html`](como-funciona.html) | As 4 etapas do sistema: instalação da central, conexão com o app, acompanhamento e economia. |
 | **Preços** | [`precos.html`](precos.html) | Tabela comparativa dos planos **Básico** (R$ 19,90), **Plus** (R$ 29,90) e **Premium** (R$ 49,90), com seletor Mensal/Anual (-15%). |
 | **Sua Conta** | [`login.html`](login.html) | Criação de conta e login com Firebase Authentication antes do checkout demonstrativo. |
@@ -54,7 +54,7 @@ Homewise_/
 | **Depoimentos** | [`depoimentos.html`](depoimentos.html) | Depoimentos **ilustrativos**, elaborados para demonstrar a proposta do projeto; não são avaliações de clientes. |
 | **Sobre Nós** | [`sobre.html`](sobre.html) | Apresentação da proposta, da equipe e link para o hotsite. |
 | **FAQ** | [`faq.html`](faq.html) | Perguntas sobre instalação, sensores compatíveis, dados e planos demonstrativos. |
-| **Hotsite da Equipe** | [`hotsite/hotindex.html`](hotsite/hotindex.html) | Jornada acadêmica dos desenvolvedores e fundadores do HomeWise. |
+| **Hotsite da Equipe** | [`hotsite/hotindex.html`](hotsite/hotindex.html) | Apresentação cinematográfica em capítulos: casa conectada guiada pela rolagem, números do projeto, equipe, história, valores e encerramento. |
 
 ---
 
@@ -67,6 +67,27 @@ Homewise_/
   - **Firebase Authentication**: Criação de contas, login, recuperação de senha e persistência de sessão.
   - **Cloud Firestore**: leitura do perfil e do status da assinatura compartilhados com o aplicativo mobile (`usuarios/{uid}`). O site não grava plano nem status da assinatura: ativar ou cancelar exige confirmação de pagamento em um backend, que este projeto ainda não possui.
 - **Font Awesome 6**: Ícones vetoriais modernos.
+- **Spline Sans (Google Fonts)**: a mesma fonte web usada pelo aplicativo mobile.
+
+---
+
+## 🎨 Design System (HomeWise 2.0)
+
+Os tokens visuais ficam no topo de [`css/style.css`](css/style.css) e foram extraídos do aplicativo mobile (`HomeWise-Mobile/src/constants/hw-tema.ts`), para que site, hotsite e app pareçam o mesmo produto.
+
+| Token | Valor | Uso |
+|---|---|---|
+| `--bg` / `--bg-deep` | `#07131b` / `#050e14` | Fundo principal e profundo |
+| `--surface` / `--surface-2` / `--surface-3` | `#0b1c27` / `#0f2431` / `#132c3b` | Cartões, superfícies elevadas e hover |
+| `--border-soft` / `--border` / `--border-strong` | `#122a39` / `#173244` / `#21465c` | Bordas |
+| `--text` / `--muted` / `--text-3` | `#f1f7fa` / `#9db1bd` / `#7f97a6` | Texto principal, secundário e terciário |
+| `--brand` / `--brand-strong` | `#22b7d4` / `#0a7d96` | Cor da marca |
+| `--btn` / `--btn-hover` / `--btn-press` | `#0b4a5c` / `#0e5a70` / `#083a48` | Botão de destaque (BotaoDestaque do app) |
+| `--water` / `--energy` | `#38bdf8` / `#4ade80` | Domínios de água e energia |
+| `--ok` / `--warn` / `--danger` | `#22c55e` / `#f59e0b` / `#f87171` | Estados de sucesso, alerta e erro |
+| `--r-sm` … `--r-xl` | 10 / 14 / 18 / 22 px | Raios de borda (iguais aos do app) |
+
+O tema claro redefine os mesmos tokens em `html[data-theme="light"]`. As animações ficam em [`css/motion.css`](css/motion.css) e [`js/motion.js`](js/motion.js) e respeitam automaticamente a preferência de movimento reduzido do sistema.
 
 ---
 
@@ -102,5 +123,5 @@ Os pagamentos e planos exibidos neste portal constituem uma **demonstração aca
 - **Contratação real de planos:** depende de uma integração de pagamento com confirmação em um backend (por exemplo, Cloud Functions e um gateway), que ainda não existe.
 - **Regras de segurança do Firebase:** ainda **não foram auditadas**. Antes de um uso real, elas precisam impedir que o próprio cliente grave campos de assinatura (`plano`, `status_assinatura`) em `usuarios/{uid}`.
 - **Depoimentos:** são ilustrativos.
-- **Download do TCC e do aplicativo:** ainda não disponíveis nas páginas.
+- **Download do TCC:** disponível no hotsite (PDF no Google Drive). **Download do aplicativo:** os botões "Baixar HomeWise" abrem a página da build Android (APK) no Expo.
 

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Início | HomeWise</title><meta name="description" content="HomeWise: monitore o consumo de água e energia da sua casa em tempo real, receba alertas e acompanhe metas de economia pelo aplicativo.">
+    <meta name="theme-color" content="#07131b"><link rel="icon" type="image/png" href="img/logo_Homewise-480.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/motion.css">
@@ -21,10 +23,11 @@
                 <a href="precos.html">Preços</a>
                 <a href="faq.html">FAQ</a>
             </nav>
-            <a href="#" class="btn btn-blue" data-download>Baixar agora <i class="fa-solid fa-download"></i></a>
+            <a href="https://expo.dev/accounts/fafabut/projects/HomeWiseMobile/builds/338aa8f4-2e61-4559-86a1-718d03e58dd7" target="_blank" rel="noopener noreferrer" title="Abre a página da build Android do HomeWise no Expo" class="btn btn-blue">Baixar HomeWise <i class="fa-solid fa-download" aria-hidden="true"></i><span class="sr-only"> (abre a página da build Android no Expo, em nova aba)</span></a>
         </div>
     </header>
     <main>
+        <!-- Abertura cinematográfica controlada pela rolagem (js/motion.js: setupOpening). -->
         <section class="hw-opening" id="abertura" aria-label="Abertura do HomeWise">
             <div class="hw-op-sticky">
                 <div class="hw-op-bg" aria-hidden="true"></div>
@@ -45,13 +48,13 @@
                     <g class="hw-op-node hw-op-node-energy is-energy"><circle cx="825" cy="380" r="34"/><path d="M830 362 L815 384 H826 L820 399 L836 375 H825 Z"/></g>
                     <g class="hw-op-node hw-op-node-hub"><circle cx="500" cy="252" r="22"/><path d="M488 250 a17 17 0 0 1 24 0 M493 256 a9 9 0 0 1 14 0 M500 262 v.5"/></g>
                 </svg>
-                <div class="hw-op-phone hw-op-phone-l" aria-hidden="true"><div class="hw-op-phone-in"><img src="img/05-metas-agua.png" alt=""></div></div>
-                <div class="hw-op-phone hw-op-phone-r" aria-hidden="true"><div class="hw-op-phone-in"><img src="img/06-alertas.png" alt=""></div></div>
+                <div class="hw-op-phone hw-op-phone-l" aria-hidden="true"><div class="hw-op-phone-in"><img src="img/03-agua-ano.png" alt=""></div></div>
+                <div class="hw-op-phone hw-op-phone-r" aria-hidden="true"><div class="hw-op-phone-in"><img src="img/04-energia-ano.png" alt=""></div></div>
                 <div class="hw-op-center">
                     <div class="hw-op-brand"><div class="hw-op-brand-in"><img src="img/logo_Homewise-480.png" alt=""><span class="logo-name">Home<span>Wise</span></span></div></div>
                     <p class="hw-op-tagline hw-op-fade">Água e energia da sua casa, conectadas e acompanhadas em tempo real.</p>
                     <div class="hw-op-actions hw-op-fade">
-                        <a class="btn btn-primary" href="#conteudo">Ir para o conteúdo <i class="fa-solid fa-arrow-down"></i></a>
+                        <a class="btn btn-primary" href="#conteudo">Ir para o conteúdo <i class="fa-solid fa-arrow-down" aria-hidden="true"></i></a>
                         <span class="hw-op-cue" aria-hidden="true">Role para explorar</span>
                     </div>
                 </div>
@@ -62,15 +65,22 @@
                 </svg>
             </div>
         </section>
-        <section class="container hero" id="conteudo" tabindex="-1">
+
+        <!-- Hero -->
+        <section class="container hero" id="conteudo" tabindex="-1" aria-labelledby="hero-title">
             <div>
-                <span class="badge">● Inteligência para economizar</span>
-                <h1>Controle. Economize.<br><span class="gradient">Transforme seu consumo.</span></h1>
-                <p class="lead">O HomeWise monitora seu consumo de água e energia em tempo real, gera alertas inteligentes e ajuda você a economizar todos os dias com decisões mais conscientes.</p>
+                <span class="badge"><i class="fa-solid fa-house-signal" aria-hidden="true"></i> Monitoramento residencial inteligente</span>
+                <h1 id="hero-title">Água e energia da sua casa, <span class="gradient">sob controle.</span></h1>
+                <p class="lead">O HomeWise conecta sensores de água e energia a um aplicativo que acompanha o consumo em tempo real, avisa quando algo sai do normal e ajuda a cumprir metas de economia.</p>
                 <div class="actions">
-                    <a href="precos.html" class="btn btn-primary">Começar agora</a>
-                    <a href="como-funciona.html" class="btn">Ver recursos</a>
+                    <a href="precos.html" class="btn btn-primary">Começar agora <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+                    <a href="#app" class="btn">Ver o aplicativo</a>
                 </div>
+                <ul class="hero-proof" aria-label="Componentes do sistema">
+                    <li data-tone="water"><i class="fa-solid fa-droplet" aria-hidden="true"></i> Sensor de vazão YF-S201</li>
+                    <li data-tone="energy"><i class="fa-solid fa-bolt" aria-hidden="true"></i> Medidor PZEM-004T</li>
+                    <li><i class="fa-solid fa-wifi" aria-hidden="true"></i> Central Wi-Fi</li>
+                </ul>
             </div>
             <div class="imagem-celulares phone-showcase">
                 <div class="phone-scene" aria-hidden="true">
@@ -83,35 +93,161 @@
                 </div>
                 <div class="home-phone-pair">
                     <div class="home-phone home-phone-back">
-                        <img loading="lazy" decoding="async" src="img/04-energia-ano.png" alt="Tela de acompanhamento do consumo de energia do HomeWise" width="390" height="844">
+                        <img decoding="async" src="img/04-energia-ano.png" alt="Tela de energia do HomeWise com o consumo medido no ano e o gráfico de potência por período" width="390" height="844">
                     </div>
                     <div class="home-phone home-phone-front">
-                        <img loading="lazy" decoding="async" src="img/02-inicio.png" alt="Tela inicial do HomeWise com o consumo de água e energia" width="390" height="844">
+                        <img decoding="async" src="img/02-inicio.png" alt="Tela inicial do HomeWise com a situação da central e o consumo de água e energia do dia" width="390" height="844">
                     </div>
+                </div>
+                <div class="hero-chip hero-chip-water" data-tone="water" aria-hidden="true"><span class="chip-ico"><i class="fa-solid fa-droplet"></i></span><span><b>Água</b><small>Vazão em tempo real</small></span></div>
+                <div class="hero-chip hero-chip-energy" data-tone="energy" aria-hidden="true"><span class="chip-ico"><i class="fa-solid fa-bolt"></i></span><span><b>Energia</b><small>Potência e kWh</small></span></div>
+                <div class="hero-chip hero-chip-alert" data-tone="warn" aria-hidden="true"><span class="chip-ico"><i class="fa-solid fa-triangle-exclamation"></i></span><span><b>Alertas</b><small>Vazamentos e picos</small></span></div>
+            </div>
+        </section>
+
+        <!-- Indicadores: regras reais do aplicativo (não são métricas de uso). -->
+        <section class="container stats-section" aria-labelledby="stats-title">
+            <h2 class="sr-only" id="stats-title">Como o HomeWise funciona, em números</h2>
+            <div class="stats">
+                <div class="stat" data-tone="water"><strong><span data-count="2">2</span></strong><p>sensores dedicados: vazão de água (YF-S201) e energia elétrica (PZEM-004T).</p></div>
+                <div class="stat" data-tone="brand"><strong><span data-count="30">30</span><small>dias</small></strong><p>de leituras para o app calibrar a linha de base de consumo da sua casa.</p></div>
+                <div class="stat" data-tone="warn"><strong><span data-count="20">20</span><small>%</small></strong><p>de desvio em relação à linha de base já é sinalizado como consumo anormal.</p></div>
+                <div class="stat" data-tone="energy"><strong><span data-count="5">5</span></strong><p>áreas no aplicativo: Início, Água, Energia, Alertas e Perfil.</p></div>
+            </div>
+        </section>
+
+        <!-- Funcionalidades -->
+        <section class="container section" id="recursos" aria-labelledby="recursos-titulo">
+            <div class="section-head">
+                <span class="eyebrow">Recursos</span>
+                <h2 class="section-title" id="recursos-titulo">Tudo o que sua casa consome, em um só lugar.</h2>
+                <p class="section-sub">Do sensor ao gráfico: o HomeWise transforma leituras em decisões simples.</p>
+            </div>
+            <div class="cards bento">
+                <article class="card is-wide" data-tone="water">
+                    <div class="icon"><i class="fa-solid fa-droplet" aria-hidden="true"></i></div>
+                    <div class="card-visual cv-wave" aria-hidden="true">
+                        <svg viewBox="0 0 400 96" preserveAspectRatio="none" focusable="false"><g class="cv-move"><path class="cv-fill" d="M0 52 C50 30 100 30 150 52 S250 74 300 52 S400 30 450 52 S550 74 600 52 S700 30 750 52 S800 63 800 63 V96 H0 Z"/><path d="M0 52 C50 30 100 30 150 52 S250 74 300 52 S400 30 450 52 S550 74 600 52 S700 30 750 52 S800 63 800 63"/><path d="M0 62 C40 50 80 50 120 62 S200 74 240 62 S320 50 360 62 S440 74 480 62 S560 50 600 62 S680 74 720 62 S800 56 800 56"/></g></svg>
+                    </div>
+                    <h3>Monitoramento de água</h3>
+                    <p>O sensor de vazão acompanha a água que entra na casa e mostra o consumo do dia e do mês em litros.</p>
+                    <span class="card-tag">YF-S201 · litros</span>
+                </article>
+                <article class="card is-wide" data-tone="energy">
+                    <div class="icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></div>
+                    <div class="card-visual" aria-hidden="true">
+                        <div class="cv-bars"><i style="--h:42%;--i:0"></i><i style="--h:64%;--i:1"></i><i style="--h:50%;--i:2"></i><i style="--h:78%;--i:3"></i><i style="--h:58%;--i:4"></i><i style="--h:88%;--i:5"></i><i style="--h:66%;--i:6"></i><i style="--h:72%;--i:7"></i></div>
+                    </div>
+                    <h3>Monitoramento de energia</h3>
+                    <p>O medidor registra potência instantânea, tensão da rede e o consumo acumulado em kWh.</p>
+                    <span class="card-tag">PZEM-004T · kWh</span>
+                </article>
+                <article class="card" data-tone="brand">
+                    <div class="icon"><i class="fa-solid fa-bullseye" aria-hidden="true"></i></div>
+                    <h3>Metas de consumo</h3>
+                    <p>Defina limites mensais de água e energia e veja quanto da meta já foi usado.</p>
+                </article>
+                <article class="card" data-tone="water">
+                    <div class="icon"><i class="fa-solid fa-clock-rotate-left" aria-hidden="true"></i></div>
+                    <h3>Histórico</h3>
+                    <p>Consulte o consumo por dia, semana, mês e ano para entender seus hábitos.</p>
+                </article>
+                <article class="card" data-tone="energy">
+                    <div class="icon"><i class="fa-solid fa-chart-column" aria-hidden="true"></i></div>
+                    <h3>Gráficos</h3>
+                    <p>Barras por período e evolução da meta deixam claro quando o consumo subiu.</p>
+                </article>
+                <article class="card is-wide" data-tone="warn">
+                    <div class="icon"><i class="fa-solid fa-bell" aria-hidden="true"></i></div>
+                    <h3>Alertas em tempo real</h3>
+                    <p>Avisos de possível vazamento, picos de consumo e central desligada ou sem comunicação.</p>
+                    <span class="card-tag">Vazamento · pico · central offline</span>
+                </article>
+                <article class="card is-wide" data-tone="brand">
+                    <div class="icon"><i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i></div>
+                    <h3>Acompanhamento inteligente</h3>
+                    <p>Depois de 30 dias de leituras, o app aprende a média da sua casa e passa a sinalizar desvios acima de 20%.</p>
+                    <span class="card-tag">Linha de base calibrada</span>
+                </article>
+            </div>
+        </section>
+
+        <!-- Demonstração com capturas reais do aplicativo (abas: js/script.js). -->
+        <section class="container section app-demo" id="app" aria-labelledby="app-titulo">
+            <div class="section-head">
+                <span class="eyebrow">O aplicativo</span>
+                <h2 class="section-title" id="app-titulo">Conheça o HomeWise por dentro.</h2>
+                <p class="section-sub">Escolha uma área para ver a tela correspondente do aplicativo.</p>
+            </div>
+            <div class="demo" data-demo>
+                <div class="demo-tabs" role="tablist" aria-label="Telas do aplicativo" aria-orientation="vertical">
+                    <button class="demo-tab" type="button" role="tab" id="demo-tab-0" aria-controls="demo-panel" aria-selected="true" data-tone="brand" data-screen="0">
+                        <span class="icon"><i class="fa-solid fa-house" aria-hidden="true"></i></span>
+                        <span><strong>Início</strong><small>Situação da central, consumo de hoje e total previsto da conta.</small></span>
+                    </button>
+                    <button class="demo-tab" type="button" role="tab" id="demo-tab-1" aria-controls="demo-panel" aria-selected="false" tabindex="-1" data-tone="water" data-screen="1">
+                        <span class="icon"><i class="fa-solid fa-droplet" aria-hidden="true"></i></span>
+                        <span><strong>Água</strong><small>Acompanhe o consumo de água por dia, semana, mês e ano, com gráficos e indicadores detalhados.</small></span>
+                    </button>
+                    <button class="demo-tab" type="button" role="tab" id="demo-tab-2" aria-controls="demo-panel" aria-selected="false" tabindex="-1" data-tone="energy" data-screen="2">
+                        <span class="icon"><i class="fa-solid fa-bolt" aria-hidden="true"></i></span>
+                        <span><strong>Energia</strong><small>Consumo por dia, semana, mês e ano, com potência e tensão da rede.</small></span>
+                    </button>
+                    <button class="demo-tab" type="button" role="tab" id="demo-tab-3" aria-controls="demo-panel" aria-selected="false" tabindex="-1" data-tone="water" data-screen="3">
+                        <span class="icon"><i class="fa-solid fa-bullseye" aria-hidden="true"></i></span>
+                        <span><strong>Metas</strong><small>Limite mensal de água e energia e o quanto já foi consumido.</small></span>
+                    </button>
+                    <button class="demo-tab" type="button" role="tab" id="demo-tab-4" aria-controls="demo-panel" aria-selected="false" tabindex="-1" data-tone="warn" data-screen="4">
+                        <span class="icon"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i></span>
+                        <span><strong>Alertas</strong><small>Diagnóstico do sistema e avisos de consumo fora do padrão.</small></span>
+                    </button>
+                </div>
+                <!-- Em telas menores, repete a descrição da opção ativa abaixo da fileira de ícones (a original segue no botão para leitores de tela). -->
+                <p class="demo-active-desc" aria-hidden="true">Situação da central, consumo de hoje e total previsto da conta.</p>
+                <div class="demo-stage" id="demo-panel" role="tabpanel" aria-labelledby="demo-tab-0" tabindex="0" data-tone="brand">
+                    <div class="demo-phone">
+                        <div class="demo-screens">
+                            <img class="is-active" src="img/02-inicio.png" alt="Tela Início: situação da central, total previsto da conta e consumo de água e energia de hoje" width="390" height="844" decoding="async">
+                            <img src="img/03-agua-ano.png" alt="Tela Água: consumo medido no ano, vazão instantânea, projeção mensal e gráfico de consumo por período" width="390" height="844" loading="lazy" decoding="async">
+                            <img src="img/04-energia-ano.png" alt="Tela Energia: consumo medido no ano, potência instantânea, tensão e gráfico de potência média por período" width="390" height="844" loading="lazy" decoding="async">
+                            <img src="img/05-metas-agua.png" alt="Tela Metas: meta mensal de água, percentual consumido e evolução no mês" width="390" height="844" loading="lazy" decoding="async">
+                            <img src="img/06-alertas.png" alt="Tela Alertas e Diagnóstico: estado da central e linha de base calibrada" width="390" height="844" loading="lazy" decoding="async">
+                        </div>
+                    </div>
+                    <p class="demo-caption">Capturas reais do aplicativo HomeWise.</p>
                 </div>
             </div>
         </section>
-        <section class="container section">
-            <h2 class="section-title">Recursos que fazem a diferença</h2>
-            <p class="section-sub">Tudo para acompanhar sua casa de forma simples.</p>
-            <div class="cards">
-                <article class="card"><div class="icon"><i class="fa-solid fa-droplet"></i></div><h3>Monitoramento de água</h3><p>Acompanhe seu consumo em tempo real e identifique vazamentos antes que virem problemas.</p></article>
-                <article class="card"><div class="icon"><i class="fa-solid fa-bolt"></i></div><h3>Monitoramento de energia</h3><p>Veja seu consumo de energia em tempo real e descubra como reduzir seus gastos.</p></article>
-                <article class="card"><div class="icon"><i class="fa-solid fa-bell"></i></div><h3>Alertas inteligentes</h3><p>Receba notificações sobre consumos anormais, vazamentos e oportunidades de economia.</p></article>
-                <article class="card"><div class="icon"><i class="fa-solid fa-chart-line"></i></div><h3>Relatórios completos</h3><p>Visualize históricos detalhados e gráficos intuitivos para tomar melhores decisões.</p></article>
+
+        <!-- Fluxo dos dados -->
+        <section class="container section" aria-labelledby="fluxo-titulo">
+            <div class="section-head">
+                <span class="eyebrow">Do sensor à palma da mão</span>
+                <h2 class="section-title" id="fluxo-titulo">Como os dados chegam até você.</h2>
             </div>
+            <ol class="flow">
+                <li class="flow-node" data-tone="water"><small>Etapa 1</small><div class="icon"><i class="fa-solid fa-faucet-drip" aria-hidden="true"></i></div><h3>Sensores medem</h3><p>Vazão de água e grandezas elétricas são lidas nos pontos de consumo.</p><span class="flow-link" aria-hidden="true"><i></i></span></li>
+                <li class="flow-node" data-tone="brand"><small>Etapa 2</small><div class="icon"><i class="fa-solid fa-microchip" aria-hidden="true"></i></div><h3>A central reúne</h3><p>A central HomeWise agrupa as leituras e as envia pela rede Wi-Fi.</p><span class="flow-link" aria-hidden="true"><i></i></span></li>
+                <li class="flow-node" data-tone="water"><small>Etapa 3</small><div class="icon"><i class="fa-solid fa-cloud" aria-hidden="true"></i></div><h3>A nuvem guarda</h3><p>Os dados ficam vinculados à sua conta, com acesso por login.</p><span class="flow-link" aria-hidden="true"><i></i></span></li>
+                <li class="flow-node" data-tone="energy"><small>Etapa 4</small><div class="icon"><i class="fa-solid fa-mobile-screen" aria-hidden="true"></i></div><h3>O app traduz</h3><p>Gráficos, metas e alertas mostram onde é possível economizar.</p></li>
+            </ol>
         </section>
+
+        <!-- Chamada final -->
         <section class="container cta">
             <div class="cta-message">
+                <span class="eyebrow">Próximo passo</span>
                 <h2>Pronto para transformar seu consumo?</h2>
                 <p>Uma solução em desenvolvimento para tornar o consumo de água e energia mais consciente em cada casa.</p>
-                <div class="actions"><a href="precos.html" class="btn btn-primary">Conhecer os planos <i class="fa-solid fa-arrow-right"></i></a></div>
+                <div class="actions"><a href="precos.html" class="btn btn-primary">Conhecer os planos <i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a><a href="hotsite/hotindex.html" class="btn">Conheça a equipe</a></div>
             </div>
             <ul class="cta-benefits"><li>Configuração simples e guiada</li><li>Proposta de planos sem fidelidade</li><li>Dúvidas frequentes respondidas no FAQ</li></ul>
         </section>
     </main>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
-    <footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.</div></footer>
+    <footer><div class="container">© 2026 HomeWise — Tecnologia com propósito para economizar água e energia.
+        <nav class="footer-links" aria-label="Links do rodapé"><a href="como-funciona.html">Como funciona</a><a href="precos.html">Planos</a><a href="faq.html">FAQ</a><a href="hotsite/hotindex.html">Hotsite da equipe</a></nav>
+    </div></footer>
     <script src="js/script.js"></script>
     <script src="js/motion.js"></script>
 </body>
