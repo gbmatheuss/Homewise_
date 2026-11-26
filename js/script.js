@@ -1,6 +1,4 @@
 // Interações compartilhadas pelas páginas HomeWise.
-// O controle de movimento do site também se aplica ao FAQ.
-const prefersReducedMotion = () => document.documentElement.dataset.motion !== 'full';
 const themeButton = document.createElement('button');
 themeButton.type = 'button';
 themeButton.className = 'theme-toggle';
@@ -188,7 +186,7 @@ document.querySelectorAll('.faq-q').forEach((button, index) => {
 // Abre/fecha a resposta com altura + opacidade; o texto já está no DOM e acessível desde o início.
 function animateAnswer(item, answer, opening) {
   answer.getAnimations?.().forEach(animation => animation.cancel());
-  if (prefersReducedMotion() || !answer.animate) {answer.hidden = !opening; return;}
+  if (document.documentElement.dataset.motion !== 'full' || !answer.animate) {answer.hidden = !opening; return;}
   answer.hidden = false;
   const style = getComputedStyle(answer);
   const full = {height: answer.offsetHeight + 'px', paddingBottom: style.paddingBottom, opacity: 1};

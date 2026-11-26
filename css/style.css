@@ -513,9 +513,6 @@ html[data-theme="light"] .price.featured{background:radial-gradient(500px 260px 
 footer{position:relative;margin-top:100px;padding:40px 0;border-top:1px solid var(--border-soft);text-align:center;font-size:14px;line-height:1.8;color:var(--text-3)}
 .footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 22px;margin-top:10px}
 .footer-links a{display:inline-block;padding:6px 2px;color:var(--brand);text-decoration:underline;text-underline-offset:3px}
-.motion-toggle{display:block;margin:10px auto 0;padding:6px 12px;border:1px solid var(--brand);border-radius:6px;background:transparent;color:var(--brand);font:inherit;cursor:pointer}
-.motion-toggle[aria-pressed="true"]{background:var(--brand);color:var(--bg)}
-.motion-toggle:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
 @media(max-width:520px){footer{margin-top:64px;padding-bottom:76px}}
 
 /* ---------- 21. Responsividade das seções do início ---------- */
@@ -579,9 +576,7 @@ html[data-theme="light"] .field input,html[data-theme="light"] .field select{bac
 html[data-theme="light"] .pix-box{background:var(--surface-2)}
 html[data-theme="light"] .btn-blue{color:#fff}
 
-/* ---------- 23. Movimento reduzido ----------
-   Modo reduzido escolhido no site. A apresentação estática cobre falhas do motor. */
+/* ---------- 23. Apresentação estática em caso de falha ---------- */
 html:not([data-motion="full"]){scroll-behavior:auto}
-html[data-motion="reduced"] *,html[data-motion="reduced"] *::before,html[data-motion="reduced"] *::after{transition-property:opacity,color,background-color,border-color!important;animation:none!important}
-html:not([data-motion="full"]):not([data-motion="reduced"]) *,html:not([data-motion="full"]):not([data-motion="reduced"]) *::before,html:not([data-motion="full"]):not([data-motion="reduced"]) *::after{transition:none!important;animation:none!important}
+html:not([data-motion="full"]) *,html:not([data-motion="full"]) *::before,html:not([data-motion="full"]) *::after{transition:none!important;animation:none!important}
 @media(hover:none){.card:hover,.testimonial:hover,.member:hover,.price:hover,.btn:hover,.how-step-card:hover{transform:none}}

@@ -1,18 +1,11 @@
 // HomeWise — decisões de apresentação tomadas antes da primeira pintura (carregado no <head>).
-// Tema salvo, preferência de movimento do site e abertura.
+// Tema salvo e abertura.
 (function () {
   var root = document.documentElement;
   root.classList.add('hw-js');
   try { if (localStorage.getItem('homewise-theme') === 'light') root.dataset.theme = 'light'; } catch (e) {}
 
-  var motionKey = 'homewise-reduce-motion';
-  var reduced = false;
-  function readPreference() {
-    try { reduced = localStorage.getItem(motionKey) === 'true'; } catch (e) {}
-  }
-  function motionMode() { return reduced ? 'reduced' : 'full'; }
-  readPreference();
-  root.dataset.motion = motionMode();
+  root.dataset.motion = 'full';
 
   // A abertura (inicial e hotsite) roda em todo carregamento, inclusive F5 / Ctrl+R.
   // Só na RECARGA sem âncora a página começa no topo; Voltar/Avançar mantêm a posição do histórico.
@@ -43,37 +36,9 @@
       root.dataset.motion = 'static';
       root.classList.remove('hw-show-opening');
     }
-    var footer = document.querySelector('footer .container');
-    if (!footer) return;
-
-    var control = document.createElement('button');
-    control.type = 'button';
-    control.className = 'motion-toggle';
-    control.textContent = 'Reduzir animações';
-    function sync() {
-      control.setAttribute('aria-pressed', String(reduced));
-      if (window.HWMotion) window.HWMotion.applyMode(motionMode());
-    }
-    control.addEventListener('click', function () {
-      reduced = !reduced;
-      try { localStorage.setItem(motionKey, String(reduced)); } catch (e) {}
-      sync();
-    });
-    window.addEventListener('storage', function (event) {
-      if (event.key !== motionKey && event.key !== null) return;
-      readPreference();
-      sync();
-    });
-    window.addEventListener('pageshow', function (event) {
-      if (!event.persisted) return;
-      readPreference();
-      sync();
-    });
-    sync();
-    footer.append(control);
   });
 
-  // As transições entre páginas acompanham o modo escolhido no site.
+  // A apresentação estática pula as transições entre páginas.
   var skip = function (event) { if (root.dataset.motion !== 'full' && event.viewTransition) event.viewTransition.skipTransition(); };
   window.addEventListener('pageswap', skip);
   window.addEventListener('pagereveal', skip);

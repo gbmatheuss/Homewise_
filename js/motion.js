@@ -1,12 +1,12 @@
 // HomeWise — motor de motion compartilhado por todas as páginas.
-// • Animações completas por padrão; o visitante pode reduzir o movimento no rodapé.
+// • Animações completas por padrão.
 // • Um único listener de scroll (passivo + requestAnimationFrame) que só atualiza trilhas
 //   próximas da área visível (IntersectionObserver) e escreve transform/opacity/variáveis CSS.
 // • Revelações executadas uma vez por carregamento, com variações por tipo de conteúdo.
 // • Composições próprias: abertura da inicial, etapas conectadas, planos, formulários e a
 //   narrativa da casa conectada do hotsite.
 (() => {
-  if (window.HWMotion) return;
+  if (window.HWMotion || document.documentElement.dataset.motion !== 'full') return;
   const root = document.documentElement;
   const body = document.body;
 
@@ -70,7 +70,7 @@
   }
 
   let cache = new WeakMap();
-  // Tudo o que o motor escreve fica registrado para poder ser desfeito (troca de modo ou falha).
+  // Tudo o que o motor escreve fica registrado para poder ser desfeito (falha).
   // Entradas de elementos removidos do DOM são descartadas em pruneWritten().
   const written = new Map();
   function pruneWritten() { written.forEach((_, el) => { if (!el.isConnected) written.delete(el); }); }
@@ -116,19 +116,17 @@
     return t;
   }
   let frame = 0;
-  // Trilhas "soft" continuam ativas no movimento reduzido (só mexem em opacidade).
-  const runs = t => isFull() || t.soft;
   const tick = guard(() => {
     frame = 0;
     const y = window.scrollY;
-    for (const t of tracks) if (t.active && runs(t)) t.update(y);
+    for (const t of tracks) if (t.active) t.update(y);
   }, 'atualização da rolagem');
   function schedule() { if (!frame && !failed) frame = requestAnimationFrame(tick); }
   const measurers = [];
   const measureAll = guard(() => {
     pruneWritten();
     measurers.forEach(fn => fn());
-    tracks.forEach(t => { if (runs(t)) t.measure?.(); });
+    tracks.forEach(t => t.measure?.());
     tick();
   }, 'medição do layout');
   let measureTimer = 0;
@@ -216,15 +214,6 @@
     return el;
   }
   const revealWords = (sel, cfg) => $$(sel).forEach(el => reveal(splitWords(el), 'words', { duration: 1800, ...cfg }));
-
-  /* ------------------------------------------------------------------ */
-  /* Preferência de movimento do site                                  */
-  /* ------------------------------------------------------------------ */
-  const applyMode = guard(mode => {
-    if (root.dataset.motion === 'static' || root.dataset.motion === mode) return;
-    root.dataset.motion = mode;
-    onModeChange();
-  }, 'mudança de preferência de movimento');
 
   /* ------------------------------------------------------------------ */
   /* Cabeçalho: compacta com a rolagem e mostra o progresso da página    */
@@ -358,26 +347,9 @@
       setStyle(node, 'scale', (1 - .55 * t).toFixed(4));
       setStyle(node, 'opacity', (1 - range(t, .82, 1)).toFixed(3));
     }
-    // Movimento reduzido: mesma narrativa, apenas com opacidade (nada se desloca, gira ou escala).
-    function updateSoft(p) {
-      const pf = range(p, 0, .26);
-      fades.forEach(el => { setStyle(el, 'opacity', (1 - pf).toFixed(3)); el.classList.toggle('is-gone', pf > .97); });
-      setStyle(brand, 'opacity', (1 - range(p, .3, .6)).toFixed(3));
-      setStyle(house, 'opacity', (1 - .6 * range(p, .2, .9)).toFixed(3));
-      setStyle(links, 'opacity', (1 - range(p, .12, .34)).toFixed(3));
-      [nodeWater, nodeEnergy].forEach(n => setStyle(n, 'opacity', (1 - range(p, .3, .6)).toFixed(3)));
-      phones.forEach((phone, i) => {
-        const s = phoneAt(i, 1);
-        setStyle(phone, 'translate', `${s.x.toFixed(1)}px ${s.y.toFixed(1)}px`);
-        setStyle(phone, 'opacity', range(p, .3, .62).toFixed(3));
-      });
-      setStyle(waves, 'opacity', (1 - range(p, .3, .9)).toFixed(3));
-      setStyle(bg, 'opacity', (1 - range(p, .55, 1)).toFixed(3));
-    }
     function update(y) {
       if (!isActive()) return;
       const p = clamp(y / D);
-      if (!isFull()) return updateSoft(p);
       // Só os celulares usam --op-p (reflexo): gravar na raiz recalcularia o estilo de toda a abertura.
       phones.forEach(phone => setVar(phone, '--op-p', p));
       // 1. Texto de apresentação sai primeiro.
@@ -434,16 +406,11 @@
       void op.offsetWidth;
       op.classList.add('is-playing');
     }
-    // Troca de modo: os estilos já foram limpos por clearWritten(); zera a geometria de referência.
-    function reset() {
-      last = { hs: 1, hy: 0, wy: 0 };
-      fades.forEach(el => el.classList.remove('is-gone'));
-    }
-    const t = track({ el: op, measure, update, soft: true });
+    const t = track({ el: op, measure, update });
     t.isActive = isActive;
     if (isActive()) play();
     if (location.hash === '#abertura') history.replaceState(null, '', location.pathname + location.search);
-    return { isActive, distance: () => D, play, reset };
+    return { isActive, distance: () => D };
   }
 
   /* ------------------------------------------------------------------ */
@@ -528,7 +495,7 @@
       io.observe(el);
     });
   }
-  // Troca de modo ou falha: todos os números voltam ao valor final.
+  // Em caso de falha: todos os números voltam ao valor final.
   function restoreCounters() {
     counters.forEach(c => { c.done = true; cancelAnimationFrame(c.raf); c.el.textContent = String(c.target); });
   }
@@ -1002,12 +969,9 @@
     function play() { if (!staged) return; st.classList.remove('is-playing'); void st.offsetWidth; st.classList.add('is-playing'); }
     track({ el: st, measure, update });
     play();
-    // Troca para movimento reduzido: volta ao layout estático (os estilos inline já foram limpos).
-    return { play, sync() { const ok = fits(); if (ok !== staged) setStaged(ok); if (ok) measureAll(); } };
   }
-  let story = null;
   function setupHotsite() {
-    story = setupStory();
+    setupStory();
     setupHotsiteScenes();
     // Capítulo novo do HomeWise 2.0: números do projeto (revelação única).
     revealWords('.hs-numbers h2');
@@ -1204,10 +1168,7 @@
   /* ------------------------------------------------------------------ */
   /* Inicialização                                                      */
   /* ------------------------------------------------------------------ */
-  let fullReady = false;
   function initFull() {
-    if (fullReady) return;
-    fullReady = true;
     setupNavbar();
     if (page === 'home') setupHome();
     if (page === 'hotsite') setupHotsite();
@@ -1223,25 +1184,6 @@
     setupCounters();
     measureAll();
   }
-  // Chamado pelo controle de movimento do site.
-  function onModeChange() {
-    restoreCounters();
-    clearWritten();
-    opening?.reset();
-    if (isFull()) initFull(); else setupCalm();
-    story?.sync();
-    if (opening && window.scrollY < 60) opening.play();
-    measureAll();
-  }
-
-  // Movimento reduzido: as seções aparecem só com opacidade (sem deslocamento).
-  let calmReady = false;
-  function setupCalm() {
-    if (calmReady) return;
-    calmReady = true;
-    reveal('main .page-head, main .section-title, main .section-sub, main .card, main .price, main .testimonial, main .member, main .faq-item, main .how-step-card, main .cta, main .support, .story-chapter, .hot-visual, main .stats, main .flow-node, main .demo-stage, .hs-numbers .stat', 'calm', { stagger: 60, duration: 900 });
-  }
-
   // Efeitos contínuos (ondas, órbitas, partículas) pausam fora da área visível.
   function pauseOffscreen() {
     const io = observer(IntersectionObserver, entries => entries.forEach(e => e.target.classList.toggle('hw-paused', !e.isIntersecting)), 'pausa fora da tela', { rootMargin: '10% 0px' });
@@ -1280,9 +1222,8 @@
     setupSpotlight();
     setupCursorGlow();
     pauseOffscreen();
-    // A abertura da inicial existe nos dois modos (no reduzido, em versão só de opacidade).
     if (page === 'home') opening = setupOpening();
-    if (isFull()) initFull(); else { setupCalm(); measureAll(); }
+    initFull();
     // Sinal para js/motion-boot.js: o motor iniciou corretamente (sem falha durante a inicialização).
     if (!failed) root.classList.add('hw-motion-on');
   } catch (error) {
@@ -1290,5 +1231,5 @@
   }
 
   // status(): diagnóstico (falha e local; tamanho do registro de estilos escritos).
-  window.HWMotion = { swapValue, applyMode, status: () => ({ failed, where: failure, written: written.size }) };
+  window.HWMotion = { swapValue, status: () => ({ failed, where: failure, written: written.size }) };
 })();

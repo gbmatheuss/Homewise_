@@ -1,6 +1,5 @@
 /* HomeWise — linguagem de motion de todo o site.
-   O modo fica em html[data-motion]: "full" (padrão), "reduced" (escolhido no site) ou "static" (recuperação se o motor falhar).
-   O modo reduzido mantém efeitos suaves de opacidade e o traçado da abertura.
+   A apresentação completa usa html[data-motion="full"]. Em caso de falha, o motor define "static".
    Propriedades animadas: transform/translate/scale/rotate, opacity, clip-path (revelações pontuais)
    e stroke-dashoffset (linhas que se desenham). */
 
@@ -117,8 +116,6 @@ html:active-view-transition .navbar{view-transition-name:hw-nav}
 [data-motion="full"] footer::before{content:'';position:absolute;top:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);transform:scaleX(0);transition:transform 1.4s var(--hw-out)}
 [data-motion="full"] footer.hw-footer-in::before{transform:scaleX(1)}
 
-/* Elementos movidos pela rolagem voltam ao lugar no modo reduzido. */
-[data-motion="reduced"] .hw-sl{translate:none!important;scale:none!important;rotate:none!important}
 @media print{.hw-pre,.hw-pre *{opacity:1!important;transform:none!important;clip-path:none!important}}
 
 /* =====================================================================
@@ -127,14 +124,6 @@ html:active-view-transition .navbar{view-transition-name:hw-nav}
 .hw-opening{display:none}
 .hw-show-opening .hw-opening{display:block;position:relative;height:calc(100svh + var(--op-d,600px));z-index:1}
 [data-motion="full"].hw-show-opening .hw-opening{margin-top:calc(var(--hw-nav-h,104px) * -1)}
-/* Movimento reduzido (pedido pelo sistema): a abertura continua, mas só com opacidade —
-   sem deslocamentos, escalas, parallax, giros ou animações contínuas. */
-[data-motion="reduced"] .hw-opening .hw-op-sticky{height:calc(100svh - var(--hw-nav-h,0px));top:var(--hw-nav-h,0px)}
-[data-motion="reduced"] .hw-opening.is-playing :is(.hw-op-brand-in,.hw-op-brand-in img,.hw-op-tagline,.hw-op-actions,.hw-op-node,.hw-op-bg){animation:hw-fade-in .9s ease both}
-[data-motion="reduced"] .hw-opening.is-playing .hw-op-phone-in{animation:none}
-[data-motion="reduced"] .hw-opening :is(.hw-link,.hw-packet),[data-motion="reduced"] .hw-op-cue::after{animation:none!important}
-[data-motion="reduced"] .hw-opening .hw-packet,[data-motion="reduced"] .hw-op-dust,[data-motion="reduced"] .hw-op-sticky::after,[data-motion="reduced"] .hw-op-phone-in::after{display:none}
-[data-motion="reduced"] .hw-opening .hw-op-phone{opacity:0}
 .hw-op-sticky{position:sticky;top:0;height:100svh;overflow:hidden;display:grid;place-items:center;isolation:isolate}
 .hw-op-bg{position:absolute;inset:0;z-index:-3;background:radial-gradient(ellipse 55% 50% at 50% 48%,#0f3a4d 0%,#0b2230 42%,transparent 78%),radial-gradient(ellipse 80% 60% at 50% 120%,#0d3346,transparent 70%),var(--bg)}
 .hw-op-grid{position:absolute;inset:-12% 0;z-index:-2;background-image:linear-gradient(#22b7d40d 1px,transparent 1px),linear-gradient(90deg,#22b7d40d 1px,transparent 1px);background-size:56px 56px;-webkit-mask-image:radial-gradient(ellipse 60% 55% at 50% 50%,#000 30%,transparent 75%);mask-image:radial-gradient(ellipse 60% 55% at 50% 50%,#000 30%,transparent 75%)}
@@ -276,7 +265,6 @@ html[data-theme="light"] .hw-op-brand-in .logo-name span{color:#0a7d96}
 .hw-steps-line .hw-run{stroke:var(--cyan);stroke-width:3;stroke-linecap:round;filter:drop-shadow(0 0 6px #22b7d499)}
 .hw-steps-line circle{fill:var(--bg);stroke:#22b7d455;stroke-width:2;transition:fill .4s ease,stroke .4s ease}
 .hw-steps-line circle.on{fill:var(--cyan);stroke:#d9f6fc}
-[data-motion="reduced"] .hw-steps-line{display:none}
 [data-motion="full"] .how-main::before{top:-220px;translate:0 calc(var(--hw-par,0) * 1px)}
 [data-motion="full"] .hw-pre .how-step-image img{transform:translateY(55%) scale(1.08)}
 [data-motion="full"] .hw-pre.is-in .how-step-image img{transform:none;transition:transform 1.3s var(--hw-out) calc(var(--hw-d,0ms) + 200ms)}
@@ -377,7 +365,7 @@ html[data-theme="light"] .hs-house .hs-node circle{fill:#fff}
 .hs-phone{backface-visibility:hidden}
 .hs-phone::before{content:'';position:absolute;top:-10%;bottom:-10%;left:0;width:70%;z-index:1;pointer-events:none;background:linear-gradient(105deg,transparent 20%,#ffffff1f 46%,#ffffff08 54%,transparent 72%);transform:translateX(calc(-110% + var(--hs-sheen,1) * 260%)) skewX(-8deg)}
 .hs-progress{display:none}
-/* Sem o palco (movimento reduzido, estático ou falha do motor) o .hs-sticky não corta nada (overflow:hidden só
+/* Sem o palco (tela pequena ou falha do motor) o .hs-sticky não corta nada (overflow:hidden só
    existe em .hs-staged). O celular frontal, girado 7°, passava da margem lateral e criava rolagem horizontal
    (ex.: +17px em 768px). Aqui os celulares ficam alinhados à borda da cena, sem sair dela. */
 .hs-story:not(.hs-staged) .hs-phones{right:0}
@@ -412,7 +400,7 @@ html[data-theme="light"] .hs-house .hs-node circle{fill:#fff}
 .hs-staged .hs-progress span{position:absolute;inset:0;transform-origin:0 50%;transform:scaleX(var(--hs-p,0));background:linear-gradient(90deg,var(--hw-water),var(--cyan),var(--hw-amber))}
 .hs-staged .hs-grid{translate:0 calc(var(--hs-p,0) * -60px)}
 /* Entrada e pausa da casa só existem com o palco ativo (.hs-staged), o único caso em que o JS as aciona.
-   Assim, sem o palco (modo estático, reduzido ou falha do motor), nada fica congelado no 1º quadro. */
+   Assim, sem o palco (tela pequena ou falha do motor), nada fica congelado no 1º quadro. */
 .hs-story.hs-staged.is-playing .hs-structure>*{stroke-dasharray:1;animation:hw-draw 1.6s var(--hw-io) both;animation-delay:calc(var(--n,0) * .1s)}
 .hs-story.hs-staged.is-playing .hs-fixture{animation:hw-fade-in .8s ease 1.2s both}
 .hs-story.hs-staged.is-playing .hs-head{animation:hw-rise-in .8s var(--hw-out) .2s both}
@@ -464,20 +452,12 @@ html[data-theme="light"] .hs-house .hs-node circle{fill:#fff}
 [data-motion="full"] .hotsite-page main{padding-top:0}
 
 /* =====================================================================
-   Robustez, acessibilidade e movimento reduzido (auditoria)
+   Robustez e acessibilidade
    ===================================================================== */
 /* Efeitos contínuos pausam fora da área visível (classe aplicada por IntersectionObserver). */
 .hw-paused,.hw-paused *,.hw-paused::before,.hw-paused::after,.hw-paused *::before,.hw-paused *::after{animation-play-state:paused!important}
 /* Logo do cabeçalho: fica oculto durante a abertura, mas nunca recebe foco invisível. */
 [data-motion="full"] .hw-nav .nav>.logo:focus-visible{opacity:1!important;scale:1!important}
-/* Movimento reduzido: entradas apenas com opacidade (sem deslocamento, escala ou giro). */
-[data-motion="reduced"] .hw-pre[data-hw="calm"]{opacity:0}
-[data-motion="reduced"] .hw-pre.is-in[data-hw="calm"]{opacity:1;transition:opacity .7s ease var(--hw-d,0ms)!important}
-/* Movimento reduzido: a abertura mantém os fades e o desenho das linhas (nada se desloca). */
-[data-motion="reduced"] .hw-opening.is-playing :is(.hw-op-brand-in,.hw-op-brand-in img,.hw-op-tagline,.hw-op-actions,.hw-op-node,.hw-op-bg){animation:hw-fade-in .9s ease both!important}
-[data-motion="reduced"] .hw-opening.is-playing .hw-draw{animation:hw-draw 1.5s var(--hw-io) both!important;animation-delay:calc(.1s + var(--n,0) * .12s)!important}
-[data-motion="reduced"] .hw-opening.is-playing .hw-op-waves path{animation:hw-draw 1.6s var(--hw-io) both!important;animation-delay:calc(.2s + var(--n,0) * .15s)!important}
-[data-motion="reduced"] .hw-opening .hw-op-phone{transition:none!important}
 /* Foco por teclado em um elemento ainda em entrada: aparece na hora, sem transição. */
 .hw-pre.hw-instant,.hw-pre.hw-instant *{transition:none!important}
 
