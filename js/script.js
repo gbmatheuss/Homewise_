@@ -1,9 +1,6 @@
 // Interações compartilhadas pelas páginas HomeWise.
-// Modo de animação definido por js/motion-boot.js (automático, segue o movimento reduzido do sistema).
-const prefersReducedMotion = () => {
-  const mode = document.documentElement.dataset.motion;
-  return mode ? mode !== 'full' : window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-};
+// O controle de movimento do site também se aplica ao FAQ.
+const prefersReducedMotion = () => document.documentElement.dataset.motion !== 'full';
 const themeButton = document.createElement('button');
 themeButton.type = 'button';
 themeButton.className = 'theme-toggle';

@@ -1,5 +1,5 @@
 // HomeWise — motor de motion compartilhado por todas as páginas.
-// • Animações sempre ativas; reduzidas automaticamente quando o sistema pede movimento reduzido.
+// • Animações completas por padrão; o visitante pode reduzir o movimento no rodapé.
 // • Um único listener de scroll (passivo + requestAnimationFrame) que só atualiza trilhas
 //   próximas da área visível (IntersectionObserver) e escreve transform/opacity/variáveis CSS.
 // • Revelações executadas uma vez por carregamento, com variações por tipo de conteúdo.
@@ -9,7 +9,6 @@
   if (window.HWMotion) return;
   const root = document.documentElement;
   const body = document.body;
-  const systemQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const range = (v, a, b) => clamp((v - a) / (b - a));
@@ -219,15 +218,13 @@
   const revealWords = (sel, cfg) => $$(sel).forEach(el => reveal(splitWords(el), 'words', { duration: 1800, ...cfg }));
 
   /* ------------------------------------------------------------------ */
-  /* Modo de animação: automático, sem controle na interface             */
+  /* Preferência de movimento do site                                  */
   /* ------------------------------------------------------------------ */
-  function applyMode() {
-    const mode = systemQuery.matches ? 'reduced' : 'full';
-    if (root.dataset.motion === mode) return;
+  const applyMode = guard(mode => {
+    if (root.dataset.motion === 'static' || root.dataset.motion === mode) return;
     root.dataset.motion = mode;
     onModeChange();
-  }
-  if (systemQuery.addEventListener) listen(systemQuery, 'change', applyMode, 'mudança de preferência de movimento');
+  }, 'mudança de preferência de movimento');
 
   /* ------------------------------------------------------------------ */
   /* Cabeçalho: compacta com a rolagem e mostra o progresso da página    */
@@ -552,7 +549,7 @@
     }, 'luz dos cartões');
     listen(document, 'pointermove', event => {
       const card = event.target.closest?.('.card, .price, .member');
-      if (!card) return;
+      if (!isFull() || !card) return;
       pending = { card, x: event.clientX, y: event.clientY };
       if (!raf) raf = requestAnimationFrame(apply);
     }, 'luz dos cartões', { passive: true });
@@ -1226,7 +1223,7 @@
     setupCounters();
     measureAll();
   }
-  // Chamado pelo listener (protegido) da preferência de movimento do sistema.
+  // Chamado pelo controle de movimento do site.
   function onModeChange() {
     restoreCounters();
     clearWritten();
@@ -1275,11 +1272,6 @@
   }
 
   try {
-    // Recarga (F5 / Ctrl+R / botão do navegador): começa no topo para a abertura se recompor inteira.
-    // Voltar/Avançar no histórico mantém a posição que o navegador restaurar; âncoras são respeitadas.
-    const navType = performance.getEntriesByType?.('navigation')[0]?.type;
-    if ((page === 'home' || page === 'hotsite') && navType === 'reload' && (!location.hash || location.hash === '#abertura') && window.scrollY) window.scrollTo(0, 0);
-
     // Sempre ativos (independem do modo): controles segmentados, formulários e menu.
     $$('.links').forEach(nav => $$('a', nav).forEach((a, i) => a.style.setProperty('--i', i)));
     $$('.checks, .cta-benefits').forEach(list => $$('li', list).forEach((li, i) => li.style.setProperty('--li', i)));

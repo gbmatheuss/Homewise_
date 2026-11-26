@@ -1,6 +1,6 @@
 /* HomeWise — linguagem de motion de todo o site.
-   O modo fica em html[data-motion]: "full" (padrão), "reduced" (o sistema pede movimento reduzido) ou "static" (recuperação se o motor falhar), definido por js/motion-boot.js antes da 1ª pintura.
-   Tudo o que se move é escopado em [data-motion="full"]; sem JS ou em "reduced" a página fica estática.
+   O modo fica em html[data-motion]: "full" (padrão), "reduced" (escolhido no site) ou "static" (recuperação se o motor falhar).
+   O modo reduzido mantém efeitos suaves de opacidade e o traçado da abertura.
    Propriedades animadas: transform/translate/scale/rotate, opacity, clip-path (revelações pontuais)
    e stroke-dashoffset (linhas que se desenham). */
 
