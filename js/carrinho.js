@@ -34,17 +34,17 @@ const planBenefitsMap = {
   ],
   Plus: [
     'Tudo do plano Básico',
-    'Relatórios completos (mensal e anual)',
-    'Metas mensais de economia',
-    'Comparativo e linha de base de consumo',
-    'Até 3 residências vinculadas'
+    'Relatórios completos (mensal e anual) e metas mensais',
+    'Comparativo, linha de base e diagnóstico avançado de rede',
+    'Múltiplas centrais, sensores e suporte técnico prioritário',
+    '1 residência vinculada'
   ],
   Premium: [
-    'Tudo do plano Plus',
-    'Múltiplas centrais e sensores por residência',
-    'Automação e diagnóstico avançado de rede',
-    'Suporte técnico prioritário',
-    'Residências ilimitadas'
+    'Todos os recursos completos do plano Plus',
+    'Relatórios completos (mensal e anual) e metas mensais',
+    'Comparativo, linha de base e diagnóstico avançado de rede',
+    'Múltiplas centrais, sensores e suporte técnico prioritário',
+    'Até 3 residências vinculadas'
   ]
 };
 
